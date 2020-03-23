@@ -17,14 +17,21 @@ import os
 from ament_index_python.packages import get_package_share_directory
 
 from launch import LaunchDescription
-from launch.actions import IncludeLaunchDescription, SetEnvironmentVariable
+from launch.actions import IncludeLaunchDescription, DeclareLaunchArgument, SetEnvironmentVariable
 from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 
 
 def generate_launch_description():
     # Get the launch directory
     example_dir = get_package_share_directory('plansys2_simple_example')
+    namespace = LaunchConfiguration('namespace')
+
+    declare_namespace_cmd = DeclareLaunchArgument(
+        'namespace',
+        default_value='',
+        description='Namespace')
 
     stdout_linebuf_envvar = SetEnvironmentVariable(
         'RCUTILS_CONSOLE_STDOUT_LINE_BUFFERED', '1')
@@ -33,14 +40,18 @@ def generate_launch_description():
         PythonLaunchDescriptionSource(os.path.join(
             get_package_share_directory('plansys2_bringup'),
             'launch',
-            'plansys2_bringup_launch.py')),
-        launch_arguments={'model_file': example_dir + '/pddl/simple_example.pddl'}.items())
+            'plansys2_bringup_launch_monolithic.py')),
+        launch_arguments={
+          'model_file': example_dir + '/pddl/simple_example.pddl',
+          'namespace': namespace
+          }.items())
 
     # Specify the actions
     move_cmd = Node(
         package='plansys2_simple_example',
         node_executable='move_action_node',
         node_name='move_action_node',
+        node_namespace=namespace,
         output='screen',
         parameters=[])
 
@@ -48,6 +59,7 @@ def generate_launch_description():
         package='plansys2_simple_example',
         node_executable='charge_action_node',
         node_name='charge_action_node',
+        node_namespace=namespace,
         output='screen',
         parameters=[])
 
@@ -55,12 +67,14 @@ def generate_launch_description():
         package='plansys2_simple_example',
         node_executable='ask_charge_action_node',
         node_name='ask_charge_action_node',
+        node_namespace=namespace,
         output='screen',
         parameters=[])   # Create the launch description and populate
     ld = LaunchDescription()
 
     # Set environment variables
     ld.add_action(stdout_linebuf_envvar)
+    ld.add_action(declare_namespace_cmd)
 
     # Declare the launch options
     ld.add_action(plansys2_cmd)
