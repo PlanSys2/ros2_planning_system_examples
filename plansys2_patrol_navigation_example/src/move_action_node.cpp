@@ -74,9 +74,10 @@ public:
     current_pos_ = msg->pose.pose;
   }
 
-  void onActivate()
+  
+  rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
+  on_activate(const rclcpp_lifecycle::State & previous_state)
   {
-    ActionExecutorClient::onActivate();
     getFeedback()->progress = 0.0;
 
     navigation_action_client_ =
@@ -111,7 +112,10 @@ public:
     navigation_goal_handle_ = future_navigation_goal_handle_.get();
     if (!navigation_goal_handle_) {
       RCLCPP_ERROR(get_logger(), "Goal was rejected by server");
+      return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::FAILURE;
     }
+
+    return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
   }
 
 private:

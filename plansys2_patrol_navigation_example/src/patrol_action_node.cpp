@@ -21,6 +21,7 @@
 
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_action/rclcpp_action.hpp"
+#include "lifecycle_msgs/msg/state.hpp"
 
 class Patrol : public plansys2::ActionExecutorClient
 {
@@ -30,13 +31,14 @@ public:
   {
   }
 
-
-  void onActivate()
+  rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
+  on_activate(const rclcpp_lifecycle::State & previous_state)
   {
-    ActionExecutorClient::onActivate();
     getFeedback()->progress = 0.0;
 
     cmd_vel_pub_ = this->create_publisher<geometry_msgs::msg::Twist>("/cmd_vel", 10);
+
+    return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
   }
 
 private:
