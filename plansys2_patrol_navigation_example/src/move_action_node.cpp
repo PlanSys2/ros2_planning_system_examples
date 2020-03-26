@@ -74,7 +74,6 @@ public:
     current_pos_ = msg->pose.pose;
   }
 
-  
   rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
   on_activate(const rclcpp_lifecycle::State & previous_state)
   {
