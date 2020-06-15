@@ -1,0 +1,8 @@
+set instance leia robot
+set instance chargingroom room
+
+set predicate (battery_low leia)
+set predicate (robot_at leia chargingroom)
+set predicate (charging_point_at chargingroom)
+
+run (charge leia chargingroom)
