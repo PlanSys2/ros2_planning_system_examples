@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <string>
-#include <iostream>
+#ifndef PLANSYS2_BT_EXAMPLE__BEHAVIOR_TREE_NODES__OPENGRIPPER_HPP_
+#define PLANSYS2_BT_EXAMPLE__BEHAVIOR_TREE_NODES__OPENGRIPPER_HPP_
 
-#include "plansys2_bt_example/behavior_tree_nodes/ApproachObject.hpp"
+#include <string>
 
 #include "behaviortree_cpp_v3/behavior_tree.h"
 #include "behaviortree_cpp_v3/bt_factory.h"
@@ -23,27 +23,18 @@
 namespace plansys2_bt_example
 {
 
-ApproachObject::ApproachObject(const std::string & name)
-: BT::ActionNodeBase(name, {}), counter_(0)
+class OpenGripper : public BT::ActionNodeBase
 {
-}
+public:
+  explicit OpenGripper(const std::string & name);
 
-void
-ApproachObject::halt()
-{
-  std::cout << "ApproachObject halt" << std::endl;
-}
+  void halt();
+  BT::NodeStatus tick();
 
-BT::NodeStatus
-ApproachObject::tick()
-{
-  std::cout << "ApproachObject tick " << counter_ << std::endl;
-
-  if (counter_++ < 5) {
-    return BT::NodeStatus::RUNNING;
-  } else {
-    return BT::NodeStatus::SUCCESS;
-  }
-}
+private:
+  int counter_;
+};
 
 }  // namespace plansys2_bt_example
+
+#endif  // PLANSYS2_BT_EXAMPLE__BEHAVIOR_TREE_NODES__OPENGRIPPER_HPP_

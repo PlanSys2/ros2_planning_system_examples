@@ -14,36 +14,43 @@
 
 #include <memory>
 
+#include "plansys2_msgs/action/execute_action.hpp"
 
-#include "behavior_tree_nodes/ApproachObject.hpp"
-#include "behavior_tree_nodes/OpenGripper.hpp"
-#include "behavior_tree_nodes/CloseGripper.hpp"
-
-#include "plansys2_executor/ActionBTExecutorClient.hpp"
+#include "plansys2_executor/ActionExecutorClient.hpp"
 
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_action/rclcpp_action.hpp"
-#include "ament_index_cpp/get_package_share_directory.hpp"
 
-class ChargeAction : public plansys2::ActionBTExecutorClient
+class AssembleAction : public plansys2::ActionExecutorClient
 {
 public:
-  ChargeAction()
-  : plansys2::ActionBTExecutorClient(
-      "charge",
-      ament_index_cpp::get_package_share_directory("plansys2_bt_example") +
-      "/behavior_trees_xml/charge.xml")
+  AssembleAction()
+  : plansys2::ActionExecutorClient("assemble")
   {
-    factory_.registerNodeType<plansys2_bt_example::ApproachObject>("ApproachObject");
-    factory_.registerNodeType<plansys2_bt_example::OpenGripper>("OpenGripper");
-    factory_.registerNodeType<plansys2_bt_example::CloseGripper>("CloseGripper");
+    getFeedback()->progress = 0.0;
+  }
+
+private:
+  void actionStep()
+  {
+    if (getFeedback()->progress < 100.0) {
+      getFeedback()->progress += 5.0;
+    }
+
+    std::cout << "\r\e[K" << std::flush;
+    std::cout << "Assembling ... [" << getFeedback()->progress << "%]  " << std::flush;
+  }
+
+  bool isFinished()
+  {
+    return getFeedback()->progress >= 100.0;
   }
 };
 
 int main(int argc, char ** argv)
 {
   rclcpp::init(argc, argv);
-  auto node = std::make_shared<ChargeAction>();
+  auto node = std::make_shared<AssembleAction>();
 
   rclcpp::spin(node->get_node_base_interface());
 

@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef BEHAVIOR_TREE_NODES__OPENGRIPPER_HPP_
-#define BEHAVIOR_TREE_NODES__OPENGRIPPER_HPP_
+#ifndef PLANSYS2_BT_EXAMPLE__BEHAVIOR_TREE_NODES__CLOSEGRIPPER_HPP_
+#define PLANSYS2_BT_EXAMPLE__BEHAVIOR_TREE_NODES__CLOSEGRIPPER_HPP_
 
 #include <string>
 
@@ -23,10 +23,10 @@
 namespace plansys2_bt_example
 {
 
-class OpenGripper : public BT::ActionNodeBase
+class CloseGripper : public BT::ActionNodeBase
 {
 public:
-  explicit OpenGripper(const std::string & name);
+  explicit CloseGripper(const std::string & name);
 
   void halt();
   BT::NodeStatus tick();
@@ -37,4 +37,4 @@ private:
 
 }  // namespace plansys2_bt_example
 
-#endif  // BEHAVIOR_TREE_NODES__OPENGRIPPER_HPP_
+#endif  // PLANSYS2_BT_EXAMPLE__BEHAVIOR_TREE_NODES__CLOSEGRIPPER_HPP_

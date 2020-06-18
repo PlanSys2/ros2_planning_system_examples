@@ -81,7 +81,7 @@ public:
 
     navigation_action_client_ =
       rclcpp_action::create_client<nav2_msgs::action::NavigateToPose>(shared_from_this(),
-        "NavigateToPose");
+        "navigate_to_pose");
 
     bool is_action_server_ready = false;
     do {

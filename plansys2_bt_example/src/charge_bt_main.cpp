@@ -14,9 +14,10 @@
 
 #include <string>
 
-#include "behavior_tree_nodes/ApproachObject.hpp"
-#include "behavior_tree_nodes/OpenGripper.hpp"
-#include "behavior_tree_nodes/CloseGripper.hpp"
+#include "plansys2_bt_example/behavior_tree_nodes/ApproachObject.hpp"
+#include "plansys2_bt_example/behavior_tree_nodes/CloseGripper.hpp"
+#include "plansys2_bt_example/behavior_tree_nodes/OpenGripper.hpp"
+#include "plansys2_bt_example/behavior_tree_nodes/Move.hpp"
 
 #include "behaviortree_cpp_v3/behavior_tree.h"
 #include "behaviortree_cpp_v3/bt_factory.h"
@@ -33,6 +34,7 @@ int main(int argc, char * argv[])
   factory.registerNodeType<plansys2_bt_example::ApproachObject>("ApproachObject");
   factory.registerNodeType<plansys2_bt_example::OpenGripper>("OpenGripper");
   factory.registerNodeType<plansys2_bt_example::CloseGripper>("CloseGripper");
+  factory.registerNodeType<plansys2_bt_example::Move>("Move");
 
   std::string pkgpath = ament_index_cpp::get_package_share_directory("plansys2_bt_example");
   std::string xml_file = pkgpath + "/behavior_trees_xml/charge.xml";

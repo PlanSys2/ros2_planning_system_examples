@@ -1,20 +1,29 @@
-(define (domain simple)
+(define (domain factory)
 (:requirements :strips :typing :adl :fluents :durative-actions)
 
 ;; Types ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (:types
 robot
-room
+zone
+piece
+car
 );; end Types ;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; Predicates ;;;;;;;;;;;;;;;;;;;;;;;;;
 (:predicates
 
-(robot_at ?r - robot ?ro - room)
-(connected ?ro1 ?ro2 - room)
-(battery_full ?r - robot)
-(battery_low ?r - robot)
-(charging_point_at ?ro - room)
+(robot_at ?r - robot ?z - zone)
+(piece_at ?p - piece ?z - zone)
+
+(piece_is_wheel ?p - piece)
+(piece_is_body_car ?p - piece)
+(piece_is_steering_wheel ?p - piece)
+
+(piece_not_used ?p - piece)
+
+(is_assembly_zone ?z - zone)
+
+(car_assembled ?c - car)
 
 );; end Predicates ;;;;;;;;;;;;;;;;;;;;
 ;; Functions ;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -23,43 +32,58 @@ room
 );; end Functions ;;;;;;;;;;;;;;;;;;;;
 ;; Actions ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (:durative-action move
-    :parameters (?r - robot ?r1 ?r2 - room)
+    :parameters (?r - robot ?z1 ?z2 - zone)
     :duration ( = ?duration 5)
     :condition (and
-        (at start(connected ?r1 ?r2))
-        (at start(robot_at ?r ?r1))
-        (over all(battery_full ?r))
-        )
+        (at start(robot_at ?r ?z1)))
     :effect (and
-        (at start(not(robot_at ?r ?r1)))
-        (at end(robot_at ?r ?r2))
+        (at start(not(robot_at ?r ?z1)))
+        (at end(robot_at ?r ?z2))
     )
 )
 
-(:durative-action askcharge
-    :parameters (?r - robot ?r1 ?r2 - room)
+(:durative-action transport
+    :parameters (?r - robot ?p - piece ?z1 ?z2 - zone)
     :duration ( = ?duration 5)
     :condition (and
-        (at start(robot_at ?r ?r1))
-        (at start(charging_point_at ?r2))
-       )
+        (at start(robot_at ?r ?z1))
+        (at start(piece_at ?p ?z1))
+    )
     :effect (and
-        (at start(not(robot_at ?r ?r1)))
-        (at start(robot_at ?r ?r2))
+        (at start(not(robot_at ?r ?z1)))
+        (at end(robot_at ?r ?z2))
+        (at start(not(piece_at ?p ?z1)))
+        (at end(piece_at ?p ?z2))
     )
 )
 
-(:durative-action charge
-    :parameters (?r - robot ?ro - room)
+(:durative-action assemble
+    :parameters (?r - robot ?z - zone ?p1 ?p2 ?p3 - piece ?c - car)
     :duration ( = ?duration 5)
     :condition (and
-        (at start(robot_at ?r ?ro))
-        (at start(charging_point_at ?ro))
+        (at start(is_assembly_zone ?z))
+        (at start(robot_at ?r ?z))
+
+        (at start(piece_at ?p1 ?z))
+        (at start(piece_at ?p2 ?z))
+        (at start(piece_at ?p3 ?z))
+
+        (at start(piece_not_used ?p1))
+        (at start(piece_not_used ?p2))
+        (at start(piece_not_used ?p3))
+
+        (at start(piece_is_wheel ?p1))
+        (at start(piece_is_body_car ?p2))
+        (at start(piece_is_steering_wheel ?p3))
     )
     :effect (and
-         (at end(not(battery_low ?r)))
-         (at end(battery_full ?r))
+        (at start(not(piece_not_used ?p1)))
+        (at start(not(piece_not_used ?p2)))
+        (at start(not(piece_not_used ?p3)))
+        (at end(car_assembled ?c))
+
     )
 )
+
 
 );; end Domain ;;;;;;;;;;;;;;;;;;;;;;;;

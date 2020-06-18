@@ -70,7 +70,7 @@ def generate_launch_description():
 
     # Declare the launch options
     ld.add_action(plansys2_cmd)
-    ld.add_action(nav2_cmd)
+    # ld.add_action(nav2_cmd)
 
     ld.add_action(move_cmd)
     ld.add_action(patrol_cmd)

@@ -30,14 +30,14 @@
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_action/rclcpp_action.hpp"
 
-class MoveAction : public plansys2::ActionBTExecutorClient
+class TransportAction : public plansys2::ActionBTExecutorClient
 {
 public:
-  MoveAction()
+  TransportAction()
   : plansys2::ActionBTExecutorClient(
-      "move",
+      "transport",
       ament_index_cpp::get_package_share_directory("plansys2_bt_example") +
-      "/behavior_trees_xml/move.xml")
+      "/behavior_trees_xml/transport.xml")
   {
     geometry_msgs::msg::PoseStamped wp;
     wp.header.frame_id = "map";
@@ -69,6 +69,9 @@ public:
     getFeedback()->progress = 0.0;
 
     factory_.registerNodeType<plansys2_bt_example::Move>("Move");
+    factory_.registerNodeType<plansys2_bt_example::OpenGripper>("ApproachObject");
+    factory_.registerNodeType<plansys2_bt_example::OpenGripper>("OpenGripper");
+    factory_.registerNodeType<plansys2_bt_example::CloseGripper>("CloseGripper");
   }
 
 private:
@@ -76,10 +79,10 @@ private:
 
   void atStart()
   {
-    auto wp_to_navigate = getArguments()[2];
+    auto wp_to_navigate = getArguments()[3];
     auto goal_pos = waypoints_[wp_to_navigate];
 
-    RCLCPP_INFO(get_logger(), "Start navigation to [%s]", wp_to_navigate.c_str());
+    RCLCPP_INFO(get_logger(), "Start transport to [%s]", wp_to_navigate.c_str());
 
     getBackboard()->set("goal", goal_pos);
 
@@ -95,7 +98,7 @@ private:
 int main(int argc, char ** argv)
 {
   rclcpp::init(argc, argv);
-  auto node = std::make_shared<MoveAction>();
+  auto node = std::make_shared<TransportAction>();
 
   rclcpp::spin(node->get_node_base_interface());
 

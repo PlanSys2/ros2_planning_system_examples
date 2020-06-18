@@ -15,7 +15,7 @@
 #include <string>
 #include <iostream>
 
-#include "behavior_tree_nodes/CloseGripper.hpp"
+#include "plansys2_bt_example/behavior_tree_nodes/CloseGripper.hpp"
 
 #include "behaviortree_cpp_v3/behavior_tree.h"
 #include "behaviortree_cpp_v3/bt_factory.h"
@@ -38,8 +38,6 @@ BT::NodeStatus
 CloseGripper::tick()
 {
   std::cout << "CloseGripper tick " << counter_ << std::endl;
-
-  counter_++;
 
   if (counter_++ < 5) {
     return BT::NodeStatus::RUNNING;

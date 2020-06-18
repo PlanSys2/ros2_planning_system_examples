@@ -12,38 +12,42 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#ifndef PLANSYS2_BT_EXAMPLE__BEHAVIOR_TREE_NODES__MOVE_HPP_
+#define PLANSYS2_BT_EXAMPLE__BEHAVIOR_TREE_NODES__MOVE_HPP_
+
 #include <string>
-#include <iostream>
 
-#include "plansys2_bt_example/behavior_tree_nodes/ApproachObject.hpp"
+#include "geometry_msgs/msg/pose_stamped.hpp"
+#include "nav2_msgs/action/navigate_to_pose.hpp"
 
+#include "plansys2_executor/BTActionNode.hpp"
 #include "behaviortree_cpp_v3/behavior_tree.h"
 #include "behaviortree_cpp_v3/bt_factory.h"
 
 namespace plansys2_bt_example
 {
 
-ApproachObject::ApproachObject(const std::string & name)
-: BT::ActionNodeBase(name, {}), counter_(0)
+class Move : public plansys2::BtActionNode<nav2_msgs::action::NavigateToPose>
 {
-}
+public:
+  explicit Move(
+    const std::string & xml_tag_name,
+    const BT::NodeConfiguration & config = {});
 
-void
-ApproachObject::halt()
-{
-  std::cout << "ApproachObject halt" << std::endl;
-}
+  void on_tick() override;
+  void on_success() override;
 
-BT::NodeStatus
-ApproachObject::tick()
-{
-  std::cout << "ApproachObject tick " << counter_ << std::endl;
-
-  if (counter_++ < 5) {
-    return BT::NodeStatus::RUNNING;
-  } else {
-    return BT::NodeStatus::SUCCESS;
+  static BT::PortsList providedPorts()
+  {
+    return {
+      BT::InputPort<geometry_msgs::msg::PoseStamped>("goal"),
+    };
   }
-}
+
+private:
+  int goal_reached_;
+};
 
 }  // namespace plansys2_bt_example
+
+#endif  // PLANSYS2_BT_EXAMPLE__BEHAVIOR_TREE_NODES__MOVE_HPP_

@@ -55,18 +55,18 @@ def generate_launch_description():
         output='screen',
         parameters=[])
 
-    charge_cmd = Node(
+    transport_cmd = Node(
         package='plansys2_bt_example',
-        node_executable='charge_action_node',
-        node_name='charge_action_node',
+        node_executable='transport_action_node',
+        node_name='transport_action_node',
         node_namespace=namespace,
         output='screen',
         parameters=[])
 
-    ask_charge_cmd = Node(
+    assemble_cmd = Node(
         package='plansys2_bt_example',
-        node_executable='ask_charge_action_node',
-        node_name='ask_charge_action_node',
+        node_executable='assemble_action_node',
+        node_name='assemble_action_node',
         node_namespace=namespace,
         output='screen',
         parameters=[])   # Create the launch description and populate
@@ -80,7 +80,7 @@ def generate_launch_description():
     ld.add_action(plansys2_cmd)
 
     ld.add_action(move_cmd)
-    ld.add_action(charge_cmd)
-    ld.add_action(ask_charge_cmd)
+    ld.add_action(transport_cmd)
+    ld.add_action(assemble_cmd)
 
     return ld

@@ -12,10 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef BEHAVIOR_TREE_NODES__APPROACHOBJECT_HPP_
-#define BEHAVIOR_TREE_NODES__APPROACHOBJECT_HPP_
-
 #include <string>
+#include <iostream>
+
+#include "plansys2_bt_example/behavior_tree_nodes/Move.hpp"
+
+#include "geometry_msgs/msg/pose2_d.hpp"
 
 #include "behaviortree_cpp_v3/behavior_tree.h"
 #include "behaviortree_cpp_v3/bt_factory.h"
@@ -23,18 +25,25 @@
 namespace plansys2_bt_example
 {
 
-class ApproachObject : public BT::ActionNodeBase
+Move::Move(
+  const std::string & xml_tag_name,
+  const BT::NodeConfiguration & config)
+: BtActionNode(xml_tag_name, "navigate_to_pose", config)
 {
-public:
-  explicit ApproachObject(const std::string & name);
+}
 
-  void halt();
-  BT::NodeStatus tick();
+void
+Move::on_tick()
+{
+  geometry_msgs::msg::PoseStamped goal;
+  getInput<geometry_msgs::msg::PoseStamped>("goal", goal);
 
-private:
-  int counter_;
-};
+  goal_.pose = goal;
+}
+
+void
+Move::on_success()
+{
+}
 
 }  // namespace plansys2_bt_example
-
-#endif  // BEHAVIOR_TREE_NODES__APPROACHOBJECT_HPP_
