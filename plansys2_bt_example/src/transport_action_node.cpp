@@ -48,15 +48,15 @@ public:
     wp.pose.orientation.y = 0.0;
     wp.pose.orientation.z = 0.0;
     wp.pose.orientation.w = 1.0;
-    waypoints_["wp1"] = wp;
+    waypoints_["wheels_zone"] = wp;
 
     wp.pose.position.x = 1.8;
     wp.pose.position.y = 0.0;
-    waypoints_["wp2"] = wp;
+    waypoints_["steering_wheels_zone"] = wp;
 
     wp.pose.position.x = 0.0;
     wp.pose.position.y = 2.0;
-    waypoints_["wp3"] = wp;
+    waypoints_["body_car_zone"] = wp;
 
     wp.pose.position.x = -0.5;
     wp.pose.position.y = -0.5;
@@ -64,7 +64,7 @@ public:
 
     wp.pose.position.x = -2.0;
     wp.pose.position.y = -0.4;
-    waypoints_["wp_control"] = wp;
+    waypoints_["assembly_zone"] = wp;
 
     getFeedback()->progress = 0.0;
 
