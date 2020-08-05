@@ -45,7 +45,7 @@ int main(int argc, char * argv[])
   bool finish = false;
 
   while (!finish && rclcpp::ok()) {
-    finish = tree.root_node->executeTick() == BT::NodeStatus::SUCCESS;
+    finish = tree.rootNode()->executeTick() == BT::NodeStatus::SUCCESS;
 
     rate.sleep();
   }
