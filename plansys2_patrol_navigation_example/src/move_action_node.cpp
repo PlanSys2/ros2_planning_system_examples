@@ -80,7 +80,8 @@ public:
     getFeedback()->progress = 0.0;
 
     navigation_action_client_ =
-      rclcpp_action::create_client<nav2_msgs::action::NavigateToPose>(shared_from_this(),
+      rclcpp_action::create_client<nav2_msgs::action::NavigateToPose>(
+        shared_from_this(),
         "navigate_to_pose");
 
     bool is_action_server_ready = false;
@@ -120,8 +121,9 @@ public:
 private:
   double getDistance(const geometry_msgs::msg::Pose & pos1, const geometry_msgs::msg::Pose & pos2)
   {
-    return sqrt((pos1.position.x - pos2.position.x) * (pos1.position.x - pos2.position.x) +
-             (pos1.position.y - pos2.position.y) * (pos1.position.y - pos2.position.y));
+    return sqrt(
+      (pos1.position.x - pos2.position.x) * (pos1.position.x - pos2.position.x) +
+      (pos1.position.y - pos2.position.y) * (pos1.position.y - pos2.position.y));
   }
 
   void actionStep()
