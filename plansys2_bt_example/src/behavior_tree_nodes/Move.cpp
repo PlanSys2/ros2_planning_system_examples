@@ -41,9 +41,10 @@ Move::on_tick()
   goal_.pose = goal;
 }
 
-void
+BT::NodeStatus
 Move::on_success()
 {
+  return BT::NodeStatus::SUCCESS;
 }
 
 }  // namespace plansys2_bt_example
