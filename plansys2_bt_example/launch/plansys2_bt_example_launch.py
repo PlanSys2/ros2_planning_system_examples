@@ -49,25 +49,25 @@ def generate_launch_description():
     # Specify the actions
     move_cmd = Node(
         package='plansys2_bt_example',
-        node_executable='move_action_node',
-        node_name='move_action_node',
-        node_namespace=namespace,
+        executable='move_action_node',
+        name='move_action_node',
+        namespace=namespace,
         output='screen',
         parameters=[])
 
     transport_cmd = Node(
         package='plansys2_bt_example',
-        node_executable='transport_action_node',
-        node_name='transport_action_node',
-        node_namespace=namespace,
+        executable='transport_action_node',
+        name='transport_action_node',
+        namespace=namespace,
         output='screen',
         parameters=[])
 
     assemble_cmd = Node(
         package='plansys2_bt_example',
-        node_executable='assemble_action_node',
-        node_name='assemble_action_node',
-        node_namespace=namespace,
+        executable='assemble_action_node',
+        name='assemble_action_node',
+        namespace=namespace,
         output='screen',
         parameters=[])   # Create the launch description and populate
     ld = LaunchDescription()

@@ -49,33 +49,33 @@ def generate_launch_description():
     # Specify the actions
     move_cmd = Node(
         package='plansys2_cascade_example',
-        node_executable='move_action_node',
-        node_name='move_action_node',
-        node_namespace=namespace,
+        executable='move_action_node',
+        name='move_action_node',
+        namespace=namespace,
         output='screen',
         parameters=[])
 
     charge_cmd = Node(
         package='plansys2_cascade_example',
-        node_executable='charge_action_node',
-        node_name='charge_action_node',
-        node_namespace=namespace,
+        executable='charge_action_node',
+        name='charge_action_node',
+        namespace=namespace,
         output='screen',
         parameters=[])
 
     ask_charge_cmd = Node(
         package='plansys2_cascade_example',
-        node_executable='ask_charge_action_node',
-        node_name='ask_charge_action_node',
-        node_namespace=namespace,
+        executable='ask_charge_action_node',
+        name='ask_charge_action_node',
+        namespace=namespace,
         output='screen',
         parameters=[])   # Create the launch description and populate
 
     check_obstacles_cmd = Node(
         package='plansys2_cascade_example',
-        node_executable='check_obstacles_node',
-        node_name='check_obstacles_node',
-        node_namespace=namespace,
+        executable='check_obstacles_node',
+        name='check_obstacles_node',
+        namespace=namespace,
         output='screen',
         parameters=[])   # Create the launch description and populate
 

@@ -67,6 +67,8 @@ public:
     factory_.registerNodeType<plansys2_bt_example::Move>("Move");
   }
 
+  BT::Blackboard::Ptr getBlackBoard() {return getBackboard();}
+
 private:
   std::map<std::string, geometry_msgs::msg::PoseStamped> waypoints_;
 
@@ -78,6 +80,7 @@ private:
     RCLCPP_INFO(get_logger(), "Start navigation to [%s]", wp_to_navigate.c_str());
 
     getBackboard()->set("goal", goal_pos);
+    getBackboard()->set("node", rclcpp::Node::make_shared("move_aux"));
 
     ActionBTExecutorClient::atStart();
   }
