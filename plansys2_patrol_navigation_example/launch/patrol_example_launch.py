@@ -50,15 +50,15 @@ def generate_launch_description():
     # Specify the actions
     move_cmd = Node(
         package='plansys2_patrol_navigation_example',
-        node_executable='move_action_node',
-        node_name='move_action_node',
+        executable='move_action_node',
+        name='move_action_node',
         output='screen',
         parameters=[])
 
     patrol_cmd = Node(
         package='plansys2_patrol_navigation_example',
-        node_executable='patrol_action_node',
-        node_name='patrol_action_node',
+        executable='patrol_action_node',
+        name='patrol_action_node',
         output='screen',
         parameters=[])
 

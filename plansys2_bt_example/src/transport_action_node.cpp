@@ -85,6 +85,7 @@ private:
     RCLCPP_INFO(get_logger(), "Start transport to [%s]", wp_to_navigate.c_str());
 
     getBackboard()->set("goal", goal_pos);
+    getBackboard()->set("node", rclcpp::Node::make_shared("move_aux"));
 
     ActionBTExecutorClient::atStart();
   }
