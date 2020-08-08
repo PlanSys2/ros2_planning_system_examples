@@ -4,7 +4,7 @@
            <OpenGripper    name="open_gripper"/>
            <ApproachObject name="approach_object"/>
            <CloseGripper   name="close_gripper"/>
-           <Move    name="move" goal="${goal}"/>
+           <Move    name="move" goal="${arg2}"/>
            <OpenGripper    name="open_gripper"/>
        </Sequence>
     </BehaviorTree>

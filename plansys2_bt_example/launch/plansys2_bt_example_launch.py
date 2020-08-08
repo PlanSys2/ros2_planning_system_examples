@@ -48,20 +48,32 @@ def generate_launch_description():
 
     # Specify the actions
     move_cmd = Node(
-        package='plansys2_bt_example',
-        executable='move_action_node',
-        name='move_action_node',
+        package='plansys2_bt_actions',
+        executable='bt_action_node',
+        name='move',
         namespace=namespace,
         output='screen',
-        parameters=[])
+        parameters=[
+          example_dir + '/config/params.yaml',
+          {
+            "action_name": "move",
+            "bt_xml_file": example_dir + '/behavior_trees_xml/move.xml'
+          }
+        ])
 
     transport_cmd = Node(
-        package='plansys2_bt_example',
-        executable='transport_action_node',
-        name='transport_action_node',
+        package='plansys2_bt_actions',
+        executable='bt_action_node',
+        name='transport',
         namespace=namespace,
         output='screen',
-        parameters=[])
+        parameters=[
+          example_dir + '/config/params.yaml',
+          {
+            "action_name": "transport",
+            "bt_xml_file": example_dir + '/behavior_trees_xml/transport.xml'
+          }
+        ])
 
     assemble_cmd = Node(
         package='plansys2_bt_example',

@@ -17,6 +17,7 @@
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_action/rclcpp_action.hpp"
 #include "nav2_msgs/action/navigate_to_pose.hpp"
+#include "tf2_geometry_msgs/tf2_geometry_msgs.h"
 
 using std::placeholders::_1;
 using std::placeholders::_2;
@@ -69,6 +70,13 @@ private:
     rclcpp::Rate loop_rate(1);
     auto feedback = std::make_shared<NavigateToPose::Feedback>();
     auto result = std::make_shared<NavigateToPose::Result>();
+
+    auto pose_cmd = goal_handle->get_goal()->pose.pose;
+    tf2::Quaternion q;
+    tf2::fromMsg(pose_cmd.orientation, q);
+    
+    RCLCPP_INFO(this->get_logger(), "Starting navigation to %lf, %lf, %lf", 
+      pose_cmd.position.x, pose_cmd.position.y, q.getAngle());
 
     auto start = now();
     int current_times = 0;

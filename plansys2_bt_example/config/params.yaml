@@ -1,0 +1,23 @@
+move:
+  ros__parameters:
+    plugins:
+      - plansys2_move_bt_node
+    waypoints: ["wheels_zone", "steering_wheels_zone", "body_car_zone", "assembly_zone"]
+    waypoint_coords:
+      wheels_zone: [0.0, -2.0, 0.0]
+      steering_wheels_zone: [1.8, 0.0, 0.0]
+      body_car_zone: [0.0, 2.0, 0.0]
+      assembly_zone: [-2.0, -0.4, 0.0]
+transport:
+  ros__parameters:
+    plugins:
+      - plansys2_close_gripper_bt_node
+      - plansys2_open_gripper_bt_node
+      - plansys2_move_bt_node
+      - plansys2_approach_object_bt_node
+    waypoints: ["wheels_zone", "steering_wheels_zone", "body_car_zone", "assembly_zone"]
+    waypoint_coords:
+      wheels_zone: [0.0, -2.0, 0.0]
+      steering_wheels_zone: [1.8, 0.0, 0.0]
+      body_car_zone: [0.0, 2.0, 0.0]
+      assembly_zone: [-2.0, -0.4, 0.0]

@@ -26,10 +26,17 @@ namespace plansys2_bt_example
 class ApproachObject : public BT::ActionNodeBase
 {
 public:
-  explicit ApproachObject(const std::string & name);
+  explicit ApproachObject(
+    const std::string & xml_tag_name,
+    const BT::NodeConfiguration & conf);
 
   void halt();
   BT::NodeStatus tick();
+
+  static BT::PortsList providedPorts()
+  {
+    return BT::PortsList({});
+  }
 
 private:
   int counter_;

@@ -26,10 +26,17 @@ namespace plansys2_bt_example
 class CloseGripper : public BT::ActionNodeBase
 {
 public:
-  explicit CloseGripper(const std::string & name);
+  explicit CloseGripper(
+    const std::string & xml_tag_name,
+    const BT::NodeConfiguration & conf);
 
   void halt();
   BT::NodeStatus tick();
+
+  static BT::PortsList providedPorts()
+  {
+    return BT::PortsList({});
+  }
 
 private:
   int counter_;
