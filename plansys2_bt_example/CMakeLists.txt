@@ -7,6 +7,7 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_action REQUIRED)
 find_package(geometry_msgs REQUIRED)
+find_package(tf2_geometry_msgs REQUIRED)
 find_package(nav2_msgs REQUIRED)
 find_package(plansys2_msgs REQUIRED)
 find_package(plansys2_executor REQUIRED)
@@ -18,6 +19,7 @@ set(dependencies
     rclcpp
     rclcpp_action
     geometry_msgs
+    tf2_geometry_msgs
     nav2_msgs
     plansys2_msgs
     plansys2_executor
