@@ -56,8 +56,8 @@ def generate_launch_description():
         parameters=[
           example_dir + '/config/params.yaml',
           {
-            "action_name": "move",
-            "bt_xml_file": example_dir + '/behavior_trees_xml/move.xml'
+            'action_name': 'move',
+            'bt_xml_file': example_dir + '/behavior_trees_xml/move.xml'
           }
         ])
 
@@ -70,8 +70,8 @@ def generate_launch_description():
         parameters=[
           example_dir + '/config/params.yaml',
           {
-            "action_name": "transport",
-            "bt_xml_file": example_dir + '/behavior_trees_xml/transport.xml'
+            'action_name': 'transport',
+            'bt_xml_file': example_dir + '/behavior_trees_xml/transport.xml'
           }
         ])
 

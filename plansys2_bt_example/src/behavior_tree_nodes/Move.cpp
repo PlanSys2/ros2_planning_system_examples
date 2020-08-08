@@ -14,15 +14,15 @@
 
 #include <string>
 #include <iostream>
+#include <vector>
+#include <memory>
 
 #include "plansys2_bt_example/behavior_tree_nodes/Move.hpp"
 
 #include "geometry_msgs/msg/pose2_d.hpp"
+#include "tf2_geometry_msgs/tf2_geometry_msgs.h"
 
 #include "behaviortree_cpp_v3/behavior_tree.h"
-#include "behaviortree_cpp_v3/bt_factory.h"
-
-#include "tf2_geometry_msgs/tf2_geometry_msgs.h"
 
 namespace plansys2_bt_tests
 {
@@ -35,15 +35,15 @@ Move::Move(
 {
   rclcpp::Node::SharedPtr node;
   config().blackboard->get("node", node);
-  
+
   node->declare_parameter("waypoints");
   node->declare_parameter("waypoint_coords");
 
   if (node->has_parameter("waypoints")) {
-    std::vector<std::string> wp_names; 
-    
+    std::vector<std::string> wp_names;
+
     node->get_parameter_or("waypoints", wp_names, {});
-  
+
     for (auto & wp : wp_names) {
       node->declare_parameter("waypoint_coords." + wp);
 
@@ -76,7 +76,7 @@ Move::on_tick()
   }
 
   geometry_msgs::msg::PoseStamped goal_pos;
-  
+
   goal_pos.header.frame_id = "map";
   goal_pos.pose.position.x = pose2nav.x;
   goal_pos.pose.position.y = pose2nav.y;

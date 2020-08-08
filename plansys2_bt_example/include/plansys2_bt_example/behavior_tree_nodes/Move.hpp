@@ -16,6 +16,7 @@
 #define PLANSYS2_BT_EXAMPLE__BEHAVIOR_TREE_NODES__MOVE_HPP_
 
 #include <string>
+#include <map>
 
 #include "geometry_msgs/msg/pose2_d.hpp"
 #include "nav2_msgs/action/navigate_to_pose.hpp"
@@ -47,9 +48,9 @@ public:
 
 private:
   int goal_reached_;
-  std::map <std::string, geometry_msgs::msg::Pose2D> waypoints_;
+  std::map<std::string, geometry_msgs::msg::Pose2D> waypoints_;
 };
 
 }  // namespace plansys2_bt_tests
 
-#endif  // UNIT__BEHAVIOR_TREE__MOVE_HPP_
+#endif  // PLANSYS2_BT_EXAMPLE__BEHAVIOR_TREE_NODES__MOVE_HPP_

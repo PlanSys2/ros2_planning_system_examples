@@ -74,8 +74,9 @@ private:
     auto pose_cmd = goal_handle->get_goal()->pose.pose;
     tf2::Quaternion q;
     tf2::fromMsg(pose_cmd.orientation, q);
-    
-    RCLCPP_INFO(this->get_logger(), "Starting navigation to %lf, %lf, %lf", 
+
+    RCLCPP_INFO(
+      this->get_logger(), "Starting navigation to %lf, %lf, %lf",
       pose_cmd.position.x, pose_cmd.position.y, q.getAngle());
 
     auto start = now();
