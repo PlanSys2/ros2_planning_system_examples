@@ -6,20 +6,7 @@ This example shows how to use Behavior Trees to carry out the tasks that an acti
 - In `src` the actions are implemented.
 - In `src / behavior_tree_nodes` BT nodes.
 
-An action executes a BT inheriting from `plansys2::ActionBTExecutorClient` and specifying a xml BT file:
-
-```
-class MoveAction : public plansys2::ActionBTExecutorClient
-{
-public:
-  MoveAction()
-  : plansys2::ActionBTExecutorClient(
-      "move",
-      ament_index_cpp::get_package_share_directory("plansys2_bt_example") +
-      "/behavior_trees_xml/move.xml")
-  {
-
-```
+See https://github.com/IntelligentRoboticsLabs/ros2_planning_system/pull/27 for details.
 
 ## How to run
 
