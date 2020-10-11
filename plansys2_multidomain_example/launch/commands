@@ -25,8 +25,10 @@ set predicate (charging_point_at chargingroom)
 set predicate (battery_low leia)
 set predicate (robot_at leia entrance)
 
+set instance boli pickable_object
+set predicate (object_at_room boli entrance)
+set goal (and(object_at_room boli bathroom))
 
-set goal (and(robot_at leia bathroom))
 get plan
 
 run (move leia entrance dinning)

@@ -18,6 +18,7 @@ set(dependencies
     plansys2_msgs
     nav2_msgs
     plansys2_executor
+    plansys2_problem_expert
     plansys2_domain_expert
 )
 
