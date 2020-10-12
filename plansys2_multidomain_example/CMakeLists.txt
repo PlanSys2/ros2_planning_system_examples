@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 project(plansys2_multidomain_example)
 
-set(CMAKE_BUILD_TYPE DEBUG)
 
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
