@@ -47,7 +47,7 @@ private:
     }
 
     std::cout << "\r\e[K" << std::flush;
-    std::cout << "Charging ... [" << std::min(100.0, progress_ * 100.0) << "%]  " <<
+    std::cout << "Assemble ... [" << std::min(100.0, progress_ * 100.0) << "%]  " <<
       std::flush;
   }
 
