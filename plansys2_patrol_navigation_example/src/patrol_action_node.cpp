@@ -23,23 +23,25 @@
 #include "rclcpp_action/rclcpp_action.hpp"
 #include "lifecycle_msgs/msg/state.hpp"
 
+using namespace std::chrono_literals;
+
 class Patrol : public plansys2::ActionExecutorClient
 {
 public:
   Patrol()
-  : plansys2::ActionExecutorClient("patrol")
+  : plansys2::ActionExecutorClient("patrol", 1s)
   {
   }
 
   rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
   on_activate(const rclcpp_lifecycle::State & previous_state)
   {
-    getFeedback()->progress = 0.0;
+    progress_ = 0.0;
 
     cmd_vel_pub_ = this->create_publisher<geometry_msgs::msg::Twist>("/cmd_vel", 10);
     cmd_vel_pub_->on_activate();
 
-    return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
+    return ActionExecutorClient::on_activate(previous_state);
   }
 
   rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
@@ -47,30 +49,27 @@ public:
   {
     cmd_vel_pub_->on_deactivate();
 
-    return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
+    return ActionExecutorClient::on_deactivate(previous_state);
   }
 
 private:
-  void actionStep()
+  void do_work()
   {
-    if (getFeedback()->progress < 100.0) {
-      getFeedback()->progress += 2.0;
-    }
+    if (progress_ < 1.0) {
+      progress_ += 0.1;
 
-    geometry_msgs::msg::Twist cmd;
-    cmd.linear.x = 0.0;
-    cmd.linear.y = 0.0;
-    cmd.linear.z = 0.0;
-    cmd.angular.x = 0.0;
-    cmd.angular.y = 0.0;
-    cmd.angular.z = 0.5;
+      send_feedback(progress_, "Patrol running");
 
-    cmd_vel_pub_->publish(cmd);
-  }
+      geometry_msgs::msg::Twist cmd;
+      cmd.linear.x = 0.0;
+      cmd.linear.y = 0.0;
+      cmd.linear.z = 0.0;
+      cmd.angular.x = 0.0;
+      cmd.angular.y = 0.0;
+      cmd.angular.z = 0.5;
 
-  bool isFinished()
-  {
-    if (getFeedback()->progress >= 100.0) {
+      cmd_vel_pub_->publish(cmd);
+    } else {
       geometry_msgs::msg::Twist cmd;
       cmd.linear.x = 0.0;
       cmd.linear.y = 0.0;
@@ -81,11 +80,11 @@ private:
 
       cmd_vel_pub_->publish(cmd);
 
-      return true;
-    } else {
-      return false;
+      finish(true, 1.0, "Patrol completed");
     }
   }
+
+  float progress_;
 
   rclcpp_lifecycle::LifecyclePublisher<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_pub_;
 };
@@ -94,6 +93,9 @@ int main(int argc, char ** argv)
 {
   rclcpp::init(argc, argv);
   auto node = std::make_shared<Patrol>();
+
+  node->set_parameter(rclcpp::Parameter("action", "patrol"));
+  node->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_CONFIGURE);
 
   rclcpp::spin(node->get_node_base_interface());
 

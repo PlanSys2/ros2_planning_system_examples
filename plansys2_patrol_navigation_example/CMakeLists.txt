@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 project(plansys2_patrol_navigation_example)
 
-set(CMAKE_BUILD_TYPE DEBUG)
 
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
@@ -18,6 +17,7 @@ set(dependencies
     plansys2_msgs
     nav2_msgs
     plansys2_executor
+    plansys2_problem_expert
     plansys2_domain_expert
 )
 

@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include <memory>
+#include <algorithm>
 
 #include "plansys2_msgs/action/execute_action.hpp"
 
@@ -21,36 +22,45 @@
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_action/rclcpp_action.hpp"
 
+using namespace std::chrono_literals;
+
 class PlaceObject : public plansys2::ActionExecutorClient
 {
 public:
   PlaceObject()
-  : plansys2::ActionExecutorClient("place_object")
+  : plansys2::ActionExecutorClient("place_object", 250ms)
   {
-    getFeedback()->progress = 0.0;
+    progress_ = 0.0;
   }
 
 private:
-  void actionStep()
+  void do_work()
   {
-    if (getFeedback()->progress < 100.0) {
-      getFeedback()->progress += 5.0;
+    if (progress_ < 1.0) {
+      progress_ += 0.02;
+      send_feedback(progress_, "PlaceObject running");
+    } else {
+      finish(true, 1.0, "PlaceObject completed");
+
+      progress_ = 0.0;
+      std::cout << std::endl;
     }
 
     std::cout << "\r\e[K" << std::flush;
-    std::cout << "Placing object ... [" << getFeedback()->progress << "%]  " << std::flush;
+    std::cout << "Placing object ... [" << std::min(100.0, progress_ * 100.0) << "%]  " <<
+      std::flush;
   }
 
-  bool isFinished()
-  {
-    return getFeedback()->progress >= 100.0;
-  }
+  float progress_;
 };
 
 int main(int argc, char ** argv)
 {
   rclcpp::init(argc, argv);
   auto node = std::make_shared<PlaceObject>();
+
+  node->set_parameter(rclcpp::Parameter("action", "place_object"));
+  node->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_CONFIGURE);
 
   rclcpp::spin(node->get_node_base_interface());
 

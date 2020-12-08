@@ -15,6 +15,7 @@
 #include <memory>
 
 #include "plansys2_msgs/action/execute_action.hpp"
+#include "plansys2_msgs/msg/action_execution_info.hpp"
 
 #include "plansys2_executor/ExecutorClient.hpp"
 #include "plansys2_problem_expert/ProblemExpertClient.hpp"
@@ -61,24 +62,22 @@ public:
   {
     switch (state_) {
       case STARTING:
+        // Set the goal for next state, and execute plan
+        problem_expert_->setGoal(plansys2::Goal("(and(patrolled wp1))"));
 
-
-        if (true) {
-          // Set the goal for next state, and execute plan
-          problem_expert_->setGoal(plansys2::Goal("(and(patrolled wp1))"));
-
-          if (executor_client_->executePlan()) {
-            state_ = PATROL_WP1;
-          }
+        if (executor_client_->executePlan()) {
+          state_ = PATROL_WP1;
         }
         break;
       case PATROL_WP1:
         {
           auto feedback = executor_client_->getFeedBack();
 
-          std::cout << "[" << feedback.seq_action << "/" << feedback.total_actions << "]" <<
-            "{" << feedback.current_action << "} [" << feedback.progress_current_action << "%]" <<
-            std::endl;
+          for (const auto & action_feedback : feedback.action_execution_status) {
+            std::cout << "[" << action_feedback.action << " " <<
+              action_feedback.completion * 100.0 << "%]";
+          }
+          std::cout << std::endl;
 
           if (executor_client_->getResult()) {
             if (executor_client_->getResult().value().success) {
@@ -94,9 +93,12 @@ public:
                 state_ = PATROL_WP2;
               }
             } else {
-              std::cout << "Finished with error: " <<
-                executor_client_->getResult().value().error_info <<
-                std::endl;
+              for (const auto & action_feedback : feedback.action_execution_status) {
+                if (action_feedback.status == plansys2_msgs::msg::ActionExecutionInfo::FAILED) {
+                  std::cout << "[" << action_feedback.action << "] finished with error: " <<
+                    action_feedback.message_status << std::endl;
+                }
+              }
               executor_client_->executePlan();  // replan and execute
             }
           }
@@ -106,9 +108,11 @@ public:
         {
           auto feedback = executor_client_->getFeedBack();
 
-          std::cout << "[" << feedback.seq_action << "/" << feedback.total_actions << "]" <<
-            "{" << feedback.current_action << "} [" << feedback.progress_current_action << "%]" <<
-            std::endl;
+          for (const auto & action_feedback : feedback.action_execution_status) {
+            std::cout << "[" << action_feedback.action << " " <<
+              action_feedback.completion * 100.0 << "%]";
+          }
+          std::cout << std::endl;
 
           if (executor_client_->getResult()) {
             if (executor_client_->getResult().value().success) {
@@ -124,9 +128,12 @@ public:
                 state_ = PATROL_WP3;
               }
             } else {
-              std::cout << "Finished with error: " <<
-                executor_client_->getResult().value().error_info <<
-                std::endl;
+              for (const auto & action_feedback : feedback.action_execution_status) {
+                if (action_feedback.status == plansys2_msgs::msg::ActionExecutionInfo::FAILED) {
+                  std::cout << "[" << action_feedback.action << "] finished with error: " <<
+                    action_feedback.message_status << std::endl;
+                }
+              }
               executor_client_->executePlan();  // replan and execute
             }
           }
@@ -136,9 +143,11 @@ public:
         {
           auto feedback = executor_client_->getFeedBack();
 
-          std::cout << "[" << feedback.seq_action << "/" << feedback.total_actions << "]" <<
-            "{" << feedback.current_action << "} [" << feedback.progress_current_action << "%]" <<
-            std::endl;
+          for (const auto & action_feedback : feedback.action_execution_status) {
+            std::cout << "[" << action_feedback.action << " " <<
+              action_feedback.completion * 100.0 << "%]";
+          }
+          std::cout << std::endl;
 
           if (executor_client_->getResult()) {
             if (executor_client_->getResult().value().success) {
@@ -154,9 +163,12 @@ public:
                 state_ = PATROL_WP4;
               }
             } else {
-              std::cout << "Finished with error: " <<
-                executor_client_->getResult().value().error_info <<
-                std::endl;
+              for (const auto & action_feedback : feedback.action_execution_status) {
+                if (action_feedback.status == plansys2_msgs::msg::ActionExecutionInfo::FAILED) {
+                  std::cout << "[" << action_feedback.action << "] finished with error: " <<
+                    action_feedback.message_status << std::endl;
+                }
+              }
               executor_client_->executePlan();  // replan and execute
             }
           }
@@ -166,9 +178,11 @@ public:
         {
           auto feedback = executor_client_->getFeedBack();
 
-          std::cout << "[" << feedback.seq_action << "/" << feedback.total_actions << "]" <<
-            "{" << feedback.current_action << "} [" << feedback.progress_current_action << "%]" <<
-            std::endl;
+          for (const auto & action_feedback : feedback.action_execution_status) {
+            std::cout << "[" << action_feedback.action << " " <<
+              action_feedback.completion * 100.0 << "%]";
+          }
+          std::cout << std::endl;
 
           if (executor_client_->getResult()) {
             if (executor_client_->getResult().value().success) {
@@ -185,9 +199,12 @@ public:
                 state_ = PATROL_WP1;
               }
             } else {
-              std::cout << "Finished with error: " <<
-                executor_client_->getResult().value().error_info <<
-                std::endl;
+              for (const auto & action_feedback : feedback.action_execution_status) {
+                if (action_feedback.status == plansys2_msgs::msg::ActionExecutionInfo::FAILED) {
+                  std::cout << "[" << action_feedback.action << "] finished with error: " <<
+                    action_feedback.message_status << std::endl;
+                }
+              }
               executor_client_->executePlan();  // replan and execute
             }
           }

@@ -21,7 +21,7 @@ set instance car_1 car
 set instance car_2 car
 set instance car_3 car
 
-set predicate (robot_at r2d2 assembly_zone)
+set predicate (robot_at r2d2 wheels_zone)
 set predicate (is_assembly_zone assembly_zone)
 
 

@@ -17,6 +17,7 @@
 #include <memory>
 #include <string>
 #include <map>
+#include <algorithm>
 
 #include "plansys2_msgs/action/execute_action.hpp"
 #include "geometry_msgs/msg/pose_stamped.hpp"
@@ -29,11 +30,13 @@
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_action/rclcpp_action.hpp"
 
+using namespace std::chrono_literals;
+
 class MoveAction : public plansys2::ActionExecutorClient
 {
 public:
   MoveAction()
-  : plansys2::ActionExecutorClient("move")
+  : plansys2::ActionExecutorClient("move", 500ms)
   {
     geometry_msgs::msg::PoseStamped wp;
     wp.header.frame_id = "/map";
@@ -77,7 +80,7 @@ public:
   rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
   on_activate(const rclcpp_lifecycle::State & previous_state)
   {
-    getFeedback()->progress = 0.0;
+    send_feedback(0.0, "Move starting");
 
     navigation_action_client_ =
       rclcpp_action::create_client<nav2_msgs::action::NavigateToPose>(
@@ -94,7 +97,7 @@ public:
 
     RCLCPP_INFO(get_logger(), "Navigation action server ready");
 
-    auto wp_to_navigate = getArguments()[2];  // The goal is in the 3rd argument of the action
+    auto wp_to_navigate = get_arguments()[2];  // The goal is in the 3rd argument of the action
     RCLCPP_INFO(get_logger(), "Start navigation to [%s]", wp_to_navigate.c_str());
 
     goal_pos_ = waypoints_[wp_to_navigate];
@@ -104,18 +107,23 @@ public:
 
     auto send_goal_options =
       rclcpp_action::Client<nav2_msgs::action::NavigateToPose>::SendGoalOptions();
-    send_goal_options.result_callback = [this](auto) {getFeedback()->progress = 100.0;};
+
+    send_goal_options.feedback_callback = [this](
+      NavigationGoalHandle::SharedPtr,
+      NavigationFeedback feedback) {
+        send_feedback(
+          std::min(1.0, std::max(0.0, 1.0 - (feedback->distance_remaining / dist_to_move))),
+          "Move running");
+      };
+
+    send_goal_options.result_callback = [this](auto) {
+        finish(true, 1.0, "Move completed");
+      };
 
     future_navigation_goal_handle_ =
       navigation_action_client_->async_send_goal(navigation_goal_, send_goal_options);
 
-    navigation_goal_handle_ = future_navigation_goal_handle_.get();
-    if (!navigation_goal_handle_) {
-      RCLCPP_ERROR(get_logger(), "Goal was rejected by server");
-      return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::FAILURE;
-    }
-
-    return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS;
+    return ActionExecutorClient::on_activate(previous_state);
   }
 
 private:
@@ -126,39 +134,16 @@ private:
       (pos1.position.y - pos2.position.y) * (pos1.position.y - pos2.position.y));
   }
 
-  void actionStep()
+  void do_work()
   {
-    // Nothing to do. Action is send and check is done in isFinished
-    auto status = navigation_goal_handle_->get_status();
-
-    // Check if the goal is still executing
-    if (status == action_msgs::msg::GoalStatus::STATUS_ACCEPTED ||
-      status == action_msgs::msg::GoalStatus::STATUS_EXECUTING)
-    {
-      RCLCPP_DEBUG(get_logger(), "Executing move action");
-    } else {
-      RCLCPP_WARN(get_logger(), "Error Executing");
-    }
-
-    double dist_to_goal = getDistance(goal_pos_.pose, current_pos_);
-
-    getFeedback()->progress = 100.0 * (1.0 - (dist_to_goal / dist_to_move));
-  }
-
-  bool isFinished()
-  {
-    if (getFeedback()->progress >= 100.0) {
-      // Check result of navigation
-      return true;
-    } else {
-      return false;
-    }
   }
 
   std::map<std::string, geometry_msgs::msg::PoseStamped> waypoints_;
 
   using NavigationGoalHandle =
     rclcpp_action::ClientGoalHandle<nav2_msgs::action::NavigateToPose>;
+  using NavigationFeedback =
+    const std::shared_ptr<const nav2_msgs::action::NavigateToPose::Feedback>;
 
   rclcpp_action::Client<nav2_msgs::action::NavigateToPose>::SharedPtr navigation_action_client_;
   std::shared_future<NavigationGoalHandle::SharedPtr> future_navigation_goal_handle_;
@@ -176,6 +161,9 @@ int main(int argc, char ** argv)
 {
   rclcpp::init(argc, argv);
   auto node = std::make_shared<MoveAction>();
+
+  node->set_parameter(rclcpp::Parameter("action", "move"));
+  node->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_CONFIGURE);
 
   rclcpp::spin(node->get_node_base_interface());
 

@@ -61,6 +61,21 @@ def generate_launch_description():
         name='ask_charge_action_node',
         output='screen',
         parameters=[])   # Create the launch description and populate
+
+    pick_object_cmd = Node(
+        package='plansys2_multidomain_example',
+        executable='pick_object_action_node',
+        name='pick_object_action_node',
+        output='screen',
+        parameters=[])   # Create the launch description and populate
+
+    place_object_cmd = Node(
+        package='plansys2_multidomain_example',
+        executable='place_object_action_node',
+        name='place_object_action_node',
+        output='screen',
+        parameters=[])   # Create the launch description and populate
+
     ld = LaunchDescription()
 
     # Set environment variables
@@ -72,5 +87,7 @@ def generate_launch_description():
     ld.add_action(move_cmd)
     ld.add_action(charge_cmd)
     ld.add_action(ask_charge_cmd)
+    ld.add_action(pick_object_cmd)
+    ld.add_action(place_object_cmd)
 
     return ld
