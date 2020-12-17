@@ -1,4 +1,4 @@
-name: plansys2_patrol_example
+name: plansys2_patrol_navigation_example
 
 on:
   pull_request:
@@ -27,7 +27,7 @@ jobs:
       - name: build and test
         uses: fmrico/action-ros-ci@0.1.1
         with:
-          package-name: plansys2_patrol_example
+          package-name: plansys2_patrol_navigation_example
           target-ros2-distro: foxy
           vcs-repo-file-url: /tmp/all.repos
           colcon-mixin-name: coverage-gcc
