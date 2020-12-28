@@ -8,6 +8,8 @@ find_package(rclcpp_action REQUIRED)
 find_package(plansys2_msgs REQUIRED)
 find_package(plansys2_executor REQUIRED)
 
+set(CMAKE_CXX_STANDARD 17)
+
 set(dependencies
     rclcpp
     rclcpp_action
