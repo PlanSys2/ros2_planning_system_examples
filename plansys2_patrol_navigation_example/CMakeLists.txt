@@ -11,6 +11,8 @@ find_package(nav2_msgs REQUIRED)
 find_package(plansys2_executor REQUIRED)
 find_package(plansys2_domain_expert REQUIRED)
 
+set(CMAKE_CXX_STANDARD 17)
+
 set(dependencies
     rclcpp
     rclcpp_action
