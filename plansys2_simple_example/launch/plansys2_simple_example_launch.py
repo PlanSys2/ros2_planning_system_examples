@@ -55,6 +55,14 @@ def generate_launch_description():
         output='screen',
         parameters=[])
 
+    patrol_cmd = Node(
+        package='plansys2_simple_example',
+        executable='patrol_action_node',
+        name='patrol_action_node',
+        namespace=namespace,
+        output='screen',
+        parameters=[])
+
     charge_cmd = Node(
         package='plansys2_simple_example',
         executable='charge_action_node',
@@ -80,6 +88,7 @@ def generate_launch_description():
     ld.add_action(plansys2_cmd)
 
     ld.add_action(move_cmd)
+    ld.add_action(patrol_cmd)
     ld.add_action(charge_cmd)
     ld.add_action(ask_charge_cmd)
 

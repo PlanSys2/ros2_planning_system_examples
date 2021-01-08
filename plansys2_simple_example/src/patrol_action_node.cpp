@@ -24,11 +24,11 @@
 
 using namespace std::chrono_literals;
 
-class MoveAction : public plansys2::ActionExecutorClient
+class PatrolAction : public plansys2::ActionExecutorClient
 {
 public:
-  MoveAction()
-  : plansys2::ActionExecutorClient("move", 50ms)
+  PatrolAction()
+  : plansys2::ActionExecutorClient("patrol", 50ms)
   {
     progress_ = 0.0;
   }
@@ -38,16 +38,16 @@ private:
   {
     if (progress_ < 1.0) {
       progress_ += 0.02;
-      send_feedback(progress_, "Move running");
+      send_feedback(progress_, "Patrol running");
     } else {
-      finish(true, 1.0, "Move completed");
+      finish(true, 1.0, "Patrol completed");
 
       progress_ = 0.0;
       std::cout << std::endl;
     }
 
     std::cout << "\r\e[K" << std::flush;
-    std::cout << "Moving ... [" << std::min(100.0, progress_ * 100.0) << "%]  " <<
+    std::cout << "Patroling ... [" << std::min(100.0, progress_ * 100.0) << "%]  " <<
       std::flush;
   }
 
@@ -57,9 +57,9 @@ private:
 int main(int argc, char ** argv)
 {
   rclcpp::init(argc, argv);
-  auto node = std::make_shared<MoveAction>();
+  auto node = std::make_shared<PatrolAction>();
 
-  node->set_parameter(rclcpp::Parameter("action", "move"));
+  node->set_parameter(rclcpp::Parameter("action", "patrol"));
   node->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_CONFIGURE);
 
   rclcpp::spin(node->get_node_base_interface());

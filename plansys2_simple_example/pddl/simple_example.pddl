@@ -15,6 +15,7 @@ room
 (battery_full ?r - robot)
 (battery_low ?r - robot)
 (charging_point_at ?ro - room)
+(patrolled ?ro - room)
 
 );; end Predicates ;;;;;;;;;;;;;;;;;;;;
 ;; Functions ;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -33,6 +34,19 @@ room
     :effect (and
         (at start(not(robot_at ?r ?r1)))
         (at end(robot_at ?r ?r2))
+    )
+)
+
+(:durative-action patrol
+    :parameters (?r - robot ?ro - room)
+    :duration ( = ?duration 2)
+    :condition (and
+        (at start (robot_at ?r ?ro))
+        (over all (robot_at ?r ?ro))
+        (at end (robot_at ?r ?ro))
+       )
+    :effect (and
+        (at end(patrolled ?ro))
     )
 )
 
