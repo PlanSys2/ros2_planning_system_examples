@@ -28,7 +28,8 @@
 namespace plansys2_bt_tests
 {
 
-class Move : public plansys2::BtActionNode<nav2_msgs::action::NavigateToPose>
+class Move : public plansys2::BtActionNode<
+    nav2_msgs::action::NavigateToPose>
 {
 public:
   explicit Move(

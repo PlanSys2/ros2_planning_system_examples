@@ -24,6 +24,8 @@
 
 #include "behaviortree_cpp_v3/behavior_tree.h"
 
+#include "rclcpp_lifecycle/lifecycle_node.hpp"
+
 namespace plansys2_bt_tests
 {
 
