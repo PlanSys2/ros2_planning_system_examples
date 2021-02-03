@@ -18,8 +18,6 @@
 #include <memory>
 #include <algorithm>
 
-#include "plansys2_msgs/action/execute_action.hpp"
-
 #include "plansys2_executor/ActionExecutorClient.hpp"
 
 #include "rclcpp/rclcpp.hpp"
