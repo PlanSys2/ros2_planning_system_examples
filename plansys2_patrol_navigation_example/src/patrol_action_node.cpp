@@ -14,7 +14,6 @@
 
 #include <memory>
 
-#include "plansys2_msgs/action/execute_action.hpp"
 #include "geometry_msgs/msg/twist.hpp"
 
 #include "plansys2_executor/ActionExecutorClient.hpp"

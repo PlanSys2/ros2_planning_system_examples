@@ -14,7 +14,6 @@
 
 #include <memory>
 
-#include "plansys2_msgs/action/execute_action.hpp"
 #include "plansys2_msgs/msg/action_execution_info.hpp"
 
 #include "plansys2_executor/ExecutorClient.hpp"
