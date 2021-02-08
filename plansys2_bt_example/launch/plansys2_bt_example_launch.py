@@ -57,6 +57,8 @@ def generate_launch_description():
           example_dir + '/config/params.yaml',
           {
             'action_name': 'move',
+            'publisher_port': 1668,
+            'server_port': 1669,
             'bt_xml_file': example_dir + '/behavior_trees_xml/move.xml'
           }
         ])
@@ -71,6 +73,8 @@ def generate_launch_description():
           example_dir + '/config/params.yaml',
           {
             'action_name': 'move',
+            'publisher_port': 1670,
+            'server_port': 1671,
             'bt_xml_file': example_dir + '/behavior_trees_xml/move.xml'
           }
         ])
@@ -85,6 +89,8 @@ def generate_launch_description():
           example_dir + '/config/params.yaml',
           {
             'action_name': 'move',
+            'publisher_port': 1672,
+            'server_port': 1673,
             'bt_xml_file': example_dir + '/behavior_trees_xml/move.xml'
           }
         ])
@@ -99,6 +105,8 @@ def generate_launch_description():
           example_dir + '/config/params.yaml',
           {
             'action_name': 'transport',
+            'publisher_port': 1674,
+            'server_port': 1675,
             'bt_xml_file': example_dir + '/behavior_trees_xml/transport.xml'
           }
         ])
@@ -112,6 +120,8 @@ def generate_launch_description():
           example_dir + '/config/params.yaml',
           {
             'action_name': 'transport',
+            'publisher_port': 1676,
+            'server_port': 1677,
             'bt_xml_file': example_dir + '/behavior_trees_xml/transport.xml'
           }
         ])
@@ -125,6 +135,8 @@ def generate_launch_description():
           example_dir + '/config/params.yaml',
           {
             'action_name': 'transport',
+            'publisher_port': 1678,
+            'server_port': 1679,
             'bt_xml_file': example_dir + '/behavior_trees_xml/transport.xml'
           }
         ])
@@ -139,14 +151,14 @@ def generate_launch_description():
     assemble_2_cmd = Node(
         package='plansys2_bt_example',
         executable='assemble_action_node',
-        name='assemble_1',
+        name='assemble_2',
         namespace=namespace,
         output='screen',
         parameters=[])   # Create the launch description and populate
     assemble_3_cmd = Node(
         package='plansys2_bt_example',
         executable='assemble_action_node',
-        name='assemble_1',
+        name='assemble_3',
         namespace=namespace,
         output='screen',
         parameters=[])   # Create the launch description and populate
