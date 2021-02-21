@@ -41,7 +41,7 @@ set predicate (piece_not_used steering_wheel_1)
 
 
 
-set goal (and(car_assembled car_1))
+set goal (and(car_assembled car_1)(car_assembled car_2)(car_assembled car_3))
 
 run
 

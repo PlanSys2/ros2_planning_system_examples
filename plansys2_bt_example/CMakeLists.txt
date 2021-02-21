@@ -31,6 +31,9 @@ set(dependencies
 
 include_directories(include)
 
+add_library(plansys2_recharge_bt_node SHARED src/behavior_tree_nodes/Recharge.cpp)
+list(APPEND plugin_libs plansys2_recharge_bt_node)
+
 add_library(plansys2_close_gripper_bt_node SHARED src/behavior_tree_nodes/CloseGripper.cpp)
 list(APPEND plugin_libs plansys2_close_gripper_bt_node)
 
@@ -51,6 +54,9 @@ endforeach()
 add_executable(assemble_action_node src/assemble_action_node.cpp)
 ament_target_dependencies(assemble_action_node ${dependencies})
 
+add_executable(assemble_controller_node src/assemble_controller_node.cpp)
+ament_target_dependencies(assemble_controller_node ${dependencies})
+
 add_executable(nav2_sim_node src/nav2_sim_node.cpp)
 ament_target_dependencies(nav2_sim_node ${dependencies})
 
@@ -58,6 +64,7 @@ install(DIRECTORY launch pddl behavior_trees_xml config DESTINATION share/${PROJ
 
 install(TARGETS
   assemble_action_node
+  assemble_controller_node
   nav2_sim_node
   ${plugin_libs}
   ARCHIVE DESTINATION lib

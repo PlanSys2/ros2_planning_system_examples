@@ -12,6 +12,7 @@ car
 ;; Predicates ;;;;;;;;;;;;;;;;;;;;;;;;;
 (:predicates
 
+(battery_full ?r - robot)
 (robot_at ?r - robot ?z - zone)
 (piece_at ?p - piece ?z - zone)
 
@@ -22,6 +23,7 @@ car
 (piece_not_used ?p - piece)
 
 (is_assembly_zone ?z - zone)
+(is_recharge_zone ?z - zone)
 
 (car_assembled ?c - car)
 
@@ -46,6 +48,7 @@ car
     :parameters (?r - robot ?p - piece ?z1 ?z2 - zone)
     :duration ( = ?duration 5)
     :condition (and
+        (over all(battery_full ?r))
         (at start(robot_at ?r ?z1))
         (at start(piece_at ?p ?z1))
     )
@@ -57,10 +60,24 @@ car
     )
 )
 
+(:durative-action recharge
+    :parameters (?r - robot ?z - zone)
+    :duration ( = ?duration 5)
+    :condition (and
+        (at start(is_recharge_zone ?z))
+        (over all(robot_at ?r ?z))
+      )
+    :effect (and
+        (at end(battery_full ?r))
+    )
+)
+
 (:durative-action assemble
     :parameters (?r - robot ?z - zone ?p1 ?p2 ?p3 - piece ?c - car)
     :duration ( = ?duration 5)
     :condition (and
+        (over all(battery_full ?r))
+
         (at start(is_assembly_zone ?z))
         (at start(robot_at ?r ?z))
 

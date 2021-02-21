@@ -14,7 +14,6 @@
 
 #include <memory>
 
-#include "plansys2_msgs/action/execute_action.hpp"
 #include "plansys2_msgs/msg/action_execution_info.hpp"
 
 #include "plansys2_executor/ExecutorClient.hpp"
@@ -65,9 +64,7 @@ public:
         // Set the goal for next state, and execute plan
         problem_expert_->setGoal(plansys2::Goal("(and(patrolled wp1))"));
 
-        if (executor_client_->executePlan()) {
-          state_ = PATROL_WP1;
-        }
+        executor_client_->executePlan();
         break;
       case PATROL_WP1:
         {
@@ -79,7 +76,9 @@ public:
           }
           std::cout << std::endl;
 
-          if (executor_client_->getResult()) {
+          auto finished_execution = !executor_client_->executePlan();
+
+          if (finished_execution && executor_client_->getResult()) {
             if (executor_client_->getResult().value().success) {
               std::cout << "Successful finished " << std::endl;
 
@@ -89,9 +88,8 @@ public:
               // Set the goal for next state, and execute plan
               problem_expert_->setGoal(plansys2::Goal("(and(patrolled wp2))"));
 
-              if (executor_client_->executePlan()) {
-                state_ = PATROL_WP2;
-              }
+              executor_client_->executePlan();
+              state_ = PATROL_WP2;
             } else {
               for (const auto & action_feedback : feedback.action_execution_status) {
                 if (action_feedback.status == plansys2_msgs::msg::ActionExecutionInfo::FAILED) {
@@ -114,7 +112,9 @@ public:
           }
           std::cout << std::endl;
 
-          if (executor_client_->getResult()) {
+          auto finished_execution = !executor_client_->executePlan();
+
+          if (finished_execution && executor_client_->getResult()) {
             if (executor_client_->getResult().value().success) {
               std::cout << "Successful finished " << std::endl;
 
@@ -124,9 +124,8 @@ public:
               // Set the goal for next state, and execute plan
               problem_expert_->setGoal(plansys2::Goal("(and(patrolled wp3))"));
 
-              if (executor_client_->executePlan()) {
-                state_ = PATROL_WP3;
-              }
+              executor_client_->executePlan();
+              state_ = PATROL_WP3;
             } else {
               for (const auto & action_feedback : feedback.action_execution_status) {
                 if (action_feedback.status == plansys2_msgs::msg::ActionExecutionInfo::FAILED) {
@@ -184,7 +183,9 @@ public:
           }
           std::cout << std::endl;
 
-          if (executor_client_->getResult()) {
+          auto finished_execution = !executor_client_->executePlan();
+
+          if (finished_execution && executor_client_->getResult()) {
             if (executor_client_->getResult().value().success) {
               std::cout << "Successful finished " << std::endl;
 
