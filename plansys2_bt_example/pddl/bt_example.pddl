@@ -12,16 +12,21 @@ car
 ;; Predicates ;;;;;;;;;;;;;;;;;;;;;;;;;
 (:predicates
 
+(battery_full ?r - robot)
+
+(robot_available ?r - robot)
+
 (robot_at ?r - robot ?z - zone)
 (piece_at ?p - piece ?z - zone)
 
 (piece_is_wheel ?p - piece)
 (piece_is_body_car ?p - piece)
-(piece_is_steering_wheel ?p - piece)
+(piece_is_sterwheel ?p - piece)
 
 (piece_not_used ?p - piece)
 
 (is_assembly_zone ?z - zone)
+(is_recharge_zone ?z - zone)
 
 (car_assembled ?c - car)
 
@@ -35,10 +40,14 @@ car
     :parameters (?r - robot ?z1 ?z2 - zone)
     :duration ( = ?duration 5)
     :condition (and
-        (at start(robot_at ?r ?z1)))
+        (at start(robot_at ?r ?z1))
+        (at start(robot_available ?r))
+        )
     :effect (and
         (at start(not(robot_at ?r ?z1)))
         (at end(robot_at ?r ?z2))
+        (at start(not(robot_available ?r)))
+        (at end(robot_available ?r))
     )
 )
 
@@ -46,14 +55,33 @@ car
     :parameters (?r - robot ?p - piece ?z1 ?z2 - zone)
     :duration ( = ?duration 5)
     :condition (and
+        (over all(battery_full ?r))
         (at start(robot_at ?r ?z1))
         (at start(piece_at ?p ?z1))
+        (at start(robot_available ?r))
     )
     :effect (and
         (at start(not(robot_at ?r ?z1)))
         (at end(robot_at ?r ?z2))
         (at start(not(piece_at ?p ?z1)))
         (at end(piece_at ?p ?z2))
+        (at start(not(robot_available ?r)))
+        (at end(robot_available ?r))
+    )
+)
+
+(:durative-action recharge
+    :parameters (?r - robot ?z - zone)
+    :duration ( = ?duration 5)
+    :condition (and
+        (at start(is_recharge_zone ?z))
+        (over all(robot_at ?r ?z))
+        (at start(robot_available ?r))
+      )
+    :effect (and
+        (at end(battery_full ?r))
+                (at start(not(robot_available ?r)))
+        (at end(robot_available ?r))
     )
 )
 
@@ -61,6 +89,8 @@ car
     :parameters (?r - robot ?z - zone ?p1 ?p2 ?p3 - piece ?c - car)
     :duration ( = ?duration 5)
     :condition (and
+        (over all(battery_full ?r))
+
         (at start(is_assembly_zone ?z))
         (at start(robot_at ?r ?z))
 
@@ -74,13 +104,16 @@ car
 
         (at start(piece_is_wheel ?p1))
         (at start(piece_is_body_car ?p2))
-        (at start(piece_is_steering_wheel ?p3))
+        (at start(piece_is_sterwheel ?p3))
+        (at start(robot_available ?r))
     )
     :effect (and
         (at start(not(piece_not_used ?p1)))
         (at start(not(piece_not_used ?p2)))
         (at start(not(piece_not_used ?p3)))
         (at end(car_assembled ?c))
+                (at start(not(robot_available ?r)))
+        (at end(robot_available ?r))
 
     )
 )

@@ -81,7 +81,7 @@ private:
 
     auto start = now();
     int current_times = 0;
-    while (rclcpp::ok() && current_times++ < 5) {
+    while (rclcpp::ok() && current_times++ < 10) {
       RCLCPP_INFO(this->get_logger(), "Navigating %d ", current_times);
 
       if (goal_handle->is_canceling()) {

@@ -64,7 +64,7 @@ public:
         // Set the goal for next state, and execute plan
         problem_expert_->setGoal(plansys2::Goal("(and(patrolled wp1))"));
 
-        if (executor_client_->executePlan()) {
+        if (executor_client_->start_plan_execution()) {
           state_ = PATROL_WP1;
         }
         break;
@@ -78,7 +78,7 @@ public:
           }
           std::cout << std::endl;
 
-          if (executor_client_->getResult()) {
+          if (executor_client_->execute_and_check_plan() && executor_client_->getResult()) {
             if (executor_client_->getResult().value().success) {
               std::cout << "Successful finished " << std::endl;
 
@@ -88,7 +88,7 @@ public:
               // Set the goal for next state, and execute plan
               problem_expert_->setGoal(plansys2::Goal("(and(patrolled wp2))"));
 
-              if (executor_client_->executePlan()) {
+              if (executor_client_->start_plan_execution()) {
                 state_ = PATROL_WP2;
               }
             } else {
@@ -98,7 +98,7 @@ public:
                     action_feedback.message_status << std::endl;
                 }
               }
-              executor_client_->executePlan();  // replan and execute
+              executor_client_->start_plan_execution();  // replan and execute
             }
           }
         }
@@ -113,7 +113,7 @@ public:
           }
           std::cout << std::endl;
 
-          if (executor_client_->getResult()) {
+          if (executor_client_->execute_and_check_plan() && executor_client_->getResult()) {
             if (executor_client_->getResult().value().success) {
               std::cout << "Successful finished " << std::endl;
 
@@ -123,7 +123,7 @@ public:
               // Set the goal for next state, and execute plan
               problem_expert_->setGoal(plansys2::Goal("(and(patrolled wp3))"));
 
-              if (executor_client_->executePlan()) {
+              if (executor_client_->start_plan_execution()) {
                 state_ = PATROL_WP3;
               }
             } else {
@@ -133,7 +133,7 @@ public:
                     action_feedback.message_status << std::endl;
                 }
               }
-              executor_client_->executePlan();  // replan and execute
+              executor_client_->start_plan_execution();  // replan and execute
             }
           }
         }
@@ -148,7 +148,7 @@ public:
           }
           std::cout << std::endl;
 
-          if (executor_client_->getResult()) {
+          if (executor_client_->execute_and_check_plan() && executor_client_->getResult()) {
             if (executor_client_->getResult().value().success) {
               std::cout << "Successful finished " << std::endl;
 
@@ -158,7 +158,7 @@ public:
               // Set the goal for next state, and execute plan
               problem_expert_->setGoal(plansys2::Goal("(and(patrolled wp4))"));
 
-              if (executor_client_->executePlan()) {
+              if (executor_client_->start_plan_execution()) {
                 state_ = PATROL_WP4;
               }
             } else {
@@ -168,7 +168,7 @@ public:
                     action_feedback.message_status << std::endl;
                 }
               }
-              executor_client_->executePlan();  // replan and execute
+              executor_client_->start_plan_execution();  // replan and execute
             }
           }
         }
@@ -183,7 +183,7 @@ public:
           }
           std::cout << std::endl;
 
-          if (executor_client_->getResult()) {
+          if (executor_client_->execute_and_check_plan() && executor_client_->getResult()) {
             if (executor_client_->getResult().value().success) {
               std::cout << "Successful finished " << std::endl;
 
@@ -193,7 +193,7 @@ public:
               // Set the goal for next state, and execute plan
               problem_expert_->setGoal(plansys2::Goal("(and(patrolled wp1))"));
 
-              if (executor_client_->executePlan()) {
+              if (executor_client_->start_plan_execution()) {
                 // Loop to WP1
                 state_ = PATROL_WP1;
               }
@@ -204,7 +204,7 @@ public:
                     action_feedback.message_status << std::endl;
                 }
               }
-              executor_client_->executePlan();  // replan and execute
+              executor_client_->start_plan_execution();  // replan and execute
             }
           }
         }
