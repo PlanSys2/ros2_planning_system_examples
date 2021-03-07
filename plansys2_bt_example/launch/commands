@@ -1,4 +1,6 @@
-set instance r2d2 robot
+set instance robot1 robot
+set instance robot1 robot
+set instance robot1 robot
 
 set instance wheels_zone zone
 set instance steering_wheels_zone zone

@@ -67,6 +67,9 @@ Move::Move(
 void
 Move::on_tick()
 {
+  rclcpp::Node::SharedPtr node;
+  config().blackboard->get("node", node);
+
   std::string goal;
   getInput<std::string>("goal", goal);
 
@@ -80,6 +83,7 @@ Move::on_tick()
   geometry_msgs::msg::PoseStamped goal_pos;
 
   goal_pos.header.frame_id = "map";
+  goal_pos.header.stamp = node->now();
   goal_pos.pose.position.x = pose2nav.x;
   goal_pos.pose.position.y = pose2nav.y;
   goal_pos.pose.position.z = 0;

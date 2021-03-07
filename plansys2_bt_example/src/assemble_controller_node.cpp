@@ -36,6 +36,10 @@ public:
     executor_client_ = std::make_shared<plansys2::ExecutorClient>(shared_from_this());
 
     init_knowledge();
+
+    if (!executor_client_->start_plan_execution()) {
+      RCLCPP_ERROR(get_logger(), "Error starting a new plan (first)");
+    }
   }
 
   void init_knowledge()
@@ -67,6 +71,7 @@ public:
 
     problem_expert_->addPredicate(plansys2::Predicate("(is_assembly_zone assembly_zone)"));
     problem_expert_->addPredicate(plansys2::Predicate("(is_recharge_zone recharge_zone)"));
+
     problem_expert_->addPredicate(plansys2::Predicate("(piece_is_wheel wheel_1)"));
     problem_expert_->addPredicate(plansys2::Predicate("(piece_is_wheel wheel_2)"));
     problem_expert_->addPredicate(plansys2::Predicate("(piece_is_wheel wheel_3)"));
@@ -81,28 +86,19 @@ public:
     problem_expert_->addPredicate(plansys2::Predicate("(piece_at body_car_2 body_car_zone)"));
     problem_expert_->addPredicate(plansys2::Predicate("(piece_at body_car_3 body_car_zone)"));
 
+    problem_expert_->addPredicate(plansys2::Predicate("(piece_is_sterwheel steering_wheel_1)"));
+    problem_expert_->addPredicate(plansys2::Predicate("(piece_is_sterwheel steering_wheel_2)"));
+    problem_expert_->addPredicate(plansys2::Predicate("(piece_is_sterwheel steering_wheel_3)"));
+    problem_expert_->addPredicate(
+      plansys2::Predicate("(piece_at steering_wheel_1 steering_wheels_zone)"));
+    problem_expert_->addPredicate(
+      plansys2::Predicate("(piece_at steering_wheel_2 steering_wheels_zone)"));
+    problem_expert_->addPredicate(
+      plansys2::Predicate("(piece_at steering_wheel_3 steering_wheels_zone)"));
+
     problem_expert_->addPredicate(plansys2::Predicate("(robot_at r2d2 wheels_zone)"));
     problem_expert_->addPredicate(plansys2::Predicate("(battery_full r2d2)"));
-
-    problem_expert_->addPredicate(
-      plansys2::Predicate(
-        "(piece_is_steering_wheel steering_wheel_1)"));
-    problem_expert_->addPredicate(
-      plansys2::Predicate(
-        "(piece_is_steering_wheel steering_wheel_2)"));
-    problem_expert_->addPredicate(
-      plansys2::Predicate(
-        "(piece_is_steering_wheel steering_wheel_3)"));
-    problem_expert_->addPredicate(
-      plansys2::Predicate(
-        "(piece_at steering_wheel_1 steering_wheels_zone)"));
-    problem_expert_->addPredicate(
-      plansys2::Predicate(
-        "(piece_at steering_wheel_2 steering_wheels_zone)"));
-    problem_expert_->addPredicate(
-      plansys2::Predicate(
-        "(piece_at steering_wheel_3 steering_wheels_zone)"));
-
+    problem_expert_->addPredicate(plansys2::Predicate("(robot_available r2d2)"));
 
     problem_expert_->addPredicate(plansys2::Predicate("(piece_not_used wheel_1)"));
     problem_expert_->addPredicate(plansys2::Predicate("(piece_not_used wheel_2)"));
@@ -116,40 +112,21 @@ public:
 
     problem_expert_->setGoal(
       plansys2::Goal(
-        "(and(piece_at wheel_1 assembly_zone))"));
-        //  "(and(piece_at wheel_1 sse) (car_assembled car_2) (car_assembled car_3))"));
+        "(and(car_assembled car_1) (car_assembled car_2) (car_assembled car_3))"));
   }
 
   void step()
   {
-    RCLCPP_INFO(get_logger(), "===============================================");
-    init_knowledge();
+    if (!executor_client_->execute_and_check_plan()) {  // Plan finished
+      auto result = executor_client_->getResult();
 
-    rclcpp::Rate rate(1);
-    bool finished = false;
-    while (
-      !finished &&
-      !problem_expert_->existPredicate(plansys2::Predicate("(car_assembled car_1)")) &&
-      !problem_expert_->existPredicate(plansys2::Predicate("(car_assembled car_2)")) &&
-      !problem_expert_->existPredicate(plansys2::Predicate("(car_assembled car_3)")))
-    {
-      finished = !executor_client_->executePlan();
-      RCLCPP_INFO(get_logger(), "Executing");
-      rate.sleep();
-    }
-
-    if (executor_client_->getResult().has_value()) {
-      if (executor_client_->getResult().value().success) {
+      if (result.value().success) {
         RCLCPP_INFO(get_logger(), "Plan succesfully finished");
       } else {
         RCLCPP_ERROR(get_logger(), "Plan finished with error");
       }
     }
-
-    problem_expert_->clearKnowledge();
-    init_knowledge();
   }
-
 
 private:
   std::shared_ptr<plansys2::ProblemExpertClient> problem_expert_;
