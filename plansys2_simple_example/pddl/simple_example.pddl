@@ -45,7 +45,7 @@ room
        )
     :effect (and
         (at start(not(robot_at ?r ?r1)))
-        (at start(robot_at ?r ?r2))
+        (at end(robot_at ?r ?r2))
     )
 )
 
