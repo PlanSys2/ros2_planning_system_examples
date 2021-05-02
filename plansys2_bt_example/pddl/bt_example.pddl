@@ -21,7 +21,7 @@ car
 
 (piece_is_wheel ?p - piece)
 (piece_is_body_car ?p - piece)
-(piece_is_sterwheel ?p - piece)
+(piece_is_steering_wheel ?p - piece)
 
 (piece_not_used ?p - piece)
 
