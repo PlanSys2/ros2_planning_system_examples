@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <plansys2_pddl_parser/Utils.h>
+
 #include <memory>
 
 #include "plansys2_msgs/msg/action_execution_info.hpp"
@@ -21,7 +23,6 @@
 #include "plansys2_executor/ExecutorClient.hpp"
 #include "plansys2_planner/PlannerClient.hpp"
 #include "plansys2_problem_expert/ProblemExpertClient.hpp"
-#include <plansys2_pddl_parser/Utils.h>
 
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_action/rclcpp_action.hpp"
@@ -172,7 +173,6 @@ public:
               auto domain = domain_expert_->getDomain();
               auto problem = problem_expert_->getProblem();
               auto plan = planner_client_->getPlan(domain, problem);
-              std::cout << problem << std::endl;
 
               if (!plan.has_value()) {
                 std::cout << "Could not find plan to reach goal " <<
