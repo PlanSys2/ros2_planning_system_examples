@@ -18,7 +18,11 @@
   <depend>tf2_geometry_msgs</depend>
   <depend>nav2_msgs</depend>
   <depend>plansys2_msgs</depend>
+  <depend>plansys2_domain_expert</depend>
   <depend>plansys2_executor</depend>
+  <depend>plansys2_planner</depend>
+  <depend>plansys2_problem_expert</depend>
+  <depend>plansys2_pddl_parser</depend>
   <depend>ament_index_cpp</depend>
   <depend>plansys2_bt_actions</depend>
 
