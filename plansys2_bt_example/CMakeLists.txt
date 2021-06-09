@@ -9,7 +9,11 @@ find_package(geometry_msgs REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 find_package(nav2_msgs REQUIRED)
 find_package(plansys2_msgs REQUIRED)
+find_package(plansys2_domain_expert REQUIRED)
 find_package(plansys2_executor REQUIRED)
+find_package(plansys2_planner REQUIRED)
+find_package(plansys2_problem_expert REQUIRED)
+find_package(plansys2_pddl_parser REQUIRED)
 find_package(ament_index_cpp REQUIRED)
 find_package(plansys2_bt_actions REQUIRED)
 
@@ -24,7 +28,11 @@ set(dependencies
     tf2_geometry_msgs
     nav2_msgs
     plansys2_msgs
+    plansys2_domain_expert
     plansys2_executor
+    plansys2_planner
+    plansys2_problem_expert
+    plansys2_pddl_parser
     ament_index_cpp
     plansys2_bt_actions
 )

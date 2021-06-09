@@ -12,11 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <plansys2_pddl_parser/Utils.h>
+
 #include <memory>
 
 #include "plansys2_msgs/msg/action_execution_info.hpp"
+#include "plansys2_msgs/msg/plan.hpp"
 
+#include "plansys2_domain_expert/DomainExpertClient.hpp"
 #include "plansys2_executor/ExecutorClient.hpp"
+#include "plansys2_planner/PlannerClient.hpp"
 #include "plansys2_problem_expert/ProblemExpertClient.hpp"
 
 #include "rclcpp/rclcpp.hpp"
@@ -30,16 +35,30 @@ public:
   {
   }
 
-  void init()
+  bool init()
   {
+    domain_expert_ = std::make_shared<plansys2::DomainExpertClient>(shared_from_this());
+    planner_client_ = std::make_shared<plansys2::PlannerClient>(shared_from_this());
     problem_expert_ = std::make_shared<plansys2::ProblemExpertClient>(shared_from_this());
     executor_client_ = std::make_shared<plansys2::ExecutorClient>(shared_from_this());
 
     init_knowledge();
 
-    if (!executor_client_->start_plan_execution()) {
+    auto domain = domain_expert_->getDomain();
+    auto problem = problem_expert_->getProblem();
+    auto plan = planner_client_->getPlan(domain, problem);
+
+    if (!plan.has_value()) {
+      std::cout << "Could not find plan to reach goal " <<
+        parser::pddl::toString(problem_expert_->getGoal()) << std::endl;
+      return false;
+    }
+
+    if (!executor_client_->start_plan_execution(plan.value())) {
       RCLCPP_ERROR(get_logger(), "Error starting a new plan (first)");
     }
+
+    return true;
   }
 
   void init_knowledge()
@@ -129,6 +148,8 @@ public:
   }
 
 private:
+  std::shared_ptr<plansys2::DomainExpertClient> domain_expert_;
+  std::shared_ptr<plansys2::PlannerClient> planner_client_;
   std::shared_ptr<plansys2::ProblemExpertClient> problem_expert_;
   std::shared_ptr<plansys2::ExecutorClient> executor_client_;
 };
@@ -138,7 +159,9 @@ int main(int argc, char ** argv)
   rclcpp::init(argc, argv);
   auto node = std::make_shared<Assemble>();
 
-  node->init();
+  if (!node->init()) {
+    return 0;
+  }
 
   rclcpp::Rate rate(5);
   while (rclcpp::ok()) {
