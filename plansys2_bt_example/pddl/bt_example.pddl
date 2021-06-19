@@ -104,7 +104,7 @@ car
 
         (at start(piece_is_wheel ?p1))
         (at start(piece_is_body_car ?p2))
-        (at start(piece_is_sterwheel ?p3))
+        (at start(piece_is_steering_wheel ?p3))
         (at start(robot_available ?r))
     )
     :effect (and
