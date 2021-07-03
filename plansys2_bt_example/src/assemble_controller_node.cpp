@@ -105,9 +105,12 @@ public:
     problem_expert_->addPredicate(plansys2::Predicate("(piece_at body_car_2 body_car_zone)"));
     problem_expert_->addPredicate(plansys2::Predicate("(piece_at body_car_3 body_car_zone)"));
 
-    problem_expert_->addPredicate(plansys2::Predicate("(piece_is_sterwheel steering_wheel_1)"));
-    problem_expert_->addPredicate(plansys2::Predicate("(piece_is_sterwheel steering_wheel_2)"));
-    problem_expert_->addPredicate(plansys2::Predicate("(piece_is_sterwheel steering_wheel_3)"));
+    problem_expert_->addPredicate(
+      plansys2::Predicate("(piece_is_steering_wheel steering_wheel_1)"));
+    problem_expert_->addPredicate(
+      plansys2::Predicate("(piece_is_steering_wheel steering_wheel_2)"));
+    problem_expert_->addPredicate(
+      plansys2::Predicate("(piece_is_steering_wheel steering_wheel_3)"));
     problem_expert_->addPredicate(
       plansys2::Predicate("(piece_at steering_wheel_1 steering_wheels_zone)"));
     problem_expert_->addPredicate(
