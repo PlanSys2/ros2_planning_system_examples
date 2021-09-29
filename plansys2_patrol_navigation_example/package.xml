@@ -3,11 +3,11 @@
 <package format="3">
   <name>plansys2_patrol_navigation_example</name>
   <version>0.0.4</version>
-  
+
   <description>An example including Navigation</description>
 
   <maintainer email="fmrico@gmail.com">Francisco Martin Rico</maintainer>
- 
+
   <license>Apache License, Version 2.0</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
@@ -22,6 +22,8 @@
   <depend>plansys2_planner</depend>
   <depend>plansys2_problem_expert</depend>
   <depend>plansys2_pddl_parser</depend>
+
+  <exec_depend>plansys2_bringup</exec_depend>
 
   <test_depend>ament_lint_common</test_depend>
   <test_depend>ament_lint_auto</test_depend>
