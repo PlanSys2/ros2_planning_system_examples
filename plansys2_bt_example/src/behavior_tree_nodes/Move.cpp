@@ -72,32 +72,36 @@ Move::Move(
   }
 }
 
-void
+BT::NodeStatus
 Move::on_tick()
 {
-  rclcpp::Node::SharedPtr node;
-  config().blackboard->get("node", node);
+  if (status() == BT::NodeStatus::IDLE) {
+    rclcpp::Node::SharedPtr node;
+    config().blackboard->get("node", node);
 
-  std::string goal;
-  getInput<std::string>("goal", goal);
+    std::string goal;
+    getInput<std::string>("goal", goal);
 
-  geometry_msgs::msg::Pose2D pose2nav;
-  if (waypoints_.find(goal) != waypoints_.end()) {
-    pose2nav = waypoints_[goal];
-  } else {
-    std::cerr << "No coordinate for waypoint [" << goal << "]" << std::endl;
+    geometry_msgs::msg::Pose2D pose2nav;
+    if (waypoints_.find(goal) != waypoints_.end()) {
+      pose2nav = waypoints_[goal];
+    } else {
+      std::cerr << "No coordinate for waypoint [" << goal << "]" << std::endl;
+    }
+
+    geometry_msgs::msg::PoseStamped goal_pos;
+
+    goal_pos.header.frame_id = "map";
+    goal_pos.header.stamp = node->now();
+    goal_pos.pose.position.x = pose2nav.x;
+    goal_pos.pose.position.y = pose2nav.y;
+    goal_pos.pose.position.z = 0;
+    goal_pos.pose.orientation = tf2::toMsg(tf2::Quaternion({0.0, 0.0, 1.0}, pose2nav.theta));
+
+    goal_.pose = goal_pos;
   }
 
-  geometry_msgs::msg::PoseStamped goal_pos;
-
-  goal_pos.header.frame_id = "map";
-  goal_pos.header.stamp = node->now();
-  goal_pos.pose.position.x = pose2nav.x;
-  goal_pos.pose.position.y = pose2nav.y;
-  goal_pos.pose.position.z = 0;
-  goal_pos.pose.orientation = tf2::toMsg(tf2::Quaternion({0.0, 0.0, 1.0}, pose2nav.theta));
-
-  goal_.pose = goal_pos;
+  return BT::NodeStatus::RUNNING;
 }
 
 BT::NodeStatus
