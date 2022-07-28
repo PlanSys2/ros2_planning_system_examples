@@ -13,22 +13,22 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-20.04]
+        os: [ubuntu-22.04]
       fail-fast: false
     steps:
       - name: Install popf deps
         run: sudo apt-get install libfl-dev
       - name: Setup ROS 2
-        uses: ros-tooling/setup-ros@0.2.1
+        uses: ros-tooling/setup-ros@0.3.3
         with:
-          required-ros-distributions: foxy
+          required-ros-distributions: humble
       - name: Create custom repos
         run: wget -O /tmp/all.repos https://raw.githubusercontent.com/IntelligentRoboticsLabs/plansys2_tfd_plan_solver/master/plansys2.repos  
       - name: build and test
         uses: ros-tooling/action-ros-ci@0.2.1
         with:
           package-name: plansys2_bt_example
-          target-ros2-distro: foxy
+          target-ros2-distro: humble
           vcs-repo-file-url: /tmp/all.repos
           colcon-mixin-name: coverage-gcc
           colcon-mixin-repository: https://raw.githubusercontent.com/colcon/colcon-mixin-repository/master/index.yaml
