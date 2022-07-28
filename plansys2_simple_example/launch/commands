@@ -27,18 +27,3 @@ set predicate (robot_at leia entrance)
 
 
 set goal (and(robot_at leia bathroom))
-
-run
-
-get plan
-
-run (move leia entrance dinning)
-run (askcharge leia entrance)
-
-run (move leia bedroom kitchen)
-
-remove predicate battery_full leia
-set predicate battery_low leia
-
-
-run --ros-args -p model_file:=/home/fmrico/ros/ros2/planning_ws/src/ros2_planning_system_examples/plansys2_simple_example/pddl/simple_example.pddl 
