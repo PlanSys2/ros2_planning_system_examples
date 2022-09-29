@@ -48,6 +48,15 @@ list(APPEND plugin_libs plansys2_close_gripper_bt_node)
 add_library(plansys2_open_gripper_bt_node SHARED src/behavior_tree_nodes/OpenGripper.cpp)
 list(APPEND plugin_libs plansys2_open_gripper_bt_node)
 
+add_library(plansys2_set_gripper_pos_bt_node SHARED src/behavior_tree_nodes/SetGripperPos.cpp)
+list(APPEND plugin_libs plansys2_set_gripper_pos_bt_node)
+
+add_library(plansys2_pick_bt_node SHARED src/behavior_tree_nodes/Pick.cpp)
+list(APPEND plugin_libs plansys2_pick_bt_node)
+
+add_library(plansys2_release_bt_node SHARED src/behavior_tree_nodes/Release.cpp)
+list(APPEND plugin_libs plansys2_release_bt_node)
+
 add_library(plansys2_move_bt_node SHARED src/behavior_tree_nodes/Move.cpp)
 list(APPEND plugin_libs plansys2_move_bt_node)
 

@@ -1,7 +1,7 @@
 <root main_tree_to_execute = "MainTree" >
     <BehaviorTree ID="MainTree">
        <Sequence name="root_sequence">
-           <Recharge    name="recharge"/>
+           <Release name="release"/>
        </Sequence>
     </BehaviorTree>
 </root>

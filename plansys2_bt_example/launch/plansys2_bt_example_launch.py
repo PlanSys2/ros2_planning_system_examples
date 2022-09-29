@@ -44,10 +44,10 @@ def generate_launch_description():
           }.items())
 
     # Specify the actions
-    move_1_cmd = Node(
+    move_cmd = Node(
         package='plansys2_bt_actions',
         executable='bt_action_node',
-        name='move_1',
+        name='move',
         namespace=namespace,
         output='screen',
         parameters=[
@@ -56,123 +56,86 @@ def generate_launch_description():
             'action_name': 'move',
             'publisher_port': 1668,
             'server_port': 1669,
-            'bt_xml_file': example_dir + '/behavior_trees_xml/move.xml'
+            'bt_xml_file': example_dir + '/behavior_trees_xml/move.xml',
           }
         ])
 
-    move_2_cmd = Node(
+    pick_cmd = Node(
         package='plansys2_bt_actions',
         executable='bt_action_node',
-        name='move_2',
+        name='pick',
         namespace=namespace,
         output='screen',
         parameters=[
           example_dir + '/config/params.yaml',
           {
-            'action_name': 'move',
-            'publisher_port': 1670,
-            'server_port': 1671,
-            'bt_xml_file': example_dir + '/behavior_trees_xml/move.xml'
+            'action_name': 'pick',
+            'publisher_port': 3670,
+            'server_port': 3671,
+            'bt_xml_file': example_dir + '/behavior_trees_xml/pick.xml',
+            'rate': 2.0
           }
         ])
 
-    move_3_cmd = Node(
+    prepick_cmd = Node(
         package='plansys2_bt_actions',
         executable='bt_action_node',
-        name='move_3',
+        name='prepick',
         namespace=namespace,
         output='screen',
         parameters=[
           example_dir + '/config/params.yaml',
           {
-            'action_name': 'move',
-            'publisher_port': 1672,
-            'server_port': 1673,
-            'bt_xml_file': example_dir + '/behavior_trees_xml/move.xml'
+            'action_name': 'prepick',
+            'publisher_port': 3672,
+            'server_port': 3673,
+            'bt_xml_file': example_dir + '/behavior_trees_xml/prepick.xml',
+            'rate': 2.0
           }
         ])
 
-    transport_1_cmd = Node(
+    release_cmd = Node(
         package='plansys2_bt_actions',
         executable='bt_action_node',
-        name='transport_1',
+        name='release',
         namespace=namespace,
         output='screen',
         parameters=[
           example_dir + '/config/params.yaml',
           {
-            'action_name': 'transport',
-            'publisher_port': 1674,
-            'server_port': 1675,
-            'bt_xml_file': example_dir + '/behavior_trees_xml/transport.xml'
-          }
-        ])
-    transport_2_cmd = Node(
-        package='plansys2_bt_actions',
-        executable='bt_action_node',
-        name='transport_2',
-        namespace=namespace,
-        output='screen',
-        parameters=[
-          example_dir + '/config/params.yaml',
-          {
-            'action_name': 'transport',
-            'publisher_port': 1676,
-            'server_port': 1677,
-            'bt_xml_file': example_dir + '/behavior_trees_xml/transport.xml'
-          }
-        ])
-    transport_3_cmd = Node(
-        package='plansys2_bt_actions',
-        executable='bt_action_node',
-        name='transport_3',
-        namespace=namespace,
-        output='screen',
-        parameters=[
-          example_dir + '/config/params.yaml',
-          {
-            'action_name': 'transport',
-            'publisher_port': 1678,
-            'server_port': 1679,
-            'bt_xml_file': example_dir + '/behavior_trees_xml/transport.xml'
+            'action_name': 'release',
+            'publisher_port': 3674,
+            'server_port': 3675,
+            'bt_xml_file': example_dir + '/behavior_trees_xml/release.xml',
+            'rate': 2.0
           }
         ])
 
-    assemble_1_cmd = Node(
+    prerelease_cmd = Node(
+        package='plansys2_bt_actions',
+        executable='bt_action_node',
+        name='prerelease',
+        namespace=namespace,
+        output='screen',
+        parameters=[
+          example_dir + '/config/params.yaml',
+          {
+            'action_name': 'prerelease',
+            'publisher_port': 3676,
+            'server_port': 3677,
+            'bt_xml_file': example_dir + '/behavior_trees_xml/prerelease.xml',
+            'rate': 2.0
+          }
+        ])
+
+
+    assemble_cmd = Node(
         package='plansys2_bt_example',
         executable='assemble_action_node',
-        name='assemble_1',
+        name='assemble',
         namespace=namespace,
         output='screen',
         parameters=[])   # Create the launch description and populate
-    assemble_2_cmd = Node(
-        package='plansys2_bt_example',
-        executable='assemble_action_node',
-        name='assemble_2',
-        namespace=namespace,
-        output='screen',
-        parameters=[])   # Create the launch description and populate
-    assemble_3_cmd = Node(
-        package='plansys2_bt_example',
-        executable='assemble_action_node',
-        name='assemble_3',
-        namespace=namespace,
-        output='screen',
-        parameters=[])   # Create the launch description and populate
-
-    recharge_1_cmd = Node(
-        package='plansys2_bt_actions',
-        executable='bt_action_node',
-        name='recharge_1',
-        namespace=namespace,
-        output='screen',
-        parameters=[
-          example_dir + '/config/params.yaml',
-          {
-            'action_name': 'recharge',
-            'bt_xml_file': example_dir + '/behavior_trees_xml/recharge.xml'
-          }
-        ])
 
     ld = LaunchDescription()
 
@@ -181,15 +144,12 @@ def generate_launch_description():
     # Declare the launch options
     ld.add_action(plansys2_cmd)
 
-    ld.add_action(move_1_cmd)
-    ld.add_action(move_2_cmd)
-    ld.add_action(move_3_cmd)
-    ld.add_action(transport_1_cmd)
-    ld.add_action(transport_2_cmd)
-    ld.add_action(transport_3_cmd)
-    ld.add_action(assemble_1_cmd)
-    ld.add_action(assemble_2_cmd)
-    ld.add_action(assemble_3_cmd)
-    ld.add_action(recharge_1_cmd)
+    ld.add_action(move_cmd)
+    ld.add_action(pick_cmd)
+    ld.add_action(prepick_cmd)
+    ld.add_action(release_cmd)
+    ld.add_action(prerelease_cmd)
+    ld.add_action(assemble_cmd)
+
 
     return ld

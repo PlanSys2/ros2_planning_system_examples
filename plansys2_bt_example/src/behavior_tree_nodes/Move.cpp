@@ -39,9 +39,11 @@ Move::Move(
   config().blackboard->get("node", node);
 
   try {
-    node->declare_parameter<std::vector<std::string>>("waypoints");
+    if (!node->has_parameter("waypoints")) {
+      node->declare_parameter<std::vector<std::string>>("waypoints");
+    }
   } catch (const rclcpp::exceptions::ParameterAlreadyDeclaredException & e) {
-    // Do nothing;
+    RCLCPP_ERROR(node->get_logger(), "Error declaring waypoints [%s]", e.what());
   }
 
   if (node->has_parameter("waypoints")) {

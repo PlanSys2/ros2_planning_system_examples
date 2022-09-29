@@ -1,0 +1,7 @@
+<root main_tree_to_execute = "MainTree" >
+    <BehaviorTree ID="MainTree">
+       <Sequence name="root_sequence">
+           <Pick    name="pick"/>
+       </Sequence>
+    </BehaviorTree>
+</root>

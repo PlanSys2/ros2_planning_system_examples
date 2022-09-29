@@ -94,16 +94,16 @@ public:
     problem_expert_->addPredicate(plansys2::Predicate("(piece_is_wheel wheel_1)"));
     problem_expert_->addPredicate(plansys2::Predicate("(piece_is_wheel wheel_2)"));
     problem_expert_->addPredicate(plansys2::Predicate("(piece_is_wheel wheel_3)"));
-    problem_expert_->addPredicate(plansys2::Predicate("(piece_at wheel_1 wheels_zone)"));
-    problem_expert_->addPredicate(plansys2::Predicate("(piece_at wheel_2 wheels_zone)"));
-    problem_expert_->addPredicate(plansys2::Predicate("(piece_at wheel_3 wheels_zone)"));
+    problem_expert_->addPredicate(plansys2::Predicate("(piece_at_zone wheel_1 wheels_zone)"));
+    problem_expert_->addPredicate(plansys2::Predicate("(piece_at_zone wheel_2 wheels_zone)"));
+    problem_expert_->addPredicate(plansys2::Predicate("(piece_at_zone wheel_3 wheels_zone)"));
 
     problem_expert_->addPredicate(plansys2::Predicate("(piece_is_body_car body_car_1)"));
     problem_expert_->addPredicate(plansys2::Predicate("(piece_is_body_car body_car_2)"));
     problem_expert_->addPredicate(plansys2::Predicate("(piece_is_body_car body_car_3)"));
-    problem_expert_->addPredicate(plansys2::Predicate("(piece_at body_car_1 body_car_zone)"));
-    problem_expert_->addPredicate(plansys2::Predicate("(piece_at body_car_2 body_car_zone)"));
-    problem_expert_->addPredicate(plansys2::Predicate("(piece_at body_car_3 body_car_zone)"));
+    problem_expert_->addPredicate(plansys2::Predicate("(piece_at_zone body_car_1 body_car_zone)"));
+    problem_expert_->addPredicate(plansys2::Predicate("(piece_at_zone body_car_2 body_car_zone)"));
+    problem_expert_->addPredicate(plansys2::Predicate("(piece_at_zone body_car_3 body_car_zone)"));
 
     problem_expert_->addPredicate(
       plansys2::Predicate("(piece_is_steering_wheel steering_wheel_1)"));
@@ -112,15 +112,14 @@ public:
     problem_expert_->addPredicate(
       plansys2::Predicate("(piece_is_steering_wheel steering_wheel_3)"));
     problem_expert_->addPredicate(
-      plansys2::Predicate("(piece_at steering_wheel_1 steering_wheels_zone)"));
+      plansys2::Predicate("(piece_at_zone steering_wheel_1 steering_wheels_zone)"));
     problem_expert_->addPredicate(
-      plansys2::Predicate("(piece_at steering_wheel_2 steering_wheels_zone)"));
+      plansys2::Predicate("(piece_at_zone steering_wheel_2 steering_wheels_zone)"));
     problem_expert_->addPredicate(
-      plansys2::Predicate("(piece_at steering_wheel_3 steering_wheels_zone)"));
+      plansys2::Predicate("(piece_at_zone steering_wheel_3 steering_wheels_zone)"));
 
     problem_expert_->addPredicate(plansys2::Predicate("(robot_at r2d2 wheels_zone)"));
-    problem_expert_->addPredicate(plansys2::Predicate("(battery_full r2d2)"));
-    problem_expert_->addPredicate(plansys2::Predicate("(robot_available r2d2)"));
+    problem_expert_->addPredicate(plansys2::Predicate("(gripper_available r2d2)"));
 
     problem_expert_->addPredicate(plansys2::Predicate("(piece_not_used wheel_1)"));
     problem_expert_->addPredicate(plansys2::Predicate("(piece_not_used wheel_2)"));
@@ -134,7 +133,10 @@ public:
 
     problem_expert_->setGoal(
       plansys2::Goal(
-        "(and(car_assembled car_1) (car_assembled car_2) (car_assembled car_3))"));
+        //"(and(ready_to_pick r2d2))")); 
+        //"(and(robot_at r2d2 assembly_zone))")); 
+        "(and(piece_at_zone steering_wheel_1 assembly_zone) (piece_at_zone body_car_1 assembly_zone) )")); 
+        // "(and(car_assembled car_1) (car_assembled car_2) (car_assembled car_3))"));
   }
 
   void step()

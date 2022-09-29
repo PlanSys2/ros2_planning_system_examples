@@ -1,0 +1,7 @@
+<root main_tree_to_execute = "MainTree" >
+    <BehaviorTree ID="MainTree">
+       <Sequence name="root_sequence">
+           <SetGripperPos    name="set_gripper_pos"/>
+       </Sequence>
+    </BehaviorTree>
+</root>
