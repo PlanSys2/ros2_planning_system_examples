@@ -14,6 +14,7 @@
 
 #include <memory>
 #include <algorithm>
+#include <cmath>
 
 #include "plansys2_executor/ActionExecutorClient.hpp"
 
@@ -29,14 +30,15 @@ public:
   : plansys2::ActionExecutorClient("mend_fuse", 250ms)
   {
     progress_ = 0.0;
-    duration_ = std::chrono::duration<double>(0);
+    duration_ = 5.0;
   }
-  
+
   private:
   void do_work()
   {
+    auto elapsed_time = now() - get_start_time();
+    progress_ = elapsed_time.seconds() / duration_;
     if (progress_ < 1.0) {
-      progress_ += 0.02;
       send_feedback(progress_, "Mend fuse running");
     } else {
       finish(true, 1.0, "Mend fuse completed");
@@ -50,7 +52,7 @@ public:
   }
 
   float progress_;
-  std::chrono::duration<double> duration_;
+  double duration_;
 };
 
 int main(int argc, char ** argv)

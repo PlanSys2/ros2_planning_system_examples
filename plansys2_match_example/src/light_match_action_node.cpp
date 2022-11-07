@@ -29,13 +29,15 @@ public:
   : plansys2::ActionExecutorClient("light_match", 250ms)
   {
     progress_ = 0.0;
+    duration_ = 8.0;
   }
-  
+
   private:
   void do_work()
   {
+    auto elapsed_time = now() - get_start_time();
+    progress_ = elapsed_time.seconds() / duration_;
     if (progress_ < 1.0) {
-      progress_ += 0.02;
       send_feedback(progress_, "Light match running");
     } else {
       finish(true, 1.0, "Light match completed");
@@ -49,6 +51,7 @@ public:
   }
 
   float progress_;
+  double duration_;
 };
 
 int main(int argc, char ** argv)
