@@ -48,6 +48,7 @@ public:
 
     std::cout << "\r\e[K" << std::flush;
     std::cout << "Mend fuse ... [" << std::min(100.0, progress_ * 100.0) << "%]  " <<
+      "  elapsed_time: " << elapsed_time.seconds() <<
       std::flush;
   }
 
