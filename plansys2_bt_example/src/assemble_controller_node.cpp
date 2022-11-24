@@ -133,10 +133,11 @@ public:
 
     problem_expert_->setGoal(
       plansys2::Goal(
-        //"(and(ready_to_pick r2d2))")); 
-        //"(and(robot_at r2d2 assembly_zone))")); 
-        "(and(piece_at_zone steering_wheel_1 assembly_zone) (piece_at_zone body_car_1 assembly_zone) )")); 
-        // "(and(car_assembled car_1) (car_assembled car_2) (car_assembled car_3))"));
+        // "(and(ready_to_pick r2d2))"));
+        // "(and(robot_at r2d2 assembly_zone))"));
+        std::string("(and(piece_at_zone steering_wheel_1 assembly_zone) ") +
+        "(piece_at_zone body_car_1 assembly_zone) )"));
+    // "(and(car_assembled car_1) (car_assembled car_2) (car_assembled car_3))"));
   }
 
   void step()

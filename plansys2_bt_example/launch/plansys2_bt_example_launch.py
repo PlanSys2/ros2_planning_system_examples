@@ -128,7 +128,6 @@ def generate_launch_description():
           }
         ])
 
-
     assemble_cmd = Node(
         package='plansys2_bt_example',
         executable='assemble_action_node',
@@ -150,6 +149,5 @@ def generate_launch_description():
     ld.add_action(release_cmd)
     ld.add_action(prerelease_cmd)
     ld.add_action(assemble_cmd)
-
 
     return ld

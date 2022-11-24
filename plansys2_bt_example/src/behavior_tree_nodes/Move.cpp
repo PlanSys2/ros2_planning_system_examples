@@ -40,7 +40,8 @@ Move::Move(
 
   try {
     if (!node->has_parameter("waypoints")) {
-      node->declare_parameter<std::vector<std::string>>("waypoints");
+      std::vector<std::string> aux;
+      node->declare_parameter<std::vector<std::string>>("waypoints", std::vector<std::string>());
     }
   } catch (const rclcpp::exceptions::ParameterAlreadyDeclaredException & e) {
     RCLCPP_ERROR(node->get_logger(), "Error declaring waypoints [%s]", e.what());
