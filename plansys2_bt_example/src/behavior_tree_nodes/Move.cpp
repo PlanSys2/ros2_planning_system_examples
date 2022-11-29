@@ -20,7 +20,7 @@
 #include "plansys2_bt_example/behavior_tree_nodes/Move.hpp"
 
 #include "geometry_msgs/msg/pose2_d.hpp"
-#include "tf2_geometry_msgs/tf2_geometry_msgs.h"
+#include "tf2_geometry_msgs/tf2_geometry_msgs.hpp"
 
 #include "behaviortree_cpp_v3/behavior_tree.h"
 
@@ -35,7 +35,7 @@ Move::Move(
   const BT::NodeConfiguration & conf)
 : plansys2::BtActionNode<nav2_msgs::action::NavigateToPose>(xml_tag_name, action_name, conf)
 {
-  rclcpp::Node::SharedPtr node;
+  rclcpp_lifecycle::LifecycleNode::SharedPtr node;
   config().blackboard->get("node", node);
 
   try {
@@ -75,7 +75,7 @@ BT::NodeStatus
 Move::on_tick()
 {
   if (status() == BT::NodeStatus::IDLE) {
-    rclcpp::Node::SharedPtr node;
+    rclcpp_lifecycle::LifecycleNode::SharedPtr node;
     config().blackboard->get("node", node);
 
     std::string goal;
