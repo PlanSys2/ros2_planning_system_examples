@@ -30,14 +30,26 @@
     (piece_not_used steering_wheel_2)
     (piece_not_used steering_wheel_3)
 
+    (not_in_place wheel_1)
+    (not_in_place wheel_2)
+    (not_in_place wheel_3)
+    (not_in_place body_car_1)
+    (not_in_place body_car_2)
+    (not_in_place body_car_3)
+    (not_in_place steering_wheel_1)
+    (not_in_place steering_wheel_2)
+    (not_in_place steering_wheel_3)
+
+
     (gripper_available r2d2)
   )
 
   ;; The goal is to have both packages delivered to their destinations:
   (:goal (and
     ;; (piece_at_robot steering_wheel_1 r2d2)
-    (piece_at_zone steering_wheel_1 assembly_zone) 
-    (piece_at_zone body_car_1 assembly_zone) 
+    ;; (piece_at_zone steering_wheel_1 assembly_zone) 
+    ;; (piece_at_zone body_car_1 assembly_zone) 
+    (car_assembled car_1) 
     )
   )
   )

@@ -33,10 +33,20 @@ public:
     duration_ = 5.0;
   }
 
-  private:
+private:
+
+  using CallbackReturnT =
+    rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn;
+
+  CallbackReturnT on_activate(const rclcpp_lifecycle::State & state)
+  {
+    start_time_ = now();
+    return ActionExecutorClient::on_activate(state);
+  }
+
   void do_work()
   {
-    auto elapsed_time = now() - get_start_time();
+    auto elapsed_time = now() - start_time_;
     progress_ = elapsed_time.seconds() / duration_;
     if (progress_ < 1.0) {
       send_feedback(progress_, "Mend fuse running");
@@ -54,6 +64,7 @@ public:
 
   float progress_;
   double duration_;
+  rclcpp::Time start_time_;
 };
 
 int main(int argc, char ** argv)

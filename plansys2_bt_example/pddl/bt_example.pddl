@@ -30,6 +30,7 @@ car
 
 (is_assembly_zone ?z - zone)
 (is_recharge_zone ?z - zone)
+(not_in_place ?p - piece)
 
 (car_assembled ?c - car)
 
@@ -60,6 +61,7 @@ car
         (at start(ready_to_pick ?r))
     )
     :effect (and
+        (at start (not_in_place ?p))
         (at start(not(ready_to_pick ?r)))
         (at start(not(piece_at_zone ?p ?z1)))
         (at end(piece_at_robot ?p ?r))
@@ -72,6 +74,7 @@ car
     :duration ( = ?duration 5)
     :condition (and
         (over all (gripper_available ?r))
+        (at start (not_in_place ?p))
         (at end (robot_at ?r ?z1))
         (at end(piece_at_zone ?p ?z1)) )
     :effect (and
@@ -83,6 +86,7 @@ car
     :parameters (?r - robot ?p - piece ?z1 - zone)
     :duration ( = ?duration 5)
     :condition (and
+        (at start (not_in_place ?p))
         (over all (robot_at ?r ?z1))
         (at start(piece_at_robot ?p ?r))
         (at start(ready_to_release ?r ?p ?z1))
@@ -92,6 +96,7 @@ car
         (at end(piece_at_zone ?p ?z1))
         (at start(not(piece_at_robot ?p ?r)))
         (at end(gripper_available ?r))
+        (at end(not(not_in_place ?p)))
     )
 )
 
@@ -99,6 +104,7 @@ car
     :parameters (?r - robot ?p - piece ?z - zone)
     :duration ( = ?duration 5)
     :condition (and
+      (at start (not_in_place ?p))
       (over all (piece_at_robot ?p ?r))
       (at end (robot_at ?r ?z))
     )
