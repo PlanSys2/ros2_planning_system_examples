@@ -1,5 +1,3 @@
-ros2 run plansys2_terminal plansys2_terminal
-
 set instance m1 match
 set instance m2 match
 set instance f1 fuse
