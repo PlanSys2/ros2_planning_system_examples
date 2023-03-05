@@ -53,10 +53,26 @@ def generate_launch_description():
         output='screen',
         parameters=[])
 
+    light_match_cmd_2 = Node(
+        package='plansys2_match_example',
+        executable='light_match_action_node',
+        name='light_match_action_node_2',
+        namespace=namespace,
+        output='screen',
+        parameters=[])
+
     mend_fuse_cmd = Node(
         package='plansys2_match_example',
         executable='mend_fuse_action_node',
         name='mend_fuse_action_node',
+        namespace=namespace,
+        output='screen',
+        parameters=[])
+
+    mend_fuse_cmd_2 = Node(
+        package='plansys2_match_example',
+        executable='mend_fuse_action_node',
+        name='mend_fuse_action_node_2',
         namespace=namespace,
         output='screen',
         parameters=[])
@@ -70,6 +86,8 @@ def generate_launch_description():
     ld.add_action(plansys2_cmd)
 
     ld.add_action(light_match_cmd)
+    ld.add_action(light_match_cmd_2)
     ld.add_action(mend_fuse_cmd)
+    ld.add_action(mend_fuse_cmd_2)
 
     return ld
