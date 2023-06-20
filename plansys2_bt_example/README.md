@@ -32,6 +32,7 @@ In terminal 3:
 ros2 run plansys2_terminal plansys2_terminal
 set instance r2d2 robot
 
+set instance recharge_zone zone
 set instance wheels_zone zone
 set instance steering_wheels_zone zone
 set instance body_car_zone zone
@@ -41,12 +42,14 @@ set instance wheel_1 piece
 set instance body_car_1 piece
 set instance steering_wheel_1 piece
 
+set predicate (robot_available r2d2)
+set predicate (robot_at r2d2 assembly_zone)
+set predicate (is_recharge_zone recharge_zone)
 set predicate (piece_at wheel_1 wheels_zone)
 set predicate (piece_at body_car_1 body_car_zone)
 set predicate (piece_at steering_wheel_1 steering_wheels_zone)
 
-set predicate (robot_at r2d2 assembly_zone)
-
 set goal (and(piece_at wheel_1 assembly_zone))
+
 run
 ```
