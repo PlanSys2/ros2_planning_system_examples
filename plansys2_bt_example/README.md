@@ -12,8 +12,11 @@ See https://github.com/IntelligentRoboticsLabs/ros2_planning_system/pull/27 for 
 
 In terminal 1:
 
-```
-ros2 launch nav2_bringup tb3_simulation_launch.py
+```bash
+export GAZEBO_MODEL_PATH=$GAZEBO_MODEL_PATH:/opt/ros/humble/share/turtlebot3_gazebo/models
+export TURTLEBOT3_MODEL=waffle
+source /usr/share/gazebo/setup.sh
+ros2 launch nav2_bringup tb3_simulation_launch.py headless:=False
 ```
 
 This launches Navigation2. Use rviz to set the robot position, as shown here:
@@ -22,14 +25,18 @@ This launches Navigation2. Use rviz to set the robot position, as shown here:
 
 In terminal 2:
 
-```
+```bash
+source $HOME/dev_ws/install/setup.bash
 ros2 launch plansys2_bt_example plansys2_bt_example_launch.py
 ```
 
 In terminal 3:
 
-```
+```bash
 ros2 run plansys2_terminal plansys2_terminal
+```
+
+```text
 set instance r2d2 robot
 
 set instance recharge_zone zone
