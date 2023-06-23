@@ -36,6 +36,8 @@ In terminal 3:
 ros2 run plansys2_terminal plansys2_terminal
 ```
 
+Enter it manually, line by line:
+
 ```text
 set instance r2d2 robot
 
@@ -59,4 +61,9 @@ set predicate (piece_at steering_wheel_1 steering_wheels_zone)
 set goal (and(piece_at wheel_1 assembly_zone))
 
 run
+```
+Or, paste commands above into a file (e.g. commands.txt), start the plansys2_terminal and enter the following:
+
+```text
+source commands.txt
 ```
