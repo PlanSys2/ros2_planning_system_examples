@@ -32,6 +32,8 @@ ros2 launch plansys2_bt_example plansys2_bt_example_launch.py
 
 In terminal 3:
 
+There are two options in this example. First option is to use the plansys2 terminal. Secondly you can use the custom assemble controller. Both options are shown below.
+
 ```bash
 ros2 run plansys2_terminal plansys2_terminal
 ```
@@ -62,8 +64,14 @@ set goal (and(piece_at wheel_1 assembly_zone))
 
 run
 ```
-Or, paste commands above into a file (e.g. commands.txt), start the plansys2_terminal and enter the following:
+You can also paste commands above into a file (e.g. commands.txt), start the plansys2_terminal and enter the following:
 
 ```text
 source commands.txt
 ```
+Or use a custom controller:
+
+```bash
+$HOME/dev_ws/build/plansys2_bt_example/assemble_controller_node
+```
+NOTE: this problem domain is different from example entered in the plansys2 terminal.
