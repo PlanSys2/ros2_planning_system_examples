@@ -21,13 +21,13 @@ jobs:
       - name: Install popf deps
         run: sudo apt-get install libfl-dev
       - name: Setup ROS 2
-        uses: ros-tooling/setup-ros@0.3.3
+        uses: ros-tooling/setup-ros@0.6.3
         with:
           required-ros-distributions: rolling
       - name: Create custom repos
         run: wget -O /tmp/all.repos https://raw.githubusercontent.com/PlanSys2/ros2_planning_system_examples/rolling/plansys2.repos
       - name: build and test
-        uses: ros-tooling/action-ros-ci@0.2.5
+        uses: ros-tooling/action-ros-ci@0.3.5
         with:
           package-name: plansys2_multidomain_example
           target-ros2-distro: rolling
