@@ -25,7 +25,7 @@ jobs:
         with:
           required-ros-distributions: humble
       - name: Create custom repos
-        run: wget -O /tmp/all.repos https://raw.githubusercontent.com/IntelligentRoboticsLabs/plansys2_tfd_plan_solver/master/plansys2.repos  
+        run: wget -O /tmp/all.repos https://raw.githubusercontent.com/PlanSys2/ros2_planning_system_examples/rolling/plansys2.repos
       - name: build and test
         uses: ros-tooling/action-ros-ci@0.2.5
         with:
