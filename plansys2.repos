@@ -2,4 +2,4 @@ repositories:
   ros2_planning_system:
     type: git
     url: https://github.com/IntelligentRoboticsLabs/ros2_planning_system
-    version: master
+    version: rolling
