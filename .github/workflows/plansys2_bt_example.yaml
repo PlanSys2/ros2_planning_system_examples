@@ -3,10 +3,10 @@ name: plansys2_bt_example
 on:
   pull_request:
     branches:
-      - master
+      - rolling
   push:
     branches:
-      - master
+      - rolling
       
 jobs:
   build-and-test:
