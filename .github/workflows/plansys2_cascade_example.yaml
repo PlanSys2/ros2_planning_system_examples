@@ -3,10 +3,12 @@ name: plansys2_cascade_example
 on:
   pull_request:
     branches:
-      - master
+      - rolling
   push:
     branches:
-      - master
+      - rolling
+  schedule:
+      - cron: '0 0 * * 6'
       
 jobs:
   build-and-test:
@@ -19,16 +21,16 @@ jobs:
       - name: Install popf deps
         run: sudo apt-get install libfl-dev
       - name: Setup ROS 2
-        uses: ros-tooling/setup-ros@0.3.3
+        uses: ros-tooling/setup-ros@0.6.3
         with:
-          required-ros-distributions: humble
+          required-ros-distributions: rolling
       - name: Create custom repos
-        run: wget -O /tmp/all.repos https://raw.githubusercontent.com/IntelligentRoboticsLabs/plansys2_tfd_plan_solver/master/plansys2.repos  
+        run: wget -O /tmp/all.repos https://raw.githubusercontent.com/PlanSys2/ros2_planning_system_examples/rolling/plansys2.repos
       - name: build and test
-        uses: ros-tooling/action-ros-ci@0.2.5
+        uses: ros-tooling/action-ros-ci@0.3.5
         with:
           package-name: plansys2_cascade_example
-          target-ros2-distro: humble
+          target-ros2-distro: rolling
           vcs-repo-file-url: /tmp/all.repos
           colcon-mixin-name: coverage-gcc
           colcon-mixin-repository: https://raw.githubusercontent.com/colcon/colcon-mixin-repository/master/index.yaml

@@ -64,6 +64,8 @@ public:
   void init_knowledge()
   {
     problem_expert_->addInstance(plansys2::Instance{"r2d2", "robot"});
+    problem_expert_->addInstance(plansys2::Instance{"c3po", "robot"});
+    problem_expert_->addInstance(plansys2::Instance{"bb8", "robot"});
 
     problem_expert_->addInstance(plansys2::Instance{"car_1", "car"});
     problem_expert_->addInstance(plansys2::Instance{"car_2", "car"});
@@ -121,6 +123,14 @@ public:
     problem_expert_->addPredicate(plansys2::Predicate("(robot_at r2d2 wheels_zone)"));
     problem_expert_->addPredicate(plansys2::Predicate("(battery_full r2d2)"));
     problem_expert_->addPredicate(plansys2::Predicate("(robot_available r2d2)"));
+
+    problem_expert_->addPredicate(plansys2::Predicate("(robot_at c3po wheels_zone)"));
+    problem_expert_->addPredicate(plansys2::Predicate("(battery_full c3po)"));
+    problem_expert_->addPredicate(plansys2::Predicate("(robot_available c3po)"));
+
+    problem_expert_->addPredicate(plansys2::Predicate("(robot_at bb8 wheels_zone)"));
+    problem_expert_->addPredicate(plansys2::Predicate("(battery_full bb8)"));
+    problem_expert_->addPredicate(plansys2::Predicate("(robot_available bb8)"));
 
     problem_expert_->addPredicate(plansys2::Predicate("(piece_not_used wheel_1)"));
     problem_expert_->addPredicate(plansys2::Predicate("(piece_not_used wheel_2)"));

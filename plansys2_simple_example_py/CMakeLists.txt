@@ -1,11 +1,15 @@
 cmake_minimum_required(VERSION 3.5)
-project(plansys2_simple_example)
+project(plansys2_simple_example_py)
 
 
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(plansys2_msgs REQUIRED)
 find_package(plansys2_executor REQUIRED)
+
+find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
+
+ament_python_install_package(${PROJECT_NAME})
 
 set(CMAKE_CXX_STANDARD 17)
 
@@ -18,9 +22,6 @@ set(dependencies
 add_executable(move_action_node src/move_action_node.cpp)
 ament_target_dependencies(move_action_node ${dependencies})
 
-add_executable(charge_action_node src/charge_action_node.cpp)
-ament_target_dependencies(charge_action_node ${dependencies})
-
 add_executable(ask_charge_action_node src/ask_charge_action_node.cpp)
 ament_target_dependencies(ask_charge_action_node ${dependencies})
 
@@ -28,11 +29,15 @@ install(DIRECTORY launch pddl DESTINATION share/${PROJECT_NAME})
 
 install(TARGETS
   move_action_node
-  charge_action_node
   ask_charge_action_node
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION lib/${PROJECT_NAME}
+)
+
+install(PROGRAMS
+  plansys2_simple_example_py/charge_action_node.py
+  DESTINATION lib/${PROJECT_NAME}
 )
 
 if(BUILD_TESTING)

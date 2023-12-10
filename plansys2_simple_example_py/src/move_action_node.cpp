@@ -21,11 +21,11 @@
 
 using namespace std::chrono_literals;
 
-class ChargeAction : public plansys2::ActionExecutorClient
+class MoveAction : public plansys2::ActionExecutorClient
 {
 public:
-  ChargeAction()
-  : plansys2::ActionExecutorClient("charge", 500ms)
+  MoveAction()
+  : plansys2::ActionExecutorClient("move", 250ms)
   {
     progress_ = 0.0;
   }
@@ -34,17 +34,17 @@ private:
   void do_work()
   {
     if (progress_ < 1.0) {
-      progress_ += 0.05;
-      send_feedback(progress_, "Charge running");
+      progress_ += 0.02;
+      send_feedback(progress_, "Move running");
     } else {
-      finish(true, 1.0, "Charge completed");
+      finish(true, 1.0, "Move completed");
 
       progress_ = 0.0;
       std::cout << std::endl;
     }
 
     std::cout << "\r\e[K" << std::flush;
-    std::cout << "Charging ... [" << std::min(100.0, progress_ * 100.0) << "%]  " <<
+    std::cout << "Moving ... [" << std::min(100.0, progress_ * 100.0) << "%]  " <<
       std::flush;
   }
 
@@ -54,9 +54,9 @@ private:
 int main(int argc, char ** argv)
 {
   rclcpp::init(argc, argv);
-  auto node = std::make_shared<ChargeAction>();
+  auto node = std::make_shared<MoveAction>();
 
-  node->set_parameter(rclcpp::Parameter("action_name", "charge"));
+  node->set_parameter(rclcpp::Parameter("action_name", "move"));
   node->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_CONFIGURE);
 
   rclcpp::spin(node->get_node_base_interface());
