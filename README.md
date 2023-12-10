@@ -1,6 +1,6 @@
 # ros2_planning_system_examples
 
-Examples for https://github.com/PlanSys2/ros2_planning_system
+Examples for https://github.com/PlanSys2/ros2_planning_system .
 
 [![GitHub Action
 Status](https://github.com/IntelligentRoboticsLabs/ros2_planning_system_examples/workflows/plansys2_simple_example/badge.svg)](https://github.com/IntelligentRoboticsLabs/ros2_planning_system_examples)
