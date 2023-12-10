@@ -3,3 +3,7 @@ repositories:
     type: git
     url: https://github.com/IntelligentRoboticsLabs/ros2_planning_system
     version: rolling
+  navigation2:
+    type: git
+    url: https://github.com/fmrico/navigation2
+    version: nav2_msgs_only

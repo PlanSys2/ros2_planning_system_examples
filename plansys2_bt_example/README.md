@@ -82,3 +82,14 @@ source $HOME/dev_ws/install/setup.bash
 $HOME/dev_ws/build/plansys2_bt_example/assemble_controller_node
 ```
 NOTE: this problem domain is different from example entered in the plansys2 terminal.
+
+### In terminal 4 (optional):
+
+To monitor the behaviortree in Groot, type the following to connect it to the plansys2 executor:
+```bash
+$HOME/dev_ws/build/groot/Groot --mode monitor --publisher_port 2666 --server_port 2667 --autoconnect
+```
+
+NOTE: best way is to run commands above just after you have followed the instructions as mentioned in `In terminal 3`.
+
+![groot](groot.png)
