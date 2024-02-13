@@ -32,7 +32,7 @@ namespace plansys2_bt_tests
 Move::Move(
   const std::string & xml_tag_name,
   const std::string & action_name,
-  const BT::NodeConfiguration & conf)
+  const BT::NodeConfig & conf)
 : plansys2::BtActionNode<nav2_msgs::action::NavigateToPose>(xml_tag_name, action_name, conf)
 {
   rclcpp_lifecycle::LifecycleNode::SharedPtr node;
@@ -116,7 +116,7 @@ Move::on_success()
 BT_REGISTER_NODES(factory)
 {
   BT::NodeBuilder builder =
-    [](const std::string & name, const BT::NodeConfiguration & config)
+    [](const std::string & name, const BT::NodeConfig & config)
     {
       return std::make_unique<plansys2_bt_tests::Move>(
         name, "navigate_to_pose", config);
