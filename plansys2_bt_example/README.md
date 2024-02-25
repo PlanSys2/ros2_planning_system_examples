@@ -8,6 +8,11 @@ This example shows how to use Behavior Trees to carry out the tasks that an acti
 
 See https://github.com/IntelligentRoboticsLabs/ros2_planning_system/pull/27 for details.
 
+## Prerequisites
+```bash
+sudo apt-get install ros-humble-turtlebot3*
+```
+
 ## How to run
 
 ### In terminal 1:
@@ -16,7 +21,7 @@ See https://github.com/IntelligentRoboticsLabs/ros2_planning_system/pull/27 for 
 export GAZEBO_MODEL_PATH=$GAZEBO_MODEL_PATH:/opt/ros/humble/share/turtlebot3_gazebo/models
 export TURTLEBOT3_MODEL=waffle
 source /usr/share/gazebo/setup.sh
-source $HOME/dev_ws/install/setup.bash
+source install/setup.bash
 ros2 launch nav2_bringup tb3_simulation_launch.py headless:=False
 ```
 
@@ -32,7 +37,7 @@ ros2 topic pub --once /initialpose geometry_msgs/msg/PoseWithCovarianceStamped "
 ### In terminal 2:
 
 ```bash
-source $HOME/dev_ws/install/setup.bash
+source install/setup.bash
 ros2 launch plansys2_bt_example plansys2_bt_example_launch.py
 ```
 
@@ -41,7 +46,7 @@ ros2 launch plansys2_bt_example plansys2_bt_example_launch.py
 There are two options in this example. First option is to use the plansys2 terminal. Secondly you can use the custom assemble controller. Both options are shown below.
 
 ```bash
-source $HOME/dev_ws/install/setup.bash
+source install/setup.bash
 
 # before you run the commands below, it seems the starting location must be different to prevent an error
 ros2 topic pub --times 3 /goal_pose geometry_msgs/PoseStamped "{header: {stamp: {sec: 0}, frame_id: 'map'}, pose: {position: {x: -0.4, y: 0.4, z: 0.01}, orientation: {w: 0.0}}}"
@@ -70,20 +75,22 @@ set predicate (piece_at steering_wheel_1 steering_wheels_zone)
 set goal (and(piece_at wheel_1 assembly_zone))
 run
 ```
-You can also paste commands above into a file (e.g. commands.txt), start the plansys2_terminal and enter the following:
+You can also paste the problem above into a file (e.g. problem.txt), start the plansys2_terminal and enter the following:
 
 ```text
-source commands.txt
+source problem.txt
 ```
 Or use a custom controller:
 
 ```bash
-source $HOME/dev_ws/install/setup.bash
+source install/setup.bash
 $HOME/dev_ws/build/plansys2_bt_example/assemble_controller_node
 ```
 NOTE: this problem domain is different from example entered in the plansys2 terminal.
 
 ### In terminal 4 (optional):
+
+NOTE: this is not working right now due to the upgrade to BT.CPP v4
 
 To monitor the behaviortree in Groot, type the following to connect it to the plansys2 executor:
 ```bash

@@ -22,7 +22,7 @@
 #include "geometry_msgs/msg/pose2_d.hpp"
 #include "tf2_geometry_msgs/tf2_geometry_msgs.hpp"
 
-#include "behaviortree_cpp_v3/behavior_tree.h"
+#include "behaviortree_cpp/behavior_tree.h"
 
 #include "rclcpp_lifecycle/lifecycle_node.hpp"
 
@@ -36,7 +36,9 @@ Move::Move(
 : plansys2::BtActionNode<nav2_msgs::action::NavigateToPose>(xml_tag_name, action_name, conf)
 {
   rclcpp_lifecycle::LifecycleNode::SharedPtr node;
-  config().blackboard->get("node", node);
+  if (!config().blackboard->get("node", node)) {
+    RCLCPP_ERROR(node_->get_logger(), "Failed to get 'node' from the blackboard");
+  }
 
   try {
     node->declare_parameter<std::vector<std::string>>("waypoints");
@@ -76,7 +78,9 @@ Move::on_tick()
 {
   if (status() == BT::NodeStatus::IDLE) {
     rclcpp_lifecycle::LifecycleNode::SharedPtr node;
-    config().blackboard->get("node", node);
+    if (!config().blackboard->get("node", node)) {
+      RCLCPP_ERROR(node_->get_logger(), "Failed to get 'node' from the blackboard");
+    }
 
     std::string goal;
     getInput<std::string>("goal", goal);
@@ -112,7 +116,7 @@ Move::on_success()
 
 }  // namespace plansys2_bt_tests
 
-#include "behaviortree_cpp_v3/bt_factory.h"
+#include "behaviortree_cpp/bt_factory.h"
 BT_REGISTER_NODES(factory)
 {
   BT::NodeBuilder builder =

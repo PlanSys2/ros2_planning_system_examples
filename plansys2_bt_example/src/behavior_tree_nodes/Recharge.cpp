@@ -17,7 +17,7 @@
 
 #include "plansys2_bt_example/behavior_tree_nodes/Recharge.hpp"
 
-#include "behaviortree_cpp_v3/behavior_tree.h"
+#include "behaviortree_cpp/behavior_tree.h"
 
 namespace plansys2_bt_example
 {
@@ -50,7 +50,7 @@ Recharge::tick()
 
 }  // namespace plansys2_bt_example
 
-#include "behaviortree_cpp_v3/bt_factory.h"
+#include "behaviortree_cpp/bt_factory.h"
 BT_REGISTER_NODES(factory)
 {
   factory.registerNodeType<plansys2_bt_example::Recharge>("Recharge");
