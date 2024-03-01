@@ -35,7 +35,7 @@ public:
   explicit Move(
     const std::string & xml_tag_name,
     const std::string & action_name,
-    const BT::NodeConfiguration & conf);
+    const BT::NodeConfig & conf);
 
   BT::NodeStatus on_tick() override;
   BT::NodeStatus on_success() override;
