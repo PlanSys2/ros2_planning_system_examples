@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import os
+import yaml
 
 from ament_index_python.packages import get_package_share_directory
 
@@ -24,7 +25,7 @@ from launch_ros.actions import Node
 
 def generate_launch_description():
     # Get the launch directory
-    example_dir = get_package_share_directory('plansys2_patrol_navigation_example')
+    example_dir = get_package_share_directory('plansys2_auction_example')
 
     plansys2_cmd = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(os.path.join(
@@ -34,26 +35,39 @@ def generate_launch_description():
         launch_arguments={'model_file': example_dir + '/pddl/patrol.pddl'}.items()
         )
 
-    nav2_cmd = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(os.path.join(
-            get_package_share_directory('nav2_bringup'),
-            'launch',
-            'tb3_simulation_launch.py')),
-        launch_arguments={
-            'autostart': 'true',
-            'params_file': os.path.join(example_dir, 'params', 'nav2_params.yaml')
-        }.items())
+    fake_nav2_cmd = Node(
+        package='plansys2_bt_example',
+        executable='nav2_sim_node',
+        name='nav2_sim_node',
+        output='screen',
+        parameters=[])
+    
+    action_param_path = os.path.join(
+        example_dir,
+        'params',
+        'actions_params.yaml'
+        )
+    with open(action_param_path, 'r') as file:
+        configFile = yaml.safe_load(file)
+        configParams = configFile['move_action_node']['ros__parameters']
+        configParams1 = configFile['move_action_node1']['ros__parameters']
 
     # Specify the actions
     move_cmd = Node(
-        package='plansys2_patrol_navigation_example',
+        package='plansys2_auction_example',
         executable='move_action_node',
         name='move_action_node',
         output='screen',
-        parameters=[])
+        parameters=[configParams])
+    move_cmd2 = Node(
+        package='plansys2_auction_example',
+        executable='move_action_node',
+        name='move_action_node1',
+        output='screen',
+        parameters=[configParams1])
 
     patrol_cmd = Node(
-        package='plansys2_patrol_navigation_example',
+        package='plansys2_auction_example',
         executable='patrol_action_node',
         name='patrol_action_node',
         output='screen',
@@ -64,9 +78,10 @@ def generate_launch_description():
 
     # Declare the launch options
     ld.add_action(plansys2_cmd)
-    # ld.add_action(nav2_cmd)
+    ld.add_action(fake_nav2_cmd)
 
     ld.add_action(move_cmd)
+    ld.add_action(move_cmd2)
     ld.add_action(patrol_cmd)
 
     return ld
