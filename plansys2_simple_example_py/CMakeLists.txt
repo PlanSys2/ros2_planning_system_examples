@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
-project(plansys2_simple_example_py)
 
+project(plansys2_simple_example_py)
 
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
