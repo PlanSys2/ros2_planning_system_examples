@@ -12,9 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <plansys2_pddl_parser/Utils.h>
 
 #include <memory>
+
+#include "plansys2_pddl_parser/Utils.hpp"
 
 #include "plansys2_msgs/msg/action_execution_info.hpp"
 #include "plansys2_msgs/msg/plan.hpp"
@@ -150,12 +151,16 @@ public:
   void step()
   {
     if (!executor_client_->execute_and_check_plan()) {  // Plan finished
-      auto result = executor_client_->getResult();
-
-      if (result.value().success) {
-        RCLCPP_INFO(get_logger(), "Plan succesfully finished");
-      } else {
-        RCLCPP_ERROR(get_logger(), "Plan finished with error");
+      switch (executor_client_->getResult().value().result) {
+        case plansys2_msgs::action::ExecutePlan::Result::SUCCESS:
+          RCLCPP_INFO(get_logger(), "Plan succesfully finished");
+          break;
+        case plansys2_msgs::action::ExecutePlan::Result::PREEMPT:
+          RCLCPP_INFO(get_logger(), "Plan preempted");
+          break;
+        case plansys2_msgs::action::ExecutePlan::Result::FAILURE:
+          RCLCPP_ERROR(get_logger(), "Plan finished with error");
+          break;
       }
     }
   }

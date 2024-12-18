@@ -12,9 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <plansys2_pddl_parser/Utils.h>
 
 #include <memory>
+
+#include "plansys2_pddl_parser/Utils.hpp"
 
 #include "plansys2_msgs/msg/action_execution_info.hpp"
 #include "plansys2_msgs/msg/plan.hpp"
@@ -100,7 +101,9 @@ public:
           std::cout << std::endl;
 
           if (!executor_client_->execute_and_check_plan() && executor_client_->getResult()) {
-            if (executor_client_->getResult().value().success) {
+            if (executor_client_->getResult().value().result ==
+              plansys2_msgs::action::ExecutePlan::Result::SUCCESS)
+            {
               std::cout << "Successful finished " << std::endl;
 
               // Cleanning up
@@ -160,9 +163,9 @@ public:
           std::cout << std::endl;
 
           if (!executor_client_->execute_and_check_plan() && executor_client_->getResult()) {
-            if (executor_client_->getResult().value().success) {
-              std::cout << "Successful finished " << std::endl;
-
+            if (executor_client_->getResult().value().result ==
+              plansys2_msgs::action::ExecutePlan::Result::SUCCESS)
+            {
               // Cleanning up
               problem_expert_->removePredicate(plansys2::Predicate("(patrolled wp2)"));
 
@@ -220,7 +223,9 @@ public:
           std::cout << std::endl;
 
           if (!executor_client_->execute_and_check_plan() && executor_client_->getResult()) {
-            if (executor_client_->getResult().value().success) {
+            if (executor_client_->getResult().value().result ==
+              plansys2_msgs::action::ExecutePlan::Result::SUCCESS)
+            {
               std::cout << "Successful finished " << std::endl;
 
               // Cleanning up
@@ -280,7 +285,9 @@ public:
           std::cout << std::endl;
 
           if (!executor_client_->execute_and_check_plan() && executor_client_->getResult()) {
-            if (executor_client_->getResult().value().success) {
+            if (executor_client_->getResult().value().result ==
+              plansys2_msgs::action::ExecutePlan::Result::SUCCESS)
+            {
               std::cout << "Successful finished " << std::endl;
 
               // Cleanning up
