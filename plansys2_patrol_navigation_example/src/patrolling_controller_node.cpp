@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "plansys2_pddl_parser/Utils.hpp"
-
 #include <memory>
+
+#include "plansys2_pddl_parser/Utils.hpp"
 
 #include "plansys2_msgs/msg/action_execution_info.hpp"
 #include "plansys2_msgs/msg/plan.hpp"
@@ -119,12 +119,12 @@ public:
                   if (action_feedback.status == plansys2_msgs::msg::ActionExecutionInfo::FAILED) {
                     RCLCPP_ERROR_STREAM(
                       get_logger(), "[" << action_feedback.action <<
-                      "] finished with error: " << action_feedback.message_status);
+                        "] finished with error: " << action_feedback.message_status);
                   }
                 }
                 break;
             }
-            
+
             // Compute the plan
             auto domain = domain_expert_->getDomain();
             auto problem = problem_expert_->getProblem();
@@ -137,7 +137,8 @@ public:
             }
 
             // Execute the plan
-            if (executor_client_->getResult().value().result == plansys2_msgs::action::ExecutePlan::Result::SUCCESS &&
+            if (executor_client_->getResult().value().result ==
+              plansys2_msgs::action::ExecutePlan::Result::SUCCESS &&
               executor_client_->start_plan_execution(plan.value()))
             {
               state_ = PATROL_WP2;
@@ -176,12 +177,12 @@ public:
                   if (action_feedback.status == plansys2_msgs::msg::ActionExecutionInfo::FAILED) {
                     RCLCPP_ERROR_STREAM(
                       get_logger(), "[" << action_feedback.action <<
-                      "] finished with error: " << action_feedback.message_status);
+                        "] finished with error: " << action_feedback.message_status);
                   }
                 }
                 break;
             }
-            
+
             // Compute the plan
             auto domain = domain_expert_->getDomain();
             auto problem = problem_expert_->getProblem();
@@ -194,7 +195,8 @@ public:
             }
 
             // Execute the plan
-            if (executor_client_->getResult().value().result == plansys2_msgs::action::ExecutePlan::Result::SUCCESS &&
+            if (executor_client_->getResult().value().result ==
+              plansys2_msgs::action::ExecutePlan::Result::SUCCESS &&
               executor_client_->start_plan_execution(plan.value()))
             {
               state_ = PATROL_WP2;
@@ -233,12 +235,12 @@ public:
                   if (action_feedback.status == plansys2_msgs::msg::ActionExecutionInfo::FAILED) {
                     RCLCPP_ERROR_STREAM(
                       get_logger(), "[" << action_feedback.action <<
-                      "] finished with error: " << action_feedback.message_status);
+                        "] finished with error: " << action_feedback.message_status);
                   }
                 }
                 break;
             }
-            
+
             // Compute the plan
             auto domain = domain_expert_->getDomain();
             auto problem = problem_expert_->getProblem();
@@ -251,7 +253,8 @@ public:
             }
 
             // Execute the plan
-            if (executor_client_->getResult().value().result == plansys2_msgs::action::ExecutePlan::Result::SUCCESS &&
+            if (executor_client_->getResult().value().result ==
+              plansys2_msgs::action::ExecutePlan::Result::SUCCESS &&
               executor_client_->start_plan_execution(plan.value()))
             {
               state_ = PATROL_WP2;
@@ -290,12 +293,12 @@ public:
                   if (action_feedback.status == plansys2_msgs::msg::ActionExecutionInfo::FAILED) {
                     RCLCPP_ERROR_STREAM(
                       get_logger(), "[" << action_feedback.action <<
-                      "] finished with error: " << action_feedback.message_status);
+                        "] finished with error: " << action_feedback.message_status);
                   }
                 }
                 break;
             }
-            
+
             // Compute the plan
             auto domain = domain_expert_->getDomain();
             auto problem = problem_expert_->getProblem();
@@ -308,7 +311,8 @@ public:
             }
 
             // Execute the plan
-            if (executor_client_->getResult().value().result == plansys2_msgs::action::ExecutePlan::Result::SUCCESS &&
+            if (executor_client_->getResult().value().result ==
+              plansys2_msgs::action::ExecutePlan::Result::SUCCESS &&
               executor_client_->start_plan_execution(plan.value()))
             {
               state_ = PATROL_WP2;
