@@ -22,7 +22,7 @@ jobs:
         run: sudo apt-get install libfl-dev
       - uses: actions/checkout@v2
       - name: Setup ROS 2
-        uses: ros-tooling/setup-ros@0.7.3
+        uses: ros-tooling/setup-ros@0.7.5
         with:
           required-ros-distributions: jazzy
       - name: Install BT.CPP v4 and test_msgs (provisional Fix)
@@ -30,7 +30,7 @@ jobs:
       - name: Rosdep update
         run: rosdep update
       - name: build and test
-        uses: ros-tooling/action-ros-ci@0.3.7
+        uses: ros-tooling/action-ros-ci@0.3.13
         with:
           package-name: plansys2_patrol_navigation_example
           target-ros2-distro: jazzy
