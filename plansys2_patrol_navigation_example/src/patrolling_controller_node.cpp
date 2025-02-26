@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <plansys2_pddl_parser/Utils.h>
+#include <plansys2_pddl_parser/Utils.hpp>
 
 #include <memory>
 
