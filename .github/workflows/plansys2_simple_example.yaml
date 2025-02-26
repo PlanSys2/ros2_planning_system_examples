@@ -3,10 +3,10 @@ name: plansys2_simple_example
 on:
   pull_request:
     branches:
-      - rolling
+      - jazzy
   push:
     branches:
-      - rolling
+      - jazzy
   schedule:
       - cron: '0 0 * * 6'
       
@@ -24,14 +24,14 @@ jobs:
       - name: Setup ROS 2
         uses: ros-tooling/setup-ros@0.7.1
         with:
-          required-ros-distributions: rolling
+          required-ros-distributions: jazzy
       - name: Install BT.CPP v4 and test_msgs (provisional Fix)
-        run: sudo apt-get install ros-rolling-behaviortree-cpp ros-rolling-test-msgs
+        run: sudo apt-get install ros-jazzy-behaviortree-cpp ros-jazzy-test-msgs
       - name: build and test
         uses: ros-tooling/action-ros-ci@0.3.6
         with:
           package-name: plansys2_simple_example
-          target-ros2-distro: rolling
+          target-ros2-distro: jazzy
           vcs-repo-file-url: ${GITHUB_WORKSPACE}/plansys2.repos
           colcon-mixin-name: coverage-gcc
           colcon-mixin-repository: https://raw.githubusercontent.com/colcon/colcon-mixin-repository/master/index.yaml
