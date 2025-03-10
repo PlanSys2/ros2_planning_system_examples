@@ -27,6 +27,12 @@ def generate_launch_description():
     # Get the launch directory
     example_dir = get_package_share_directory('plansys2_simple_example')
     namespace = LaunchConfiguration('namespace')
+    domain = LaunchConfiguration('domain')
+
+    declare_domain_cmd = DeclareLaunchArgument(
+        'domain',
+        default_value='simple_example',
+        description='domain')
 
     declare_namespace_cmd = DeclareLaunchArgument(
         'namespace',
@@ -39,7 +45,7 @@ def generate_launch_description():
             'launch',
             'plansys2_bringup_launch_monolithic.py')),
         launch_arguments={
-          'model_file': example_dir + '/pddl/simple_example.pddl',
+          'model_file': [example_dir, '/pddl/', domain, '.pddl'],
           'namespace': namespace
           }.items())
 
@@ -66,10 +72,21 @@ def generate_launch_description():
         name='ask_charge_action_node',
         namespace=namespace,
         output='screen',
-        parameters=[])   # Create the launch description and populate
+        parameters=[])
+
+    patrol_cmd = Node(
+        package='plansys2_simple_example',
+        executable='patrol_action_node',
+        name='patrol_action_node',
+        namespace=namespace,
+        output='screen',
+        parameters=[])
+
+    # Create the launch description and populate
     ld = LaunchDescription()
 
     ld.add_action(declare_namespace_cmd)
+    ld.add_action(declare_domain_cmd)
 
     # Declare the launch options
     ld.add_action(plansys2_cmd)
@@ -77,5 +94,6 @@ def generate_launch_description():
     ld.add_action(move_cmd)
     ld.add_action(charge_cmd)
     ld.add_action(ask_charge_cmd)
+    ld.add_action(patrol_cmd)
 
     return ld
