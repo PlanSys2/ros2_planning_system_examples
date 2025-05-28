@@ -1,37 +1,35 @@
 cmake_minimum_required(VERSION 3.5)
 project(plansys2_simple_example_py)
 
-
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
-find_package(plansys2_msgs REQUIRED)
 find_package(plansys2_executor REQUIRED)
 
 find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
 
 ament_python_install_package(${PROJECT_NAME})
 
-
-
-set(dependencies
-    rclcpp::rclcpp
-    plansys2_executor::plansys2_executor
-    ${plansys2_msgs_TARGETS}
+add_executable(move_action_node src/move_action_node.cpp)
+target_link_libraries(move_action_node
+  PRIVATE
+  plansys2_executor::plansys2_executor
+  rclcpp::rclcpp
 )
 
-add_executable(move_action_node src/move_action_node.cpp)
-target_link_libraries(move_action_node PUBLIC ${dependencies})
-
 add_executable(ask_charge_action_node src/ask_charge_action_node.cpp)
-target_link_libraries(ask_charge_action_node PUBLIC ${dependencies})
+target_link_libraries(ask_charge_action_node
+  PRIVATE
+  plansys2_executor::plansys2_executor
+  rclcpp::rclcpp
+)
 
-install(DIRECTORY launch pddl DESTINATION share/${PROJECT_NAME})
+install(DIRECTORY launch pddl
+  DESTINATION share/${PROJECT_NAME}
+)
 
 install(TARGETS
   move_action_node
   ask_charge_action_node
-  ARCHIVE DESTINATION lib
-  LIBRARY DESTINATION lib
   RUNTIME DESTINATION lib/${PROJECT_NAME}
 )
 
@@ -46,5 +44,10 @@ if(BUILD_TESTING)
 
   find_package(ament_cmake_gtest REQUIRED)
 endif()
+
+ament_export_dependencies(
+  plansys2_executor
+  rclcpp
+)
 
 ament_package()
