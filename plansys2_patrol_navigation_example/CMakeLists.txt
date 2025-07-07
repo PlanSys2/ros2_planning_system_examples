@@ -14,28 +14,27 @@ find_package(plansys2_planner REQUIRED)
 find_package(plansys2_problem_expert REQUIRED)
 find_package(plansys2_pddl_parser REQUIRED)
 
-set(CMAKE_CXX_STANDARD 17)
 
 set(dependencies
-    rclcpp
-    rclcpp_action
-    plansys2_msgs
-    nav2_msgs
-    plansys2_domain_expert
-    plansys2_executor
-    plansys2_planner
-    plansys2_problem_expert
-    plansys2_pddl_parser
+    rclcpp::rclcpp
+    rclcpp_action::rclcpp_action
+    plansys2_domain_expert::plansys2_domain_expert
+    plansys2_executor::plansys2_executor
+    plansys2_planner::plansys2_planner
+    plansys2_problem_expert::plansys2_problem_expert
+    plansys2_pddl_parser::plansys2_pddl_parser
+    ${plansys2_msgs_TARGETS}
+    ${nav2_msgs_TARGETS}
 )
 
 add_executable(move_action_node src/move_action_node.cpp)
-ament_target_dependencies(move_action_node ${dependencies})
+target_link_libraries(move_action_node PUBLIC ${dependencies})
 
 add_executable(patrol_action_node src/patrol_action_node.cpp)
-ament_target_dependencies(patrol_action_node ${dependencies})
+target_link_libraries(patrol_action_node PUBLIC ${dependencies})
 
 add_executable(patrolling_controller_node src/patrolling_controller_node.cpp)
-ament_target_dependencies(patrolling_controller_node ${dependencies})
+target_link_libraries(patrolling_controller_node PUBLIC ${dependencies})
 
 install(DIRECTORY launch pddl params DESTINATION share/${PROJECT_NAME})
 
@@ -54,7 +53,5 @@ if(BUILD_TESTING)
 
   find_package(ament_cmake_gtest REQUIRED)
 endif()
-
-ament_export_dependencies(${dependencies})
 
 ament_package()

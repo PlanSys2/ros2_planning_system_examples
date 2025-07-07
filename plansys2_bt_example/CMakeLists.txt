@@ -17,24 +17,22 @@ find_package(plansys2_pddl_parser REQUIRED)
 find_package(ament_index_cpp REQUIRED)
 find_package(plansys2_bt_actions REQUIRED)
 
-if(NOT CMAKE_CXX_STANDARD)
-  set(CMAKE_CXX_STANDARD 17)
-endif()
+
 
 set(dependencies
-    rclcpp
-    rclcpp_action
-    geometry_msgs
-    tf2_geometry_msgs
-    nav2_msgs
-    plansys2_msgs
-    plansys2_domain_expert
-    plansys2_executor
-    plansys2_planner
-    plansys2_problem_expert
-    plansys2_pddl_parser
-    ament_index_cpp
-    plansys2_bt_actions
+    rclcpp::rclcpp
+    rclcpp_action::rclcpp_action
+    plansys2_domain_expert::plansys2_domain_expert
+    plansys2_executor::plansys2_executor
+    plansys2_planner::plansys2_planner
+    plansys2_problem_expert::plansys2_problem_expert
+    plansys2_pddl_parser::plansys2_pddl_parser
+    ament_index_cpp::ament_index_cpp
+    plansys2_bt_actions::plansys2_bt_actions
+    ${geometry_msgs_TARGETS}
+    ${tf2_geometry_msgs_TARGETS}
+    ${nav2_msgs_TARGETS}
+    ${plansys2_msgs_TARGETS}
 )
 
 include_directories(include)
@@ -55,18 +53,18 @@ add_library(plansys2_approach_object_bt_node SHARED src/behavior_tree_nodes/Appr
 list(APPEND plugin_libs plansys2_approach_object_bt_node)
 
 foreach(bt_plugin ${plugin_libs})
-  ament_target_dependencies(${bt_plugin} ${dependencies})
+  target_link_libraries(${bt_plugin} PUBLIC ${dependencies})
   target_compile_definitions(${bt_plugin} PRIVATE BT_PLUGIN_EXPORT)
 endforeach()
 
 add_executable(assemble_action_node src/assemble_action_node.cpp)
-ament_target_dependencies(assemble_action_node ${dependencies})
+target_link_libraries(assemble_action_node PUBLIC ${dependencies})
 
 add_executable(assemble_controller_node src/assemble_controller_node.cpp)
-ament_target_dependencies(assemble_controller_node ${dependencies})
+target_link_libraries(assemble_controller_node PUBLIC ${dependencies})
 
 add_executable(nav2_sim_node src/nav2_sim_node.cpp)
-ament_target_dependencies(nav2_sim_node ${dependencies})
+target_link_libraries(nav2_sim_node PUBLIC ${dependencies})
 
 install(DIRECTORY launch pddl behavior_trees_xml config DESTINATION share/${PROJECT_NAME})
 
@@ -77,7 +75,7 @@ install(TARGETS
   ${plugin_libs}
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
-  RUNTIME DESTINATION lib/${PROJECT_NAME}
+  RUNTIME DESTINATION bin
 )
 
 if(BUILD_TESTING)
@@ -86,7 +84,5 @@ if(BUILD_TESTING)
 
   find_package(ament_cmake_gtest REQUIRED)
 endif()
-
-ament_export_dependencies(${dependencies})
 
 ament_package()
