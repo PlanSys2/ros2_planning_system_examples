@@ -19,7 +19,7 @@
 
 #include "plansys2_bt_example/behavior_tree_nodes/Move.hpp"
 
-#include "geometry_msgs/msg/pose2_d.hpp"
+#include "geometry_msgs/msg/pose.hpp"
 #include "tf2_geometry_msgs/tf2_geometry_msgs.hpp"
 
 #include "behaviortree_cpp/behavior_tree.h"
@@ -60,10 +60,10 @@ Move::Move(
 
       std::vector<double> coords;
       if (node->get_parameter_or("waypoint_coords." + wp, coords, {})) {
-        geometry_msgs::msg::Pose2D pose;
-        pose.x = coords[0];
-        pose.y = coords[1];
-        pose.theta = coords[2];
+        geometry_msgs::msg::Pose pose;
+        pose.position.x = coords[0];
+        pose.position.y = coords[1];
+        pose.orientation = tf2::toMsg(tf2::Quaternion({0.0, 0.0, 1.0}, coords[2]));
 
         waypoints_[wp] = pose;
       } else {
@@ -85,7 +85,7 @@ Move::on_tick()
     std::string goal;
     getInput<std::string>("goal", goal);
 
-    geometry_msgs::msg::Pose2D pose2nav;
+    geometry_msgs::msg::Pose pose2nav;
     if (waypoints_.find(goal) != waypoints_.end()) {
       pose2nav = waypoints_[goal];
     } else {
@@ -96,10 +96,7 @@ Move::on_tick()
 
     goal_pos.header.frame_id = "map";
     goal_pos.header.stamp = node->now();
-    goal_pos.pose.position.x = pose2nav.x;
-    goal_pos.pose.position.y = pose2nav.y;
-    goal_pos.pose.position.z = 0;
-    goal_pos.pose.orientation = tf2::toMsg(tf2::Quaternion({0.0, 0.0, 1.0}, pose2nav.theta));
+    goal_pos.pose = pose2nav;
 
     goal_.pose = goal_pos;
   }
