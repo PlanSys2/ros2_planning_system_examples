@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include <memory>
+#include <tuple>
 
 #include "plansys2_pddl_parser/Utils.hpp"
 

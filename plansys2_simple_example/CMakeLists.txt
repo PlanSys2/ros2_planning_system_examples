@@ -7,22 +7,22 @@ find_package(rclcpp REQUIRED)
 find_package(plansys2_msgs REQUIRED)
 find_package(plansys2_executor REQUIRED)
 
-set(CMAKE_CXX_STANDARD 17)
+
 
 set(dependencies
-    rclcpp
-    plansys2_msgs
-    plansys2_executor
+    rclcpp::rclcpp
+    plansys2_executor::plansys2_executor
+    ${plansys2_msgs_TARGETS}
 )
 
 add_executable(move_action_node src/move_action_node.cpp)
-ament_target_dependencies(move_action_node ${dependencies})
+target_link_libraries(move_action_node PUBLIC ${dependencies})
 
 add_executable(charge_action_node src/charge_action_node.cpp)
-ament_target_dependencies(charge_action_node ${dependencies})
+target_link_libraries(charge_action_node PUBLIC ${dependencies})
 
 add_executable(ask_charge_action_node src/ask_charge_action_node.cpp)
-ament_target_dependencies(ask_charge_action_node ${dependencies})
+target_link_libraries(ask_charge_action_node PUBLIC ${dependencies})
 
 install(DIRECTORY launch pddl DESTINATION share/${PROJECT_NAME})
 
@@ -41,7 +41,5 @@ if(BUILD_TESTING)
 
   find_package(ament_cmake_gtest REQUIRED)
 endif()
-
-ament_export_dependencies(${dependencies})
 
 ament_package()
