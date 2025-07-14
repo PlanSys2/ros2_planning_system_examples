@@ -26,7 +26,7 @@ class PickObject : public plansys2::ActionExecutorClient
 {
 public:
   PickObject()
-  : plansys2::ActionExecutorClient("pick_object", 250ms)
+  : plansys2::ActionExecutorClient("pick_object")
   {
     progress_ = 0.0;
   }
@@ -58,6 +58,7 @@ int main(int argc, char ** argv)
   auto node = std::make_shared<PickObject>();
 
   node->set_parameter(rclcpp::Parameter("action_name", "pick_object"));
+  node->set_parameter(rclcpp::Parameter("rate", 4.0));
   node->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_CONFIGURE);
 
   rclcpp::spin(node->get_node_base_interface());

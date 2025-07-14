@@ -39,9 +39,9 @@ def generate_launch_description():
             'launch',
             'plansys2_bringup_launch_monolithic.py')),
         launch_arguments={
-          'model_file': example_dir + '/pddl/bt_example.pddl',
-          'namespace': namespace
-          }.items())
+            'model_file': example_dir + '/pddl/bt_example.pddl',
+            'namespace': namespace
+        }.items())
 
     # Specify the actions
     move_1_cmd = Node(
@@ -51,13 +51,13 @@ def generate_launch_description():
         namespace=namespace,
         output='screen',
         parameters=[
-          example_dir + '/config/params.yaml',
-          {
-            'action_name': 'move',
-            'publisher_port': 1668,
-            'server_port': 1669,
-            'bt_xml_file': example_dir + '/behavior_trees_xml/move.xml'
-          }
+            example_dir + '/config/params.yaml',
+            {
+                'action_name': 'move',
+                'enable_groot_monitoring': True,
+                'server_port': 1700,
+                'bt_xml_file': example_dir + '/behavior_trees_xml/move.xml'
+            }
         ])
 
     move_2_cmd = Node(
@@ -67,13 +67,13 @@ def generate_launch_description():
         namespace=namespace,
         output='screen',
         parameters=[
-          example_dir + '/config/params.yaml',
-          {
-            'action_name': 'move',
-            'publisher_port': 1670,
-            'server_port': 1671,
-            'bt_xml_file': example_dir + '/behavior_trees_xml/move.xml'
-          }
+            example_dir + '/config/params.yaml',
+            {
+                'action_name': 'move',
+                'enable_groot_monitoring': True,
+                'server_port': 1700,
+                'bt_xml_file': example_dir + '/behavior_trees_xml/move.xml'
+            }
         ])
 
     move_3_cmd = Node(
@@ -83,13 +83,13 @@ def generate_launch_description():
         namespace=namespace,
         output='screen',
         parameters=[
-          example_dir + '/config/params.yaml',
-          {
-            'action_name': 'move',
-            'publisher_port': 1672,
-            'server_port': 1673,
-            'bt_xml_file': example_dir + '/behavior_trees_xml/move.xml'
-          }
+            example_dir + '/config/params.yaml',
+            {
+                'action_name': 'move',
+                'enable_groot_monitoring': True,
+                'server_port': 1700,
+                'bt_xml_file': example_dir + '/behavior_trees_xml/move.xml'
+            }
         ])
 
     transport_1_cmd = Node(
@@ -99,13 +99,13 @@ def generate_launch_description():
         namespace=namespace,
         output='screen',
         parameters=[
-          example_dir + '/config/params.yaml',
-          {
-            'action_name': 'transport',
-            'publisher_port': 1674,
-            'server_port': 1675,
-            'bt_xml_file': example_dir + '/behavior_trees_xml/transport.xml'
-          }
+            example_dir + '/config/params.yaml',
+            {
+                'action_name': 'transport',
+                'enable_groot_monitoring': True,
+                'server_port': 1700,
+                'bt_xml_file': example_dir + '/behavior_trees_xml/transport.xml'
+            }
         ])
     transport_2_cmd = Node(
         package='plansys2_bt_actions',
@@ -114,13 +114,13 @@ def generate_launch_description():
         namespace=namespace,
         output='screen',
         parameters=[
-          example_dir + '/config/params.yaml',
-          {
-            'action_name': 'transport',
-            'publisher_port': 1676,
-            'server_port': 1677,
-            'bt_xml_file': example_dir + '/behavior_trees_xml/transport.xml'
-          }
+            example_dir + '/config/params.yaml',
+            {
+                'action_name': 'transport',
+                'enable_groot_monitoring': True,
+                'server_port': 1700,
+                'bt_xml_file': example_dir + '/behavior_trees_xml/transport.xml'
+            }
         ])
     transport_3_cmd = Node(
         package='plansys2_bt_actions',
@@ -129,13 +129,13 @@ def generate_launch_description():
         namespace=namespace,
         output='screen',
         parameters=[
-          example_dir + '/config/params.yaml',
-          {
-            'action_name': 'transport',
-            'publisher_port': 1678,
-            'server_port': 1679,
-            'bt_xml_file': example_dir + '/behavior_trees_xml/transport.xml'
-          }
+            example_dir + '/config/params.yaml',
+            {
+                'action_name': 'transport',
+                'enable_groot_monitoring': True,
+                'server_port': 1700,
+                'bt_xml_file': example_dir + '/behavior_trees_xml/transport.xml'
+            }
         ])
 
     assemble_1_cmd = Node(
@@ -167,11 +167,11 @@ def generate_launch_description():
         namespace=namespace,
         output='screen',
         parameters=[
-          example_dir + '/config/params.yaml',
-          {
-            'action_name': 'recharge',
-            'bt_xml_file': example_dir + '/behavior_trees_xml/recharge.xml'
-          }
+            example_dir + '/config/params.yaml',
+            {
+                'action_name': 'recharge',
+                'bt_xml_file': example_dir + '/behavior_trees_xml/recharge.xml'
+            }
         ])
 
     ld = LaunchDescription()
