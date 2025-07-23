@@ -71,7 +71,7 @@ def generate_launch_description():
             {
                 'action_name': 'move',
                 'enable_groot_monitoring': True,
-                'server_port': 1700,
+                'server_port': 1702,
                 'bt_xml_file': example_dir + '/behavior_trees_xml/move.xml'
             }
         ])
@@ -87,7 +87,7 @@ def generate_launch_description():
             {
                 'action_name': 'move',
                 'enable_groot_monitoring': True,
-                'server_port': 1700,
+                'server_port': 1704,
                 'bt_xml_file': example_dir + '/behavior_trees_xml/move.xml'
             }
         ])
@@ -103,7 +103,7 @@ def generate_launch_description():
             {
                 'action_name': 'transport',
                 'enable_groot_monitoring': True,
-                'server_port': 1700,
+                'server_port': 1706,
                 'bt_xml_file': example_dir + '/behavior_trees_xml/transport.xml'
             }
         ])
@@ -118,7 +118,7 @@ def generate_launch_description():
             {
                 'action_name': 'transport',
                 'enable_groot_monitoring': True,
-                'server_port': 1700,
+                'server_port': 1708,
                 'bt_xml_file': example_dir + '/behavior_trees_xml/transport.xml'
             }
         ])
@@ -133,7 +133,7 @@ def generate_launch_description():
             {
                 'action_name': 'transport',
                 'enable_groot_monitoring': True,
-                'server_port': 1700,
+                'server_port': 1710,
                 'bt_xml_file': example_dir + '/behavior_trees_xml/transport.xml'
             }
         ])
