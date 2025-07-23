@@ -26,7 +26,7 @@ class AskCharge : public plansys2::ActionExecutorClient
 {
 public:
   AskCharge()
-  : plansys2::ActionExecutorClient("askcharge", 1s)
+  : plansys2::ActionExecutorClient("askcharge")
   {
     progress_ = 0.0;
   }
@@ -58,6 +58,7 @@ int main(int argc, char ** argv)
   auto node = std::make_shared<AskCharge>();
 
   node->set_parameter(rclcpp::Parameter("action_name", "askcharge"));
+  node->set_parameter(rclcpp::Parameter("rate", 1.0));
   node->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_CONFIGURE);
 
   rclcpp::spin(node->get_node_base_interface());

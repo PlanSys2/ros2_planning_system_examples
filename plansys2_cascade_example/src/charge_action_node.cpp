@@ -26,7 +26,7 @@ class ChargeAction : public plansys2::ActionExecutorClient
 {
 public:
   ChargeAction()
-  : plansys2::ActionExecutorClient("charge", 500ms)
+  : plansys2::ActionExecutorClient("charge")
   {
     progress_ = 0.0;
   }
@@ -58,6 +58,7 @@ int main(int argc, char ** argv)
   auto node = std::make_shared<ChargeAction>();
 
   node->set_parameter(rclcpp::Parameter("action_name", "charge"));
+  node->set_parameter(rclcpp::Parameter("rate", 2.0));
   node->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_CONFIGURE);
 
   rclcpp::spin(node->get_node_base_interface());

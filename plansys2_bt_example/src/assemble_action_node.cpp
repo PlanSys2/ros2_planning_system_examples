@@ -26,7 +26,7 @@ class AssembleAction : public plansys2::ActionExecutorClient
 {
 public:
   AssembleAction()
-  : plansys2::ActionExecutorClient("assemble", 500ms)
+  : plansys2::ActionExecutorClient("assemble")
   {
     progress_ = 0.0;
   }
@@ -58,6 +58,7 @@ int main(int argc, char ** argv)
   auto node = std::make_shared<AssembleAction>();
 
   node->set_parameter(rclcpp::Parameter("action_name", "assemble"));
+  node->set_parameter(rclcpp::Parameter("rate", 2.0));
   node->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_CONFIGURE);
 
   rclcpp::spin(node->get_node_base_interface());

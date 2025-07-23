@@ -25,7 +25,7 @@ class MoveAction : public plansys2::ActionExecutorClient
 {
 public:
   MoveAction()
-  : plansys2::ActionExecutorClient("move", 250ms)
+  : plansys2::ActionExecutorClient("move")
   {
     progress_ = 0.0;
   }
@@ -57,6 +57,7 @@ int main(int argc, char ** argv)
   auto node = std::make_shared<MoveAction>();
 
   node->set_parameter(rclcpp::Parameter("action_name", "move"));
+  node->set_parameter(rclcpp::Parameter("rate", 4.0));
   node->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_CONFIGURE);
 
   rclcpp::spin(node->get_node_base_interface());
