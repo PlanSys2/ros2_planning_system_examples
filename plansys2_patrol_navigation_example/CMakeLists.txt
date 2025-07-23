@@ -1,49 +1,60 @@
 cmake_minimum_required(VERSION 3.5)
 project(plansys2_patrol_navigation_example)
 
-
 find_package(ament_cmake REQUIRED)
-find_package(rclcpp REQUIRED)
-find_package(rclcpp_action REQUIRED)
-find_package(plansys2_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
+find_package(lifecycle_msgs REQUIRED)
 find_package(nav2_msgs REQUIRED)
 find_package(plansys2_domain_expert REQUIRED)
 find_package(plansys2_executor REQUIRED)
+find_package(plansys2_msgs REQUIRED)
+find_package(plansys2_pddl_parser REQUIRED)
 find_package(plansys2_planner REQUIRED)
 find_package(plansys2_problem_expert REQUIRED)
-find_package(plansys2_pddl_parser REQUIRED)
-
-
-set(dependencies
-    rclcpp::rclcpp
-    rclcpp_action::rclcpp_action
-    plansys2_domain_expert::plansys2_domain_expert
-    plansys2_executor::plansys2_executor
-    plansys2_planner::plansys2_planner
-    plansys2_problem_expert::plansys2_problem_expert
-    plansys2_pddl_parser::plansys2_pddl_parser
-    ${plansys2_msgs_TARGETS}
-    ${nav2_msgs_TARGETS}
-)
+find_package(rclcpp REQUIRED)
+find_package(rclcpp_action REQUIRED)
 
 add_executable(move_action_node src/move_action_node.cpp)
-target_link_libraries(move_action_node PUBLIC ${dependencies})
+target_link_libraries(move_action_node
+  PRIVATE
+  ${geometry_msgs_TARGETS}
+  ${nav2_msgs_TARGETS}
+  plansys2_executor::plansys2_executor
+  rclcpp::rclcpp
+  rclcpp_action::rclcpp_action
+)
 
 add_executable(patrol_action_node src/patrol_action_node.cpp)
-target_link_libraries(patrol_action_node PUBLIC ${dependencies})
+target_link_libraries(patrol_action_node
+  PRIVATE
+  ${geometry_msgs_TARGETS}
+  ${lifecycle_msgs_TARGETS}
+  plansys2_executor::plansys2_executor
+  rclcpp::rclcpp
+  rclcpp_action::rclcpp_action
+)
 
 add_executable(patrolling_controller_node src/patrolling_controller_node.cpp)
-target_link_libraries(patrolling_controller_node PUBLIC ${dependencies})
+target_link_libraries(patrolling_controller_node
+  PRIVATE
+  plansys2_executor::plansys2_executor
+  plansys2_domain_expert::plansys2_domain_expert
+  ${plansys2_msgs_TARGETS}
+  plansys2_pddl_parser::plansys2_pddl_parser
+  plansys2_planner::plansys2_planner
+  plansys2_problem_expert::plansys2_problem_expert
+  rclcpp::rclcpp
+  rclcpp_action::rclcpp_action
+)
 
-install(DIRECTORY launch pddl params DESTINATION share/${PROJECT_NAME})
+install(DIRECTORY launch pddl params
+  DESTINATION share/${PROJECT_NAME}
+)
 
 install(TARGETS
   move_action_node
   patrol_action_node
   patrolling_controller_node
-  ARCHIVE DESTINATION lib
-  LIBRARY DESTINATION lib
   RUNTIME DESTINATION lib/${PROJECT_NAME}
 )
 
@@ -53,5 +64,18 @@ if(BUILD_TESTING)
 
   find_package(ament_cmake_gtest REQUIRED)
 endif()
+
+ament_export_dependencies(
+  lifecycle_msgs
+  nav2_msgs
+  plansys2_domain_expert
+  plansys2_executor
+  plansys2_msgs
+  plansys2_planner
+  plansys2_problem_expert
+  plansys2_pddl_parser
+  rclcpp
+  rclcpp_action
+)
 
 ament_package()
