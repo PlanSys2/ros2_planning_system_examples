@@ -20,7 +20,7 @@
 #include "plansys2_bt_example/behavior_tree_nodes/Move.hpp"
 
 #include "geometry_msgs/msg/pose2_d.hpp"
-#include "tf2_geometry_msgs/tf2_geometry_msgs.h"
+#include "tf2_geometry_msgs/tf2_geometry_msgs.hpp"
 
 #include "behaviortree_cpp_v3/behavior_tree.h"
 
@@ -39,7 +39,7 @@ Move::Move(
   config().blackboard->get("node", node);
 
   try {
-    node->declare_parameter<std::vector<std::string>>("waypoints");
+    node->declare_parameter<std::vector<std::string>>("waypoints", std::vector<std::string>{});
   } catch (const rclcpp::exceptions::ParameterAlreadyDeclaredException & e) {
     // Do nothing;
   }
