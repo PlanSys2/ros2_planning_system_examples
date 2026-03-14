@@ -181,12 +181,15 @@ int main(int argc, char ** argv)
     return 0;
   }
 
+  rclcpp::executors::SingleThreadedExecutor exec;
+  exec.add_node(node->get_node_base_interface());
+
   rclcpp::Rate rate(5);
   while (rclcpp::ok()) {
     node->step();
 
     rate.sleep();
-    rclcpp::spin_some(node->get_node_base_interface());
+    exec.spin_some();
   }
 
   rclcpp::shutdown();
