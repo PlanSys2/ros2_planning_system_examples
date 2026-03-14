@@ -55,12 +55,15 @@ private:
     const rclcpp_action::GoalUUID & uuid,
     std::shared_ptr<const NavigateToPose::Goal> goal)
   {
+    (void)uuid;
+    (void)goal;
     return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
   }
 
   rclcpp_action::CancelResponse handle_cancel(
     const std::shared_ptr<GoalHandleNavigateToPose> goal_handle)
   {
+    (void)goal_handle;
     RCLCPP_INFO(this->get_logger(), "Received request to cancel goal");
     return rclcpp_action::CancelResponse::ACCEPT;
   }
@@ -83,6 +86,9 @@ private:
     int current_times = 0;
     while (rclcpp::ok() && current_times++ < 10) {
       RCLCPP_INFO(this->get_logger(), "Navigating %d ", current_times);
+
+      feedback->distance_remaining = 10.0 - current_times;
+      goal_handle->publish_feedback(feedback);
 
       if (goal_handle->is_canceling()) {
         goal_handle->canceled(result);
