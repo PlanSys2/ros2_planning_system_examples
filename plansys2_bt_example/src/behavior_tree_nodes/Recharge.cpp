@@ -40,6 +40,9 @@ Recharge::tick()
 {
   std::cout << "Recharge tick " << counter_ << std::endl;
 
+  float completion = std::min(1.0f, counter_ / 10.0f);
+  config().blackboard->set<float>("completion", completion);
+
   if (counter_++ < 10) {
     return BT::NodeStatus::RUNNING;
   } else {

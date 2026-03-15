@@ -39,6 +39,9 @@ public:
 
   BT::NodeStatus on_tick() override;
   BT::NodeStatus on_success() override;
+  void on_feedback(
+    const std::shared_ptr<const nav2_msgs::action::NavigateToPose::Feedback> feedback)
+  override;
 
   static BT::PortsList providedPorts()
   {

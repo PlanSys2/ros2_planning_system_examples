@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <algorithm>
 #include <string>
 #include <iostream>
 #include <vector>
@@ -107,7 +108,19 @@ Move::on_tick()
 BT::NodeStatus
 Move::on_success()
 {
+  config().blackboard->set<float>("completion", 1.0f);
   return BT::NodeStatus::SUCCESS;
+}
+
+void
+Move::on_feedback(
+  const std::shared_ptr<const nav2_msgs::action::NavigateToPose::Feedback> feedback)
+{
+  // nav2_sim sends distance_remaining counting down from ~10 to ~0
+  constexpr float kInitialDistance = 10.0f;
+  float completion = 1.0f - std::min(
+    1.0f, std::max(0.0f, feedback->distance_remaining / kInitialDistance));
+  config().blackboard->set<float>("completion", completion);
 }
 
 

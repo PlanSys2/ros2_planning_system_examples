@@ -40,6 +40,9 @@ ApproachObject::tick()
 {
   std::cout << "ApproachObject tick " << counter_ << std::endl;
 
+  float completion = std::min(1.0f, counter_ / 5.0f);
+  config().blackboard->set<float>("completion", completion);
+
   if (counter_++ < 5) {
     return BT::NodeStatus::RUNNING;
   } else {
