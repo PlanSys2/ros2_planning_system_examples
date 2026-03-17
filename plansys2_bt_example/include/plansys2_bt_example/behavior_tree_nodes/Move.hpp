@@ -17,6 +17,7 @@
 
 #include <string>
 #include <map>
+#include <memory>
 
 #include "geometry_msgs/msg/pose.hpp"
 #include "nav2_msgs/action/navigate_to_pose.hpp"
