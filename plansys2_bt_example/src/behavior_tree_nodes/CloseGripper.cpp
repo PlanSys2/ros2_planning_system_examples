@@ -14,6 +14,7 @@
 
 #include <string>
 #include <iostream>
+#include <algorithm>
 
 #include "plansys2_bt_example/behavior_tree_nodes/CloseGripper.hpp"
 
