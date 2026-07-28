@@ -1,12 +1,12 @@
-name: rolling
+name: lyrical
 
 on:
   pull_request:
     branches:
-      - rolling
+      - lyrical
   push:
     branches:
-      - rolling
+      - lyrical
   schedule:
       - cron: '0 0 * * 6'
   workflow_dispatch:
@@ -14,19 +14,19 @@ jobs:
   build-and-test:
     runs-on: ubuntu-26.04
     container:
-      image: ghcr.io/ros-tooling/setup-ros-docker/setup-ros-docker-ubuntu-resolute-ros-rolling-ros-base:master
+      image: ghcr.io/ros-tooling/setup-ros-docker/setup-ros-docker-ubuntu-resolute-ros-lyrical-ros-base:master
     steps:
       - name: Repo checkout
         uses: actions/checkout@v6
         with:
-          ref: rolling
+          ref: lyrical
       - name: Install popf deps
         run: apt-get update && apt-get install -y libfl-dev
       - name: build and test
         uses: ros-tooling/action-ros-ci@0.4.8
         with:
           package-name: plansys2_bt_example plansys2_cascade_example plansys2_multidomain_example plansys2_patrol_navigation_example plansys2_simple_example plansys2_simple_example_py
-          target-ros2-distro: rolling
+          target-ros2-distro: lyrical
           vcs-repo-file-url: ${GITHUB_WORKSPACE}/plansys2.repos
           colcon-defaults: |
             {

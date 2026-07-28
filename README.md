@@ -7,6 +7,9 @@ Examples for https://github.com/PlanSys2/ros2_planning_system .
 Status](https://github.com/PlanSys2/ros2_planning_system_examples/workflows/rolling/badge.svg)](https://github.com/PlanSys2/ros2_planning_system_examples)
 
 [![GitHub Action
+Status](https://github.com/PlanSys2/ros2_planning_system_examples/workflows/lyrical/badge.svg)](https://github.com/PlanSys2/ros2_planning_system_examples)
+
+[![GitHub Action
 Status](https://github.com/PlanSys2/ros2_planning_system_examples/workflows/kilted/badge.svg)](https://github.com/PlanSys2/ros2_planning_system_examples)
 
 [![GitHub Action
