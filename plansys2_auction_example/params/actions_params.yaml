@@ -1,0 +1,53 @@
+move_action_node:
+  ros__parameters:
+    waypoints:
+      - "wp1"
+      - "wp2"
+      - "wp3"
+      - "wp4"
+      - "wp_control"
+    wp1:
+      x: 0.0
+      y: -2.0
+    wp2:
+      x: 1.8
+      y: 0.0
+    wp3:
+      x: 0.0
+      y: 2.0
+    wp4:
+      x: -0.5
+      y: -0.5
+    wp_control:
+      x: -2.0
+      y: -0.4
+
+move_action_node1:
+  ros__parameters:
+    waypoints:
+      - "wp1"
+      - "wp2"
+      - "wp3"
+      - "wp4"
+      - "wp_control"
+    wp1:
+      x: -1.95
+      y: 0.29
+    wp2:
+      x: -1.77
+      y: 0.54
+    wp3:
+      x: -1.91
+      y: -0.021
+    wp4:
+      x: -0.5
+      y: -0.5
+    wp_control:
+      x: -2.0
+      y: -0.4
+
+
+# move_action_node:
+#   ros__parameters:
+#     waypoints:
+#       - {name: "wp1", x: 1.1, y: 2.1}

@@ -24,7 +24,7 @@ namespace plansys2_bt_example
 
 ApproachObject::ApproachObject(
   const std::string & xml_tag_name,
-  const BT::NodeConfiguration & conf)
+  const BT::NodeConfig & conf)
 : BT::ActionNodeBase(xml_tag_name, conf), counter_(0)
 {
 }

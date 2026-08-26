@@ -28,7 +28,7 @@ class ApproachObject : public BT::ActionNodeBase
 public:
   explicit ApproachObject(
     const std::string & xml_tag_name,
-    const BT::NodeConfiguration & conf);
+    const BT::NodeConfig & conf);
 
   void halt();
   BT::NodeStatus tick();
