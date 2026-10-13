@@ -3,6 +3,10 @@ repositories:
     type: git
     url: https://github.com/fmrico/cascade_lifecycle.git
     version: rolling-devel
+  kairos:
+    type: git
+    url: https://github.com/PlanSys2/kairos.git
+    version: main
   ros2_planning_system:
     type: git
     url: https://github.com/PlanSys2/ros2_planning_system.git
