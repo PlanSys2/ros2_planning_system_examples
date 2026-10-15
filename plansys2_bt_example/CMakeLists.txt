@@ -79,6 +79,25 @@ target_link_libraries(assemble_controller_node
   rclcpp_action::rclcpp_action
 )
 
+add_executable(timed_action_node src/timed_action_node.cpp)
+target_link_libraries(timed_action_node
+  PRIVATE
+  rclcpp::rclcpp
+  plansys2_executor::plansys2_executor
+)
+
+add_executable(assemble_arm_controller_node src/assemble_arm_controller_node.cpp)
+target_link_libraries(assemble_arm_controller_node
+  PRIVATE
+  plansys2_domain_expert::plansys2_domain_expert
+  plansys2_executor::plansys2_executor
+  ${plansys2_msgs_TARGETS}
+  plansys2_pddl_parser::plansys2_pddl_parser
+  plansys2_planner::plansys2_planner
+  plansys2_problem_expert::plansys2_problem_expert
+  rclcpp::rclcpp
+)
+
 add_executable(nav2_sim_node src/nav2_sim_node.cpp)
 target_include_directories(nav2_sim_node PRIVATE
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
@@ -108,6 +127,7 @@ install(TARGETS ${plugin_libs}
 )
 
 install(TARGETS assemble_action_node assemble_controller_node nav2_sim_node
+  timed_action_node assemble_arm_controller_node
   RUNTIME DESTINATION lib/${PROJECT_NAME}
 )
 

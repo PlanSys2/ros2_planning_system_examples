@@ -100,3 +100,31 @@ $HOME/dev_ws/build/groot/Groot --mode monitor --publisher_port 2666 --server_por
 NOTE: best way is to run commands above just after you have followed the instructions as mentioned in `In terminal 3`.
 
 ![groot](groot.png)
+
+## Variant: assembly with arms, to analyze parallel execution
+
+`pddl/bt_arm_example.pddl` splits each trip into a long `move` and a short `approach`, and adds
+an arm preparation before each pick (`prepare_pick`) and each release (`prepare_release`). The
+preparation needs `(heading ?r ?z)`, which the **start** of `approach` makes true and which stays
+true until the robot leaves, so the plan prepares the arm during the approach.
+
+The executor turns the plan into a behavior tree with a BT builder:
+
+* `SimpleBTBuilder` only waits for actions to **end**: it prepares the arm after the approach.
+* `STNBTBuilder` follows the plan's time network, start and end of each action: it prepares the
+  arm while the robot approaches.
+
+Both complete the plan; the difference is how much of it runs in parallel. Navigation is
+simulated (`nav2_sim_node`), so no Nav2 is needed:
+
+```
+ros2 launch plansys2_bt_example plansys2_bt_arm_example_launch.py bt_builder:=stn  # or simple
+ros2 run plansys2_bt_example assemble_arm_controller_node --ros-args -p cars:=3
+```
+
+The controller reports the planned and the actual time:
+
+```
+Plan with 25 actions, 35.0 s planned
+Plan succesfully finished in 40.2 s
+```
