@@ -200,7 +200,7 @@ public:
               plansys2_msgs::action::ExecutePlan::Result::SUCCESS &&
               executor_client_->start_plan_execution(plan.value()))
             {
-              state_ = PATROL_WP2;
+              state_ = PATROL_WP3;
             }
           }
         }
@@ -258,7 +258,7 @@ public:
               plansys2_msgs::action::ExecutePlan::Result::SUCCESS &&
               executor_client_->start_plan_execution(plan.value()))
             {
-              state_ = PATROL_WP2;
+              state_ = PATROL_WP4;
             }
           }
         }
@@ -316,7 +316,7 @@ public:
               plansys2_msgs::action::ExecutePlan::Result::SUCCESS &&
               executor_client_->start_plan_execution(plan.value()))
             {
-              state_ = PATROL_WP2;
+              state_ = PATROL_WP1;
             }
           }
         }
