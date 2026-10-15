@@ -148,21 +148,31 @@ public:
         "(and(car_assembled car_1) (car_assembled car_2) (car_assembled car_3))"));
   }
 
-  void step()
+  // Returns false once the plan is over
+  bool step()
   {
-    if (!executor_client_->execute_and_check_plan()) {  // Plan finished
-      switch (executor_client_->getResult().value().result) {
-        case plansys2_msgs::action::ExecutePlan::Result::SUCCESS:
-          RCLCPP_INFO(get_logger(), "Plan succesfully finished");
-          break;
-        case plansys2_msgs::action::ExecutePlan::Result::PREEMPT:
-          RCLCPP_INFO(get_logger(), "Plan preempted");
-          break;
-        case plansys2_msgs::action::ExecutePlan::Result::FAILURE:
-          RCLCPP_ERROR(get_logger(), "Plan finished with error");
-          break;
-      }
+    if (executor_client_->execute_and_check_plan()) {
+      return true;
     }
+
+    auto result = executor_client_->getResult();
+    if (!result.has_value()) {  // The executor is gone, e.g. PlanSys2 stopped
+      RCLCPP_ERROR(get_logger(), "Plan finished without result");
+      return false;
+    }
+
+    switch (result.value().result) {
+      case plansys2_msgs::action::ExecutePlan::Result::SUCCESS:
+        RCLCPP_INFO(get_logger(), "Plan succesfully finished");
+        break;
+      case plansys2_msgs::action::ExecutePlan::Result::PREEMPT:
+        RCLCPP_INFO(get_logger(), "Plan preempted");
+        break;
+      case plansys2_msgs::action::ExecutePlan::Result::FAILURE:
+        RCLCPP_ERROR(get_logger(), "Plan finished with error");
+        break;
+    }
+    return false;
   }
 
 private:
@@ -185,9 +195,7 @@ int main(int argc, char ** argv)
   exec.add_node(node->get_node_base_interface());
 
   rclcpp::Rate rate(5);
-  while (rclcpp::ok()) {
-    node->step();
-
+  while (rclcpp::ok() && node->step()) {
     rate.sleep();
     exec.spin_some();
   }

@@ -15,6 +15,7 @@
 # limitations under the License.
 
 import rclpy
+from rclpy.executors import ExternalShutdownException
 from rclpy.parameter import Parameter, ParameterType
 
 from plansys2_support_py.ActionExecutorClient import ActionExecutorClient
@@ -44,9 +45,13 @@ def main(args=None):
 
     node.trigger_configure()
 
-    rclpy.spin(node)
+    try:
+        rclpy.spin(node)
+    except (KeyboardInterrupt, ExternalShutdownException):
+        pass  # Ctrl-C
 
-    rclpy.shutdown()
+    node.destroy_node()
+    rclpy.try_shutdown()
 
 if __name__ == '__main__':
     main()
