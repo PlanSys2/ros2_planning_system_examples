@@ -29,7 +29,7 @@ This simulates EasyNav: each navigation takes 10 s, for several robots at once.
 
 ```bash
 source install/setup.bash
-ros2 launch plansys2_bt_example plansys2_bt_example_launch.py
+ros2 launch plansys2_bt_example plansys2_bt_example.launch.yaml
 ```
 
 ### In terminal 3:
@@ -107,7 +107,7 @@ simulated: the launcher starts its own `easynav_sim_node` (do not run another on
 a robot nor EasyNav has to run:
 
 ```
-ros2 launch plansys2_bt_example plansys2_bt_arm_example_launch.py bt_builder:=stn  # or simple
+ros2 launch plansys2_bt_example plansys2_bt_arm_example.launch.yaml bt_builder:=stn  # or simple
 ros2 run plansys2_bt_example assemble_arm_controller_node --ros-args -p cars:=3
 ```
 

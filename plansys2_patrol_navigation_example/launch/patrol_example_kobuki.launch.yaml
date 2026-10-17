@@ -24,7 +24,7 @@ launch:
     - {name: gui, value: $(var gui)}
     - {name: rviz, value: $(var rviz)}
 - include:
-    file: $(find-pkg-share plansys2_patrol_navigation_example)/launch/patrol_example_launch.py
+    file: $(find-pkg-share plansys2_patrol_navigation_example)/launch/patrol_example.launch.yaml
 # Once PlanSys2 and EasyNav are up
 - timer:
     period: 20.0

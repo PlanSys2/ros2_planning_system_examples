@@ -17,7 +17,7 @@ The patrolling_controller_node node must be run separately. Use the PlanSys2 API
 In terminal 1:
 
 ```
-ros2 launch plansys2_patrol_navigation_example patrol_example_fakesim_launch.py
+ros2 launch plansys2_patrol_navigation_example patrol_example_fakesim.launch.yaml
 ```
 
 In terminal 2:
@@ -45,7 +45,7 @@ ros2 launch easynav_playground_kobuki easynav_costmap_rpp.launch.yaml
 In terminal 2 (`waypoints_file` sets the waypoints for another map):
 
 ```
-ros2 launch plansys2_patrol_navigation_example patrol_example_launch.py
+ros2 launch plansys2_patrol_navigation_example patrol_example.launch.yaml
 ```
 
 In terminal 3:

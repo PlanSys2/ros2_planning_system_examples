@@ -1,0 +1,251 @@
+# Copyright 2026 Intelligent Robotics Lab
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Assembly with arms: the same plan executed with SimpleBTBuilder or STNBTBuilder
+# (bt_builder:=simple|stn) to compare how each one parallelizes it.
+
+launch:
+- arg:
+    name: namespace
+    default: ''
+    description: Namespace
+- arg:
+    name: bt_builder
+    default: simple
+    description: 'Behavior tree builder that executes the plan: simple or stn'
+- include:
+    file: $(find-pkg-share plansys2_bringup)/launch/plansys2_bringup_launch_monolithic.py
+    arg:
+    - {name: model_file, value: $(find-pkg-share plansys2_bt_example)/pddl/bt_arm_example.pddl}
+    - {name: namespace, value: $(var namespace)}
+    - {name: params_file, value: $(find-pkg-share plansys2_bt_example)/config/plansys2_arm_$(var bt_builder).yaml}
+# Navigation is simulated: neither a robot nor EasyNav has to run
+- node:
+    pkg: plansys2_bt_example
+    exec: easynav_sim_node
+    namespace: $(var namespace)
+    output: screen
+# Performers of robot 1; timed actions last as in the domain, in seconds
+- node:
+    pkg: plansys2_bt_actions
+    exec: bt_action_node
+    name: move_1
+    namespace: $(var namespace)
+    output: screen
+    param:
+    - from: $(find-pkg-share plansys2_bt_example)/config/params.yaml
+    - {name: action_name, value: move}
+    - {name: bt_xml_file, value: $(find-pkg-share plansys2_bt_example)/behavior_trees_xml/move.xml}
+- node:
+    pkg: plansys2_bt_example
+    exec: timed_action_node
+    name: approach_1
+    namespace: $(var namespace)
+    output: screen
+    param:
+    - {name: action_name, value: approach}
+    - {name: duration, value: 3.0}
+    - {name: rate, value: 10.0}
+- node:
+    pkg: plansys2_bt_example
+    exec: timed_action_node
+    name: prepare_pick_1
+    namespace: $(var namespace)
+    output: screen
+    param:
+    - {name: action_name, value: prepare_pick}
+    - {name: duration, value: 3.0}
+    - {name: rate, value: 10.0}
+- node:
+    pkg: plansys2_bt_example
+    exec: timed_action_node
+    name: pick_1
+    namespace: $(var namespace)
+    output: screen
+    param:
+    - {name: action_name, value: pick}
+    - {name: duration, value: 2.0}
+    - {name: rate, value: 10.0}
+- node:
+    pkg: plansys2_bt_example
+    exec: timed_action_node
+    name: prepare_release_1
+    namespace: $(var namespace)
+    output: screen
+    param:
+    - {name: action_name, value: prepare_release}
+    - {name: duration, value: 3.0}
+    - {name: rate, value: 10.0}
+- node:
+    pkg: plansys2_bt_example
+    exec: timed_action_node
+    name: release_1
+    namespace: $(var namespace)
+    output: screen
+    param:
+    - {name: action_name, value: release}
+    - {name: duration, value: 2.0}
+    - {name: rate, value: 10.0}
+- node:
+    pkg: plansys2_bt_example
+    exec: timed_action_node
+    name: assemble_1
+    namespace: $(var namespace)
+    output: screen
+    param:
+    - {name: action_name, value: assemble}
+    - {name: duration, value: 5.0}
+    - {name: rate, value: 10.0}
+# Performers of robot 2; timed actions last as in the domain, in seconds
+- node:
+    pkg: plansys2_bt_actions
+    exec: bt_action_node
+    name: move_2
+    namespace: $(var namespace)
+    output: screen
+    param:
+    - from: $(find-pkg-share plansys2_bt_example)/config/params.yaml
+    - {name: action_name, value: move}
+    - {name: bt_xml_file, value: $(find-pkg-share plansys2_bt_example)/behavior_trees_xml/move.xml}
+- node:
+    pkg: plansys2_bt_example
+    exec: timed_action_node
+    name: approach_2
+    namespace: $(var namespace)
+    output: screen
+    param:
+    - {name: action_name, value: approach}
+    - {name: duration, value: 3.0}
+    - {name: rate, value: 10.0}
+- node:
+    pkg: plansys2_bt_example
+    exec: timed_action_node
+    name: prepare_pick_2
+    namespace: $(var namespace)
+    output: screen
+    param:
+    - {name: action_name, value: prepare_pick}
+    - {name: duration, value: 3.0}
+    - {name: rate, value: 10.0}
+- node:
+    pkg: plansys2_bt_example
+    exec: timed_action_node
+    name: pick_2
+    namespace: $(var namespace)
+    output: screen
+    param:
+    - {name: action_name, value: pick}
+    - {name: duration, value: 2.0}
+    - {name: rate, value: 10.0}
+- node:
+    pkg: plansys2_bt_example
+    exec: timed_action_node
+    name: prepare_release_2
+    namespace: $(var namespace)
+    output: screen
+    param:
+    - {name: action_name, value: prepare_release}
+    - {name: duration, value: 3.0}
+    - {name: rate, value: 10.0}
+- node:
+    pkg: plansys2_bt_example
+    exec: timed_action_node
+    name: release_2
+    namespace: $(var namespace)
+    output: screen
+    param:
+    - {name: action_name, value: release}
+    - {name: duration, value: 2.0}
+    - {name: rate, value: 10.0}
+- node:
+    pkg: plansys2_bt_example
+    exec: timed_action_node
+    name: assemble_2
+    namespace: $(var namespace)
+    output: screen
+    param:
+    - {name: action_name, value: assemble}
+    - {name: duration, value: 5.0}
+    - {name: rate, value: 10.0}
+# Performers of robot 3; timed actions last as in the domain, in seconds
+- node:
+    pkg: plansys2_bt_actions
+    exec: bt_action_node
+    name: move_3
+    namespace: $(var namespace)
+    output: screen
+    param:
+    - from: $(find-pkg-share plansys2_bt_example)/config/params.yaml
+    - {name: action_name, value: move}
+    - {name: bt_xml_file, value: $(find-pkg-share plansys2_bt_example)/behavior_trees_xml/move.xml}
+- node:
+    pkg: plansys2_bt_example
+    exec: timed_action_node
+    name: approach_3
+    namespace: $(var namespace)
+    output: screen
+    param:
+    - {name: action_name, value: approach}
+    - {name: duration, value: 3.0}
+    - {name: rate, value: 10.0}
+- node:
+    pkg: plansys2_bt_example
+    exec: timed_action_node
+    name: prepare_pick_3
+    namespace: $(var namespace)
+    output: screen
+    param:
+    - {name: action_name, value: prepare_pick}
+    - {name: duration, value: 3.0}
+    - {name: rate, value: 10.0}
+- node:
+    pkg: plansys2_bt_example
+    exec: timed_action_node
+    name: pick_3
+    namespace: $(var namespace)
+    output: screen
+    param:
+    - {name: action_name, value: pick}
+    - {name: duration, value: 2.0}
+    - {name: rate, value: 10.0}
+- node:
+    pkg: plansys2_bt_example
+    exec: timed_action_node
+    name: prepare_release_3
+    namespace: $(var namespace)
+    output: screen
+    param:
+    - {name: action_name, value: prepare_release}
+    - {name: duration, value: 3.0}
+    - {name: rate, value: 10.0}
+- node:
+    pkg: plansys2_bt_example
+    exec: timed_action_node
+    name: release_3
+    namespace: $(var namespace)
+    output: screen
+    param:
+    - {name: action_name, value: release}
+    - {name: duration, value: 2.0}
+    - {name: rate, value: 10.0}
+- node:
+    pkg: plansys2_bt_example
+    exec: timed_action_node
+    name: assemble_3
+    namespace: $(var namespace)
+    output: screen
+    param:
+    - {name: action_name, value: assemble}
+    - {name: duration, value: 5.0}
+    - {name: rate, value: 10.0}
