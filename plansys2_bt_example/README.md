@@ -9,30 +9,21 @@ This example shows how to use Behavior Trees to carry out the tasks that an acti
 See https://github.com/IntelligentRoboticsLabs/ros2_planning_system/pull/27 for details.
 
 ## Prerequisites
-```bash
-sudo apt-get install ros-humble-turtlebot3*
-```
+
+Navigation uses [EasyNav](https://easynavigation.github.io): the `Move` BT node sends its goals
+with `easynav_system::GoalManagerClient`. Without EasyNav, the package is built without `Move`
+and `easynav_sim_node`.
 
 ## How to run
 
 ### In terminal 1:
 
 ```bash
-export GAZEBO_MODEL_PATH=$GAZEBO_MODEL_PATH:/opt/ros/humble/share/turtlebot3_gazebo/models
-export TURTLEBOT3_MODEL=waffle
-source /usr/share/gazebo/setup.sh
 source install/setup.bash
-ros2 launch nav2_bringup tb3_simulation_launch.py headless:=False
+ros2 run plansys2_bt_example easynav_sim_node
 ```
 
-This launches Navigation2. Use rviz to set the robot position, as shown here:
-
- ![nav2 start](nav2_init.png)
-
-Or use the commandline (e.g. in terminal 2):
-```bash
-ros2 topic pub --once /initialpose geometry_msgs/msg/PoseWithCovarianceStamped "{header: {stamp: {sec: 0, nanosec: 0}, frame_id: 'map'}, pose:{pose: {position: {x: -2.0, y: -0.5, z: 0.01}, orientation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}}}}"
-```
+This simulates EasyNav: each navigation takes 10 s, for several robots at once.
 
 ### In terminal 2:
 
@@ -47,9 +38,6 @@ There are two options in this example. First option is to use the plansys2 termi
 
 ```bash
 source install/setup.bash
-
-# before you run the commands below, it seems the starting location must be different to prevent an error
-ros2 topic pub --times 3 /goal_pose geometry_msgs/PoseStamped "{header: {stamp: {sec: 0}, frame_id: 'map'}, pose: {position: {x: -0.4, y: 0.4, z: 0.01}, orientation: {w: 0.0}}}"
 
 ros2 run plansys2_terminal plansys2_terminal
 ```
@@ -115,7 +103,8 @@ The executor turns the plan into a behavior tree with a BT builder:
   arm while the robot approaches.
 
 Both complete the plan; the difference is how much of it runs in parallel. Navigation is
-simulated (`nav2_sim_node`), so no Nav2 is needed:
+simulated: the launcher starts its own `easynav_sim_node` (do not run another one), so neither
+a robot nor EasyNav has to run:
 
 ```
 ros2 launch plansys2_bt_example plansys2_bt_arm_example_launch.py bt_builder:=stn  # or simple

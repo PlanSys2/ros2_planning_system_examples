@@ -17,7 +17,9 @@
   <depend>rclcpp_action</depend>
   <depend>geometry_msgs</depend>
   <depend>tf2_geometry_msgs</depend>
-  <depend>nav2_msgs</depend>
+  <!-- Optional: without EasyNav, the navigation parts are not built -->
+  <depend>easynav_interfaces</depend>
+  <depend>easynav_system</depend>
   <depend>plansys2_msgs</depend>
   <depend>plansys2_domain_expert</depend>
   <depend>plansys2_executor</depend>

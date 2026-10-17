@@ -4,7 +4,6 @@ project(plansys2_patrol_navigation_example)
 find_package(ament_cmake REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(lifecycle_msgs REQUIRED)
-find_package(nav2_msgs REQUIRED)
 find_package(plansys2_domain_expert REQUIRED)
 find_package(plansys2_executor REQUIRED)
 find_package(plansys2_msgs REQUIRED)
@@ -14,15 +13,25 @@ find_package(plansys2_problem_expert REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_action REQUIRED)
 
-add_executable(move_action_node src/move_action_node.cpp)
-target_link_libraries(move_action_node
-  PRIVATE
-  ${geometry_msgs_TARGETS}
-  ${nav2_msgs_TARGETS}
-  plansys2_executor::plansys2_executor
-  rclcpp::rclcpp
-  rclcpp_action::rclcpp_action
-)
+# Navigation with EasyNav is optional: without it, move_action_node is not built
+find_package(easynav_interfaces QUIET)
+find_package(easynav_system QUIET)
+if(easynav_system_FOUND AND easynav_interfaces_FOUND)
+  add_executable(move_action_node src/move_action_node.cpp)
+  target_link_libraries(move_action_node
+    PRIVATE
+    ${easynav_interfaces_TARGETS}
+    easynav_system::easynav_system
+    ${geometry_msgs_TARGETS}
+    plansys2_executor::plansys2_executor
+    rclcpp::rclcpp
+  )
+  install(TARGETS move_action_node
+    RUNTIME DESTINATION lib/${PROJECT_NAME}
+  )
+else()
+  message(WARNING "EasyNav not found: move_action_node is not built")
+endif()
 
 add_executable(patrol_action_node src/patrol_action_node.cpp)
 target_link_libraries(patrol_action_node
@@ -52,7 +61,6 @@ install(DIRECTORY launch pddl params
 )
 
 install(TARGETS
-  move_action_node
   patrol_action_node
   patrolling_controller_node
   RUNTIME DESTINATION lib/${PROJECT_NAME}
@@ -67,7 +75,6 @@ endif()
 
 ament_export_dependencies(
   lifecycle_msgs
-  nav2_msgs
   plansys2_domain_expert
   plansys2_executor
   plansys2_msgs

@@ -34,12 +34,11 @@ def generate_launch_description():
         launch_arguments={'model_file': example_dir + '/pddl/patrol.pddl'}.items()
         )
 
-    fake_nav2_cmd = Node(
+    # Simulated EasyNav: each navigation takes 10 s
+    easynav_sim_cmd = Node(
         package='plansys2_bt_example',
-        executable='nav2_sim_node',
-        name='nav2_sim_node',
-        output='screen',
-        parameters=[])
+        executable='easynav_sim_node',
+        output='screen')
 
     # Specify the actions
     move_cmd = Node(
@@ -47,7 +46,7 @@ def generate_launch_description():
         executable='move_action_node',
         name='move_action_node',
         output='screen',
-        parameters=[])
+        parameters=[example_dir + '/params/waypoints_fakesim.yaml'])
 
     patrol_cmd = Node(
         package='plansys2_patrol_navigation_example',
@@ -61,7 +60,7 @@ def generate_launch_description():
 
     # Declare the launch options
     ld.add_action(plansys2_cmd)
-    ld.add_action(fake_nav2_cmd)
+    ld.add_action(easynav_sim_cmd)
 
     ld.add_action(move_cmd)
     ld.add_action(patrol_cmd)

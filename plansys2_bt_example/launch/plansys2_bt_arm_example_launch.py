@@ -63,10 +63,10 @@ def generate_launch_description():
     ld.add_action(declare_namespace_cmd)
     ld.add_action(declare_bt_builder_cmd)
     ld.add_action(plansys2_cmd)
-    # Navigation is simulated: no Nav2 needed
+    # Navigation is simulated: neither a robot nor EasyNav has to run
     ld.add_action(Node(
         package='plansys2_bt_example',
-        executable='nav2_sim_node',
+        executable='easynav_sim_node',
         namespace=namespace,
         output='screen'))
 
@@ -83,8 +83,6 @@ def generate_launch_description():
                 {
                     'action_name': 'move',
                     'bt_xml_file': example_dir + '/behavior_trees_xml/move.xml',
-                    # Many nodes here: discovering navigate_to_pose can take over 1 s
-                    'wait_for_service_timeout': 5000,
                 }
             ]))
         for action, duration in TIMED_ACTIONS.items():
