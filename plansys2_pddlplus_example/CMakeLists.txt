@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.16)
 project(plansys2_pddlplus_example)
 
 find_package(ament_cmake REQUIRED)
+find_package(ament_index_cpp REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(plansys2_domain_expert REQUIRED)
 find_package(plansys2_executor REQUIRED)
@@ -19,6 +20,7 @@ target_link_libraries(timed_action_node
 add_executable(greenhouse_controller_node src/greenhouse_controller_node.cpp)
 target_link_libraries(greenhouse_controller_node
   PRIVATE
+  ament_index_cpp::ament_index_cpp
   plansys2_domain_expert::plansys2_domain_expert
   plansys2_executor::plansys2_executor
   plansys2_planner::plansys2_planner

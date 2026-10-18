@@ -16,9 +16,12 @@
 // do meanwhile: the battery, the level of the cistern and the temperature of the nursery.
 // Ends with 0 if the goal holds at the end of the plan
 
+#include <fstream>
 #include <memory>
+#include <sstream>
 #include <string>
 
+#include "ament_index_cpp/get_package_share_path.hpp"
 #include "plansys2_domain_expert/DomainExpertClient.hpp"
 #include "plansys2_executor/ExecutorClient.hpp"
 #include "plansys2_pddl_parser/Utils.hpp"
@@ -44,9 +47,14 @@ public:
     auto planner = std::make_shared<plansys2::PlannerClient>();
     auto executor = std::make_shared<plansys2::ExecutorClient>();
 
-    // The problem comes with the problem expert, from its problem_file
-    while (rclcpp::ok() && problem->getGoal().nodes.empty()) {
-      RCLCPP_INFO(get_logger(), "Waiting for the problem...");
+    // The world evolves from the moment the problem is there: it starts now, as it is in the file
+    const auto file = ament_index_cpp::get_package_share_path("plansys2_pddlplus_example") /
+      "pddl" / "watering.pddl";
+    std::ifstream in(file);
+    std::stringstream text;
+    text << in.rdbuf();
+    while (rclcpp::ok() && !(problem->clearKnowledge() && problem->addProblem(text.str()))) {
+      RCLCPP_INFO(get_logger(), "Waiting for the problem expert...");
       rclcpp::sleep_for(500ms);
     }
 

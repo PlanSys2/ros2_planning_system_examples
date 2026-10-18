@@ -20,6 +20,9 @@ ros2 launch plansys2_pddlplus_example plansys2_pddlplus_example.launch.yaml
 ros2 run plansys2_pddlplus_example greenhouse_controller_node
 ```
 
+The controller loads `watering.pddl` each time it runs: the nursery warms up from the moment the
+problem is there, so it starts from the beginning however long the system has been up.
+
 ## How PlanSys2 executes it
 
 - The problem expert runs the dynamics: each step, the processes whose precondition holds and

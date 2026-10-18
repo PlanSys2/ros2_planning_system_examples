@@ -21,7 +21,6 @@ launch:
     file: $(find-pkg-share plansys2_bringup)/launch/plansys2_bringup_launch_monolithic.py
     arg:
     - {name: model_file, value: $(find-pkg-share plansys2_pddlplus_example)/pddl/greenhouse.pddl}
-    - {name: problem_file, value: $(find-pkg-share plansys2_pddlplus_example)/pddl/watering.pddl}
     - {name: namespace, value: $(var namespace)}
 - node:
     pkg: plansys2_pddlplus_example
