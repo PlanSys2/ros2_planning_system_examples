@@ -17,6 +17,10 @@ launch:
     name: namespace
     default: ''
     description: Namespace
+- arg:
+    name: recharge_fails_at
+    default: '-1.0'
+    description: The first recharge fails at this fraction of its duration (negative, never)
 - include:
     file: $(find-pkg-share plansys2_bringup)/launch/plansys2_bringup_launch_monolithic.py
     arg:
@@ -38,6 +42,7 @@ launch:
     output: screen
     param:
     - {name: action_name, value: recharge}
+    - {name: fail_once_at, value: $(var recharge_fails_at)}
 - node:
     pkg: plansys2_pddlplus_example
     exec: timed_action_node
@@ -54,3 +59,36 @@ launch:
     output: screen
     param:
     - {name: action_name, value: open_window}
+- node:
+    pkg: plansys2_pddlplus_example
+    exec: timed_action_node
+    name: pick_tool_action_node
+    namespace: $(var namespace)
+    output: screen
+    param:
+    - {name: action_name, value: pick_tool}
+- node:
+    pkg: plansys2_pddlplus_example
+    exec: timed_action_node
+    name: plug_action_node
+    namespace: $(var namespace)
+    output: screen
+    param:
+    - {name: action_name, value: plug}
+- node:
+    pkg: plansys2_pddlplus_example
+    exec: timed_action_node
+    name: tend_action_node
+    namespace: $(var namespace)
+    output: screen
+    param:
+    - {name: action_name, value: tend}
+# The plan tends both plants at once
+- node:
+    pkg: plansys2_pddlplus_example
+    exec: timed_action_node
+    name: tend_action_node_2
+    namespace: $(var namespace)
+    output: screen
+    param:
+    - {name: action_name, value: tend}

@@ -19,7 +19,7 @@ import unittest
 
 from ament_index_python.packages import get_package_share_directory
 import launch
-from launch.actions import IncludeLaunchDescription
+from launch.actions import IncludeLaunchDescription, SetEnvironmentVariable
 from launch.launch_description_sources import AnyLaunchDescriptionSource
 from launch_ros.actions import Node
 import launch_testing
@@ -39,7 +39,10 @@ def generate_test_description():
         package='plansys2_pddlplus_example', executable='greenhouse_controller_node',
         output='screen')
     return (
-        launch.LaunchDescription([example, controller, launch_testing.actions.ReadyToTest()]),
+        launch.LaunchDescription([
+            # A domain of its own: what another test left shutting down does not answer here
+            SetEnvironmentVariable('ROS_DOMAIN_ID', str(110 + os.getpid() % 100)),
+            example, controller, launch_testing.actions.ReadyToTest()]),
         {'controller': controller})
 
 

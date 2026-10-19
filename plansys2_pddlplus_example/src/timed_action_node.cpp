@@ -13,7 +13,8 @@
 // limitations under the License.
 
 // A performer of any action: it lasts what the plan gives it, so a durative action acts
-// for all of its planned duration, and a non-durative one ends at once
+// for all of its planned duration, and a non-durative one ends at once. With fail_once_at, its
+// first execution fails at that fraction of its duration
 
 #include <memory>
 #include <string>
@@ -29,6 +30,7 @@ public:
   : plansys2::ActionExecutorClient("timed_action")
   {
     set_parameter({"rate", 10.0});
+    declare_parameter("fail_once_at", -1.0);
   }
 
   rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
@@ -43,6 +45,12 @@ private:
   {
     const double planned = get_planned_duration();
     const double elapsed = (now() - started_).seconds();
+    const double fail_at = get_parameter("fail_once_at").as_double();
+    if (!failed_ && fail_at >= 0.0 && elapsed >= fail_at * planned) {
+      failed_ = true;
+      finish(false, elapsed / planned, "failure injected");
+      return;
+    }
     if (elapsed >= planned) {
       finish(true, 1.0, "done");
     } else {
@@ -51,6 +59,7 @@ private:
   }
 
   rclcpp::Time started_;
+  bool failed_ {false};
 };
 
 int main(int argc, char ** argv)
