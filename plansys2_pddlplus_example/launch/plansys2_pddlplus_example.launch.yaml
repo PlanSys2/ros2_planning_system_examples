@@ -1,0 +1,94 @@
+# Copyright 2026 Intelligent Robotics Lab
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+launch:
+- arg:
+    name: namespace
+    default: ''
+    description: Namespace
+- arg:
+    name: recharge_fails_at
+    default: '-1.0'
+    description: The first recharge fails at this fraction of its duration (negative, never)
+- include:
+    file: $(find-pkg-share plansys2_bringup)/launch/plansys2_bringup_launch_monolithic.py
+    arg:
+    - {name: model_file, value: $(find-pkg-share plansys2_pddlplus_example)/pddl/greenhouse.pddl}
+    - {name: namespace, value: $(var namespace)}
+- node:
+    pkg: plansys2_pddlplus_example
+    exec: timed_action_node
+    name: move_action_node
+    namespace: $(var namespace)
+    output: screen
+    param:
+    - {name: action_name, value: move}
+- node:
+    pkg: plansys2_pddlplus_example
+    exec: timed_action_node
+    name: recharge_action_node
+    namespace: $(var namespace)
+    output: screen
+    param:
+    - {name: action_name, value: recharge}
+    - {name: fail_once_at, value: $(var recharge_fails_at)}
+- node:
+    pkg: plansys2_pddlplus_example
+    exec: timed_action_node
+    name: open_valve_action_node
+    namespace: $(var namespace)
+    output: screen
+    param:
+    - {name: action_name, value: open_valve}
+- node:
+    pkg: plansys2_pddlplus_example
+    exec: timed_action_node
+    name: open_window_action_node
+    namespace: $(var namespace)
+    output: screen
+    param:
+    - {name: action_name, value: open_window}
+- node:
+    pkg: plansys2_pddlplus_example
+    exec: timed_action_node
+    name: pick_tool_action_node
+    namespace: $(var namespace)
+    output: screen
+    param:
+    - {name: action_name, value: pick_tool}
+- node:
+    pkg: plansys2_pddlplus_example
+    exec: timed_action_node
+    name: plug_action_node
+    namespace: $(var namespace)
+    output: screen
+    param:
+    - {name: action_name, value: plug}
+- node:
+    pkg: plansys2_pddlplus_example
+    exec: timed_action_node
+    name: tend_action_node
+    namespace: $(var namespace)
+    output: screen
+    param:
+    - {name: action_name, value: tend}
+# The plan tends both plants at once
+- node:
+    pkg: plansys2_pddlplus_example
+    exec: timed_action_node
+    name: tend_action_node_2
+    namespace: $(var namespace)
+    output: screen
+    param:
+    - {name: action_name, value: tend}

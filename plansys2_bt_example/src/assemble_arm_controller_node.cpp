@@ -19,6 +19,9 @@
 #include <memory>
 #include <string>
 
+#include "lifecycle_msgs/msg/state.hpp"
+#include "lifecycle_msgs/srv/get_state.hpp"
+
 #include "plansys2_domain_expert/DomainExpertClient.hpp"
 #include "plansys2_executor/ExecutorClient.hpp"
 #include "plansys2_pddl_parser/Utils.hpp"
@@ -35,12 +38,41 @@ public:
     declare_parameter("cars", 3);
   }
 
+  // Whether the node is active, asked through its lifecycle
+  bool active(const std::string & node)
+  {
+    auto client = create_client<lifecycle_msgs::srv::GetState>(node + "/get_state");
+    if (!client->wait_for_service(std::chrono::seconds(1))) {
+      return false;
+    }
+    auto future = client->async_send_request(
+      std::make_shared<lifecycle_msgs::srv::GetState::Request>());
+    if (rclcpp::spin_until_future_complete(shared_from_this(), future, std::chrono::seconds(1)) !=
+      rclcpp::FutureReturnCode::SUCCESS)
+    {
+      return false;
+    }
+    return future.get()->current_state.id == lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE;
+  }
+
+  // PlanSys2 up before asking it anything: a request while it starts may get no answer
+  void wait_for_plansys2()
+  {
+    for (const auto & node : {"domain_expert", "problem_expert", "planner", "executor"}) {
+      while (rclcpp::ok() && !active(node)) {
+        RCLCPP_INFO(get_logger(), "Waiting for %s...", node);
+        rclcpp::sleep_for(std::chrono::milliseconds(500));
+      }
+    }
+  }
+
   bool init()
   {
     domain_expert_ = std::make_shared<plansys2::DomainExpertClient>();
     planner_client_ = std::make_shared<plansys2::PlannerClient>();
     problem_expert_ = std::make_shared<plansys2::ProblemExpertClient>();
     executor_client_ = std::make_shared<plansys2::ExecutorClient>();
+    wait_for_plansys2();
 
     init_knowledge(get_parameter("cars").as_int());
 
@@ -59,6 +91,10 @@ public:
     }
     RCLCPP_INFO(
       get_logger(), "Plan with %zu actions, %.1f s planned", plan->items.size(), makespan);
+    for (const auto & item : plan->items) {
+      RCLCPP_INFO(
+        get_logger(), "  %7.3f: %s [%.3f]", item.time, item.action.c_str(), item.duration);
+    }
 
     start_ = now();
     if (!executor_client_->start_plan_execution(plan.value())) {
@@ -76,13 +112,16 @@ public:
     }
     auto result = executor_client_->getResult();
     double elapsed = (now() - start_).seconds();
-    if (result && result->result == plansys2_msgs::action::ExecutePlan::Result::SUCCESS) {
+    succeeded_ = result && result->result == plansys2_msgs::action::ExecutePlan::Result::SUCCESS;
+    if (succeeded_) {
       RCLCPP_INFO(get_logger(), "Plan succesfully finished in %.1f s", elapsed);
     } else {
       RCLCPP_ERROR(get_logger(), "Plan finished with error after %.1f s", elapsed);
     }
     return false;
   }
+
+  bool succeeded() const {return succeeded_;}
 
 private:
   void init_knowledge(int cars)
@@ -133,6 +172,7 @@ private:
   std::shared_ptr<plansys2::ProblemExpertClient> problem_expert_;
   std::shared_ptr<plansys2::ExecutorClient> executor_client_;
   rclcpp::Time start_;
+  bool succeeded_ {false};
 };
 
 int main(int argc, char ** argv)
@@ -153,5 +193,6 @@ int main(int argc, char ** argv)
   }
 
   rclcpp::shutdown();
-  return 0;
+  // A test tells by it whether the plan succeeded
+  return node->succeeded() ? 0 : 1;
 }

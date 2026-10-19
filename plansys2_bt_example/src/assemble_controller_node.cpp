@@ -20,6 +20,9 @@
 #include "plansys2_msgs/msg/action_execution_info.hpp"
 #include "plansys2_msgs/msg/plan.hpp"
 
+#include "lifecycle_msgs/msg/state.hpp"
+#include "lifecycle_msgs/srv/get_state.hpp"
+
 #include "plansys2_domain_expert/DomainExpertClient.hpp"
 #include "plansys2_executor/ExecutorClient.hpp"
 #include "plansys2_planner/PlannerClient.hpp"
@@ -36,12 +39,41 @@ public:
   {
   }
 
+  // Whether the node is active, asked through its lifecycle
+  bool active(const std::string & node)
+  {
+    auto client = create_client<lifecycle_msgs::srv::GetState>(node + "/get_state");
+    if (!client->wait_for_service(std::chrono::seconds(1))) {
+      return false;
+    }
+    auto future = client->async_send_request(
+      std::make_shared<lifecycle_msgs::srv::GetState::Request>());
+    if (rclcpp::spin_until_future_complete(shared_from_this(), future, std::chrono::seconds(1)) !=
+      rclcpp::FutureReturnCode::SUCCESS)
+    {
+      return false;
+    }
+    return future.get()->current_state.id == lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE;
+  }
+
+  // PlanSys2 up before asking it anything: a request while it starts may get no answer
+  void wait_for_plansys2()
+  {
+    for (const auto & node : {"domain_expert", "problem_expert", "planner", "executor"}) {
+      while (rclcpp::ok() && !active(node)) {
+        RCLCPP_INFO(get_logger(), "Waiting for %s...", node);
+        rclcpp::sleep_for(std::chrono::milliseconds(500));
+      }
+    }
+  }
+
   bool init()
   {
     domain_expert_ = std::make_shared<plansys2::DomainExpertClient>();
     planner_client_ = std::make_shared<plansys2::PlannerClient>();
     problem_expert_ = std::make_shared<plansys2::ProblemExpertClient>();
     executor_client_ = std::make_shared<plansys2::ExecutorClient>();
+    wait_for_plansys2();
 
     init_knowledge();
 
@@ -163,6 +195,7 @@ public:
 
     switch (result.value().result) {
       case plansys2_msgs::action::ExecutePlan::Result::SUCCESS:
+        succeeded_ = true;
         RCLCPP_INFO(get_logger(), "Plan succesfully finished");
         break;
       case plansys2_msgs::action::ExecutePlan::Result::PREEMPT:
@@ -175,7 +208,10 @@ public:
     return false;
   }
 
+  bool succeeded() const {return succeeded_;}
+
 private:
+  bool succeeded_ {false};
   std::shared_ptr<plansys2::DomainExpertClient> domain_expert_;
   std::shared_ptr<plansys2::PlannerClient> planner_client_;
   std::shared_ptr<plansys2::ProblemExpertClient> problem_expert_;
@@ -188,7 +224,8 @@ int main(int argc, char ** argv)
   auto node = std::make_shared<Assemble>();
 
   if (!node->init()) {
-    return 0;
+    rclcpp::shutdown();
+    return 1;
   }
 
   rclcpp::executors::SingleThreadedExecutor exec;
@@ -202,5 +239,6 @@ int main(int argc, char ** argv)
 
   rclcpp::shutdown();
 
-  return 0;
+  // A test tells by it whether the plan succeeded
+  return node->succeeded() ? 0 : 1;
 }

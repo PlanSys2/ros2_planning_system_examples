@@ -56,6 +56,18 @@ target_link_libraries(patrolling_controller_node
   rclcpp_action::rclcpp_action
 )
 
+add_executable(patrol_waypoints_controller_node src/patrol_waypoints_controller_node.cpp)
+target_link_libraries(patrol_waypoints_controller_node
+  PRIVATE
+  ${lifecycle_msgs_TARGETS}
+  plansys2_executor::plansys2_executor
+  plansys2_domain_expert::plansys2_domain_expert
+  ${plansys2_msgs_TARGETS}
+  plansys2_planner::plansys2_planner
+  plansys2_problem_expert::plansys2_problem_expert
+  rclcpp::rclcpp
+)
+
 install(DIRECTORY launch pddl params
   DESTINATION share/${PROJECT_NAME}
 )
@@ -63,6 +75,7 @@ install(DIRECTORY launch pddl params
 install(TARGETS
   patrol_action_node
   patrolling_controller_node
+  patrol_waypoints_controller_node
   RUNTIME DESTINATION lib/${PROJECT_NAME}
 )
 
@@ -71,6 +84,12 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 
   find_package(ament_cmake_gtest REQUIRED)
+
+  # The example run end to end; it needs the simulated EasyNav
+  if(easynav_system_FOUND AND easynav_interfaces_FOUND)
+    find_package(launch_testing_ament_cmake REQUIRED)
+    add_launch_test(test/test_patrol_waypoints.py TIMEOUT 300)
+  endif()
 endif()
 
 ament_export_dependencies(

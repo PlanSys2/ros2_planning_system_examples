@@ -14,11 +14,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from plansys2_support_py.ActionExecutorClient import ActionExecutorClient
 import rclpy
 from rclpy.executors import ExternalShutdownException
-from rclpy.parameter import Parameter, ParameterType
-
-from plansys2_support_py.ActionExecutorClient import ActionExecutorClient
+from rclpy.parameter import Parameter
 
 
 class ChargeAction(ActionExecutorClient):
@@ -28,14 +27,17 @@ class ChargeAction(ActionExecutorClient):
         self.progress_ = 0.0
 
     def do_work(self):
-        if self.progress_ < 1.0:
-            self.progress_ += 0.05
+        # As long as the plan says it lasts
+        rate = self.get_parameter('rate').value
+        self.progress_ += 1.0 / max(1.0, self.get_planned_duration() * rate)
+        if self.progress_ < 1.0 - 1e-3:
             self.send_feedback(self.progress_, 'Charge running')
         else:
-            self.finish(True, 1.0, 'Charge completed');
+            self.finish(True, 1.0, 'Charge completed')
             self.progress_ = 0.0
-        
+
         self.get_logger().info('charging ... {}'.format(self.progress_))
+
 
 def main(args=None):
     rclpy.init(args=args)
@@ -53,6 +55,6 @@ def main(args=None):
     node.destroy_node()
     rclpy.try_shutdown()
 
+
 if __name__ == '__main__':
     main()
-
