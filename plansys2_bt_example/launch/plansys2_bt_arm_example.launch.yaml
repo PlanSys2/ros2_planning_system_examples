@@ -22,7 +22,7 @@ launch:
     description: Namespace
 - arg:
     name: bt_builder
-    default: simple
+    default: stn
     description: 'Behavior tree builder that executes the plan: simple or stn'
 - include:
     file: $(find-pkg-share plansys2_bringup)/launch/plansys2_bringup_launch_monolithic.py

@@ -12,6 +12,7 @@ find_package(plansys2_pddl_parser REQUIRED)
 find_package(plansys2_planner REQUIRED)
 find_package(plansys2_problem_expert REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(lifecycle_msgs REQUIRED)
 find_package(rclcpp_action REQUIRED)
 find_package(rclcpp_lifecycle REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
@@ -109,6 +110,7 @@ target_include_directories(assemble_controller_node PRIVATE
 )
 target_link_libraries(assemble_controller_node
   PRIVATE
+  ${lifecycle_msgs_TARGETS}
   plansys2_domain_expert::plansys2_domain_expert
   plansys2_executor::plansys2_executor
   ${plansys2_msgs_TARGETS}
@@ -129,6 +131,7 @@ target_link_libraries(timed_action_node
 add_executable(assemble_arm_controller_node src/assemble_arm_controller_node.cpp)
 target_link_libraries(assemble_arm_controller_node
   PRIVATE
+  ${lifecycle_msgs_TARGETS}
   plansys2_domain_expert::plansys2_domain_expert
   plansys2_executor::plansys2_executor
   ${plansys2_msgs_TARGETS}
@@ -164,6 +167,14 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 
   find_package(ament_cmake_gtest REQUIRED)
+
+  # The example run end to end; it needs the simulated EasyNav
+  if(easynav_system_FOUND AND easynav_interfaces_FOUND)
+    find_package(launch_testing_ament_cmake REQUIRED)
+    add_launch_test(test/test_terminal_commands.py TIMEOUT 300)
+    add_launch_test(test/test_assemble_controller.py TIMEOUT 300)
+    add_launch_test(test/test_assemble_arm_controller.py TIMEOUT 900)
+  endif()
 endif()
 
 ament_export_include_directories(include/${PROJECT_NAME})

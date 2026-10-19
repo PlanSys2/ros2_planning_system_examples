@@ -72,7 +72,7 @@ Or use a custom controller:
 
 ```bash
 source install/setup.bash
-$HOME/dev_ws/build/plansys2_bt_example/assemble_controller_node
+ros2 run plansys2_bt_example assemble_controller_node
 ```
 NOTE: this problem domain is different from example entered in the plansys2 terminal.
 
@@ -107,7 +107,7 @@ simulated: the launcher starts its own `easynav_sim_node` (do not run another on
 a robot nor EasyNav has to run:
 
 ```
-ros2 launch plansys2_bt_example plansys2_bt_arm_example.launch.yaml bt_builder:=stn  # or simple
+ros2 launch plansys2_bt_example plansys2_bt_arm_example.launch.yaml  # bt_builder:=simple to compare
 ros2 run plansys2_bt_example assemble_arm_controller_node --ros-args -p cars:=3
 ```
 

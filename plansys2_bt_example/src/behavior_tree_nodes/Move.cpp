@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <algorithm>
 #include <atomic>
 #include <chrono>
 #include <memory>
@@ -190,10 +191,25 @@ Move::onRunning()
       }
       return BT::NodeStatus::RUNNING;
     case State::SENT_PREEMPT:
-    case State::ACCEPTED_AND_NAVIGATING:
       return BT::NodeStatus::RUNNING;
+    case State::ACCEPTED_AND_NAVIGATING:
+      {
+        // Its progress, for the feedback of the action: by distance, or by time without it
+        const auto & feedback = client->get_feedback();
+        double done = feedback.distance_covered;
+        double total = done + feedback.distance_to_goal;
+        if (total <= 0.0) {
+          done = rclcpp::Duration(feedback.navigation_time).seconds();
+          total = done + rclcpp::Duration(feedback.estimated_time_remaining).seconds();
+        }
+        if (total > 0.0) {
+          config().blackboard->set<float>("completion", std::clamp(done / total, 0.0, 1.0));
+        }
+        return BT::NodeStatus::RUNNING;
+      }
     case State::NAVIGATION_FINISHED:
       client->reset();
+      config().blackboard->set<float>("completion", 0.0f);
       return BT::NodeStatus::SUCCESS;
     case State::IDLE:  // Not expected after sending
       return BT::NodeStatus::FAILURE;
