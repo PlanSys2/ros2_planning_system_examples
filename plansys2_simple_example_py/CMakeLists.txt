@@ -43,6 +43,10 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 
   find_package(ament_cmake_gtest REQUIRED)
+
+  # The example run end to end
+  find_package(launch_testing_ament_cmake REQUIRED)
+  add_launch_test(test/test_terminal_commands.py TIMEOUT 300)
 endif()
 
 ament_export_dependencies(
