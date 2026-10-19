@@ -44,7 +44,8 @@ def generate_test_description():
     # The terminal once the executor is active, as one would type
     terminal = ExecuteProcess(
         cmd=['bash', '-c',
-             'until ros2 lifecycle get /executor 2>/dev/null | grep -q "^active"; do sleep 0.5; '
+             'until ros2 lifecycle get --no-daemon /executor 2>/dev/null | grep -q "^active"; '
+             'do sleep 0.5; '
              f'done; ros2 run plansys2_terminal plansys2_terminal < {commands.name}'],
         output='screen')
     return (
