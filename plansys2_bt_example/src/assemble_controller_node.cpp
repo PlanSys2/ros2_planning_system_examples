@@ -13,14 +13,12 @@
 // limitations under the License.
 
 #include <memory>
-#include <thread>
 #include <tuple>
 
 #include "plansys2_pddl_parser/Utils.hpp"
 
 #include "plansys2_msgs/msg/action_execution_info.hpp"
 #include "plansys2_msgs/msg/plan.hpp"
-
 
 #include "plansys2_domain_expert/DomainExpertClient.hpp"
 #include "plansys2_executor/ExecutorClient.hpp"
@@ -37,7 +35,6 @@ public:
   : rclcpp::Node("assembling_controller")
   {
   }
-
 
   bool init()
   {
@@ -80,7 +77,6 @@ public:
     problem_expert_->addInstance(plansys2::Instance{"body_car_zone", "zone"});
     problem_expert_->addInstance(plansys2::Instance{"assembly_zone", "zone"});
     problem_expert_->addInstance(plansys2::Instance{"recharge_zone", "zone"});
-
 
     problem_expert_->addInstance(plansys2::Instance{"wheel_1", "piece"});
     problem_expert_->addInstance(plansys2::Instance{"wheel_2", "piece"});
@@ -194,14 +190,7 @@ int main(int argc, char ** argv)
   rclcpp::init(argc, argv);
   auto node = std::make_shared<Assemble>();
 
-  // Spun from the start in a thread of its own: the clients get their answers from it
-  rclcpp::executors::SingleThreadedExecutor exec;
-  exec.add_node(node->get_node_base_interface());
-  std::thread spinner([&exec]() {exec.spin();});
-
   if (!node->init()) {
-    exec.cancel();
-    spinner.join();
     rclcpp::shutdown();
     return 1;
   }
@@ -211,8 +200,6 @@ int main(int argc, char ** argv)
     rate.sleep();
   }
 
-  exec.cancel();
-  spinner.join();
   rclcpp::shutdown();
 
   // A test tells by it whether the plan succeeded

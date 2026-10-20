@@ -13,7 +13,8 @@ find_package(plansys2_problem_expert REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_action REQUIRED)
 
-# Navigation with EasyNav is optional: without it, move_action_node is not built
+# Navigation with EasyNav is optional: without it, move_action_node and
+# patrolling_controller_node (it shows the feedback of EasyNav) are not built
 find_package(easynav_interfaces QUIET)
 find_package(easynav_system QUIET)
 if(easynav_system_FOUND AND easynav_interfaces_FOUND)
@@ -26,11 +27,25 @@ if(easynav_system_FOUND AND easynav_interfaces_FOUND)
     plansys2_executor::plansys2_executor
     rclcpp::rclcpp
   )
-  install(TARGETS move_action_node
+
+  add_executable(patrolling_controller_node src/patrolling_controller_node.cpp)
+  target_link_libraries(patrolling_controller_node
+    PRIVATE
+    ${easynav_interfaces_TARGETS}
+    plansys2_executor::plansys2_executor
+    plansys2_domain_expert::plansys2_domain_expert
+    ${plansys2_msgs_TARGETS}
+    plansys2_pddl_parser::plansys2_pddl_parser
+    plansys2_planner::plansys2_planner
+    plansys2_problem_expert::plansys2_problem_expert
+    rclcpp::rclcpp
+    rclcpp_action::rclcpp_action
+  )
+  install(TARGETS move_action_node patrolling_controller_node
     RUNTIME DESTINATION lib/${PROJECT_NAME}
   )
 else()
-  message(WARNING "EasyNav not found: move_action_node is not built")
+  message(WARNING "EasyNav not found: move_action_node and patrolling_controller_node are not built")
 endif()
 
 add_executable(patrol_action_node src/patrol_action_node.cpp)
@@ -39,19 +54,6 @@ target_link_libraries(patrol_action_node
   ${geometry_msgs_TARGETS}
   ${lifecycle_msgs_TARGETS}
   plansys2_executor::plansys2_executor
-  rclcpp::rclcpp
-  rclcpp_action::rclcpp_action
-)
-
-add_executable(patrolling_controller_node src/patrolling_controller_node.cpp)
-target_link_libraries(patrolling_controller_node
-  PRIVATE
-  plansys2_executor::plansys2_executor
-  plansys2_domain_expert::plansys2_domain_expert
-  ${plansys2_msgs_TARGETS}
-  plansys2_pddl_parser::plansys2_pddl_parser
-  plansys2_planner::plansys2_planner
-  plansys2_problem_expert::plansys2_problem_expert
   rclcpp::rclcpp
   rclcpp_action::rclcpp_action
 )
@@ -74,7 +76,6 @@ install(DIRECTORY launch pddl params
 
 install(TARGETS
   patrol_action_node
-  patrolling_controller_node
   patrol_waypoints_controller_node
   RUNTIME DESTINATION lib/${PROJECT_NAME}
 )

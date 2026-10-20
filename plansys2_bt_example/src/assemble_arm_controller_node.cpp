@@ -17,9 +17,7 @@
 
 #include <algorithm>
 #include <memory>
-#include <thread>
 #include <string>
-
 
 #include "plansys2_domain_expert/DomainExpertClient.hpp"
 #include "plansys2_executor/ExecutorClient.hpp"
@@ -36,7 +34,6 @@ public:
   {
     declare_parameter("cars", 3);
   }
-
 
   bool init()
   {
@@ -150,14 +147,8 @@ int main(int argc, char ** argv)
 {
   rclcpp::init(argc, argv);
   auto node = std::make_shared<AssembleArm>();
-  // Spun from the start in a thread of its own: the clients get their answers from it
-  rclcpp::executors::SingleThreadedExecutor exec;
-  exec.add_node(node->get_node_base_interface());
-  std::thread spinner([&exec]() {exec.spin();});
 
   if (!node->init()) {
-    exec.cancel();
-    spinner.join();
     rclcpp::shutdown();
     return 1;
   }
@@ -167,8 +158,6 @@ int main(int argc, char ** argv)
     rate.sleep();
   }
 
-  exec.cancel();
-  spinner.join();
   rclcpp::shutdown();
   // A test tells by it whether the plan succeeded
   return node->succeeded() ? 0 : 1;

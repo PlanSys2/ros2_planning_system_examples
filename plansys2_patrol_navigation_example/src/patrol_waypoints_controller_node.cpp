@@ -15,10 +15,8 @@
 // Patrols the waypoints of `waypoints` once, in order, and ends: 0 if every plan succeeded
 
 #include <memory>
-#include <thread>
 #include <string>
 #include <vector>
-
 
 #include "plansys2_domain_expert/DomainExpertClient.hpp"
 #include "plansys2_executor/ExecutorClient.hpp"
@@ -37,7 +35,6 @@ public:
   {
     declare_parameter("waypoints", std::vector<std::string>{"wp1", "wp2"});
   }
-
 
   int run()
   {
@@ -88,13 +85,7 @@ int main(int argc, char ** argv)
 {
   rclcpp::init(argc, argv);
   auto node = std::make_shared<PatrolWaypointsController>();
-  // Spun from the start in a thread of its own: the clients get their answers from it
-  rclcpp::executors::SingleThreadedExecutor exec;
-  exec.add_node(node->get_node_base_interface());
-  std::thread spinner([&exec]() {exec.spin();});
   const int result = node->run();
-  exec.cancel();
-  spinner.join();
   rclcpp::shutdown();
   return result;
 }

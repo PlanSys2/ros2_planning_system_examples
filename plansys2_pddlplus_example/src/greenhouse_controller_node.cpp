@@ -18,7 +18,6 @@
 
 #include <fstream>
 #include <memory>
-#include <thread>
 #include <sstream>
 #include <string>
 #include <utility>
@@ -44,7 +43,6 @@ public:
   : rclcpp::Node("greenhouse_controller")
   {
   }
-
 
   // The result: 0 if the plan reached the goal
   int run()
@@ -172,13 +170,7 @@ int main(int argc, char ** argv)
 {
   rclcpp::init(argc, argv);
   auto node = std::make_shared<GreenhouseController>();
-  // Spun from the start in a thread of its own: the clients get their answers from it
-  rclcpp::executors::SingleThreadedExecutor exec;
-  exec.add_node(node->get_node_base_interface());
-  std::thread spinner([&exec]() {exec.spin();});
   const int ret = node->run();
-  exec.cancel();
-  spinner.join();
   rclcpp::shutdown();
   return ret;
 }

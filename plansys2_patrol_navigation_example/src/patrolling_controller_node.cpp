@@ -12,10 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <functional>
 #include <memory>
-#include <thread>
 #include <tuple>
 
+#include "easynav_interfaces/msg/navigation_control.hpp"
 #include "plansys2_pddl_parser/Utils.hpp"
 
 #include "plansys2_msgs/msg/action_execution_info.hpp"
@@ -35,6 +36,20 @@ public:
   PatrollingController()
   : rclcpp::Node("patrolling_controller"), state_(STARTING)
   {
+    // A callback of the controller itself: its executor serves it, the clients do not need it
+    navigation_sub_ = create_subscription<easynav_interfaces::msg::NavigationControl>(
+      "easynav_control", 100,
+      std::bind(&PatrollingController::navigation_callback, this, std::placeholders::_1));
+  }
+
+  void navigation_callback(easynav_interfaces::msg::NavigationControl::UniquePtr msg)
+  {
+    if (msg->type == easynav_interfaces::msg::NavigationControl::FEEDBACK) {
+      RCLCPP_INFO_THROTTLE(
+        get_logger(), *get_clock(), 2000,
+        "EasyNav: %.1f m to the goal, %.1f s left (%.1f m covered)", msg->distance_to_goal,
+        rclcpp::Duration(msg->estimated_time_remaining).seconds(), msg->distance_covered);
+    }
   }
 
   void init()
@@ -335,6 +350,7 @@ private:
   std::shared_ptr<plansys2::PlannerClient> planner_client_;
   std::shared_ptr<plansys2::ProblemExpertClient> problem_expert_;
   std::shared_ptr<plansys2::ExecutorClient> executor_client_;
+  rclcpp::Subscription<easynav_interfaces::msg::NavigationControl>::SharedPtr navigation_sub_;
 };
 
 int main(int argc, char ** argv)
@@ -342,21 +358,19 @@ int main(int argc, char ** argv)
   rclcpp::init(argc, argv);
   auto node = std::make_shared<PatrollingController>();
 
-  // Spun from the start in a thread of its own: the clients get their answers from it
-  rclcpp::executors::SingleThreadedExecutor exec;
-  exec.add_node(node->get_node_base_interface());
-  std::thread spinner([&exec]() {exec.spin();});
-
   node->init();
+
+  // The clients bring their own answers: the executor is for the subscription of the controller
+  rclcpp::executors::SingleThreadedExecutor exec;
+  exec.add_node(node);
 
   rclcpp::Rate rate(5);
   while (rclcpp::ok()) {
     node->step();
+    exec.spin_some();
     rate.sleep();
   }
 
-  exec.cancel();
-  spinner.join();
   rclcpp::shutdown();
 
   return 0;
