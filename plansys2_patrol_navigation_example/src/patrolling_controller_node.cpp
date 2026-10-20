@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include <memory>
+#include <thread>
 #include <tuple>
 
 #include "plansys2_pddl_parser/Utils.hpp"
@@ -38,10 +39,10 @@ public:
 
   void init()
   {
-    domain_expert_ = std::make_shared<plansys2::DomainExpertClient>();
-    planner_client_ = std::make_shared<plansys2::PlannerClient>();
-    problem_expert_ = std::make_shared<plansys2::ProblemExpertClient>();
-    executor_client_ = std::make_shared<plansys2::ExecutorClient>();
+    domain_expert_ = std::make_shared<plansys2::DomainExpertClient>(*this);
+    planner_client_ = std::make_shared<plansys2::PlannerClient>(*this);
+    problem_expert_ = std::make_shared<plansys2::ProblemExpertClient>(*this);
+    executor_client_ = std::make_shared<plansys2::ExecutorClient>(*this);
     init_knowledge();
   }
 
@@ -341,19 +342,21 @@ int main(int argc, char ** argv)
   rclcpp::init(argc, argv);
   auto node = std::make_shared<PatrollingController>();
 
-  node->init();
-
+  // Spun from the start in a thread of its own: the clients get their answers from it
   rclcpp::executors::SingleThreadedExecutor exec;
   exec.add_node(node->get_node_base_interface());
+  std::thread spinner([&exec]() {exec.spin();});
+
+  node->init();
 
   rclcpp::Rate rate(5);
   while (rclcpp::ok()) {
     node->step();
-
     rate.sleep();
-    exec.spin_some();
   }
 
+  exec.cancel();
+  spinner.join();
   rclcpp::shutdown();
 
   return 0;

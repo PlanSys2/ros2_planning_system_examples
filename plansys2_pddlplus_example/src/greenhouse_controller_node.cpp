@@ -18,14 +18,13 @@
 
 #include <fstream>
 #include <memory>
+#include <thread>
 #include <sstream>
 #include <string>
 #include <utility>
 #include <vector>
 
 #include "ament_index_cpp/get_package_share_path.hpp"
-#include "lifecycle_msgs/msg/state.hpp"
-#include "lifecycle_msgs/srv/get_state.hpp"
 #include "plansys2_domain_expert/DomainExpertClient.hpp"
 #include "plansys2_executor/ExecutorClient.hpp"
 #include "plansys2_msgs/msg/action_execution_info.hpp"
@@ -46,36 +45,20 @@ public:
   {
   }
 
-  // Whether the node is active, asked through its lifecycle
-  bool active(const std::string & node)
-  {
-    auto client = create_client<lifecycle_msgs::srv::GetState>(node + "/get_state");
-    if (!client->wait_for_service(1s)) {
-      return false;
-    }
-    auto future = client->async_send_request(
-      std::make_shared<lifecycle_msgs::srv::GetState::Request>());
-    if (rclcpp::spin_until_future_complete(shared_from_this(), future, 1s) !=
-      rclcpp::FutureReturnCode::SUCCESS)
-    {
-      return false;
-    }
-    return future.get()->current_state.id == lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE;
-  }
 
   // The result: 0 if the plan reached the goal
   int run()
   {
-    auto domain = std::make_shared<plansys2::DomainExpertClient>();
-    auto problem = std::make_shared<plansys2::ProblemExpertClient>();
-    auto planner = std::make_shared<plansys2::PlannerClient>();
-    auto executor = std::make_shared<plansys2::ExecutorClient>();
-    // PlanSys2 up, before the world starts
-    for (const auto & node : {"domain_expert", "problem_expert", "planner", "executor"}) {
-      while (rclcpp::ok() && !active(node)) {
-        RCLCPP_INFO(get_logger(), "Waiting for %s...", node);
-        rclcpp::sleep_for(500ms);
-      }
+    auto domain = std::make_shared<plansys2::DomainExpertClient>(*this);
+    auto problem = std::make_shared<plansys2::ProblemExpertClient>(*this);
+    auto planner = std::make_shared<plansys2::PlannerClient>(*this);
+    auto executor = std::make_shared<plansys2::ExecutorClient>(*this);
+    // All of PlanSys2 active before the world starts: it evolves from the moment the problem is
+    // there, and planning and executing it must not wait
+    if (!domain->wait_active() || !problem->wait_active() || !planner->wait_active() ||
+      !executor->wait_active())
+    {
+      return 1;
     }
 
     // The world evolves from the moment the problem is there: it starts now, as it is in the file
@@ -189,7 +172,13 @@ int main(int argc, char ** argv)
 {
   rclcpp::init(argc, argv);
   auto node = std::make_shared<GreenhouseController>();
+  // Spun from the start in a thread of its own: the clients get their answers from it
+  rclcpp::executors::SingleThreadedExecutor exec;
+  exec.add_node(node->get_node_base_interface());
+  std::thread spinner([&exec]() {exec.spin();});
   const int ret = node->run();
+  exec.cancel();
+  spinner.join();
   rclcpp::shutdown();
   return ret;
 }
