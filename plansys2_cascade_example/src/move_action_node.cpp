@@ -29,7 +29,7 @@ class MoveAction : public plansys2::ActionExecutorClient
 {
 public:
   MoveAction()
-  : plansys2::ActionExecutorClient("move", 250ms)
+  : plansys2::ActionExecutorClient("move")
   {
     progress_ = 0.0;
 
@@ -39,8 +39,9 @@ public:
 private:
   void do_work()
   {
-    if (progress_ < 1.0) {
-      progress_ += 0.02;
+    // As long as the plan says it lasts
+    progress_ += 1.0 / std::max(1.0, get_planned_duration() * get_parameter("rate").as_double());
+    if (progress_ < 1.0 - 1e-3) {
       send_feedback(progress_, "Move running");
     } else {
       finish(true, 1.0, "Move completed");
@@ -63,6 +64,7 @@ int main(int argc, char ** argv)
   auto node = std::make_shared<MoveAction>();
 
   node->set_parameter(rclcpp::Parameter("action_name", "move"));
+  node->set_parameter(rclcpp::Parameter("rate", 4.0));
   node->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_CONFIGURE);
 
   rclcpp::spin(node->get_node_base_interface());

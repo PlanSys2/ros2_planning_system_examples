@@ -17,7 +17,7 @@
 
 #include "plansys2_bt_example/behavior_tree_nodes/Recharge.hpp"
 
-#include "behaviortree_cpp_v3/behavior_tree.h"
+#include "behaviortree_cpp/behavior_tree.h"
 
 namespace plansys2_bt_example
 {
@@ -40,17 +40,20 @@ Recharge::tick()
 {
   std::cout << "Recharge tick " << counter_ << std::endl;
 
+  // Its progress, for the feedback of the action
   if (counter_++ < 10) {
+    config().blackboard->set<float>("completion", counter_ / 10.0f);
     return BT::NodeStatus::RUNNING;
   } else {
     counter_ = 0;
+    config().blackboard->set<float>("completion", 0.0f);
     return BT::NodeStatus::SUCCESS;
   }
 }
 
 }  // namespace plansys2_bt_example
 
-#include "behaviortree_cpp_v3/bt_factory.h"
+#include "behaviortree_cpp/bt_factory.h"
 BT_REGISTER_NODES(factory)
 {
   factory.registerNodeType<plansys2_bt_example::Recharge>("Recharge");

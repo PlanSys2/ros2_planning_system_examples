@@ -12,9 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <plansys2_pddl_parser/Utils.h>
-
 #include <memory>
+#include <tuple>
+
+#include "plansys2_pddl_parser/Utils.hpp"
 
 #include "plansys2_msgs/msg/action_execution_info.hpp"
 #include "plansys2_msgs/msg/plan.hpp"
@@ -37,10 +38,10 @@ public:
 
   bool init()
   {
-    domain_expert_ = std::make_shared<plansys2::DomainExpertClient>();
-    planner_client_ = std::make_shared<plansys2::PlannerClient>();
-    problem_expert_ = std::make_shared<plansys2::ProblemExpertClient>();
-    executor_client_ = std::make_shared<plansys2::ExecutorClient>();
+    domain_expert_ = std::make_shared<plansys2::DomainExpertClient>(*this);
+    planner_client_ = std::make_shared<plansys2::PlannerClient>(*this);
+    problem_expert_ = std::make_shared<plansys2::ProblemExpertClient>(*this);
+    executor_client_ = std::make_shared<plansys2::ExecutorClient>(*this);
 
     init_knowledge();
 
@@ -64,6 +65,8 @@ public:
   void init_knowledge()
   {
     problem_expert_->addInstance(plansys2::Instance{"r2d2", "robot"});
+    problem_expert_->addInstance(plansys2::Instance{"c3po", "robot"});
+    problem_expert_->addInstance(plansys2::Instance{"bb8", "robot"});
 
     problem_expert_->addInstance(plansys2::Instance{"car_1", "car"});
     problem_expert_->addInstance(plansys2::Instance{"car_2", "car"});
@@ -74,7 +77,6 @@ public:
     problem_expert_->addInstance(plansys2::Instance{"body_car_zone", "zone"});
     problem_expert_->addInstance(plansys2::Instance{"assembly_zone", "zone"});
     problem_expert_->addInstance(plansys2::Instance{"recharge_zone", "zone"});
-
 
     problem_expert_->addInstance(plansys2::Instance{"wheel_1", "piece"});
     problem_expert_->addInstance(plansys2::Instance{"wheel_2", "piece"});
@@ -122,6 +124,14 @@ public:
     problem_expert_->addPredicate(plansys2::Predicate("(battery_full r2d2)"));
     problem_expert_->addPredicate(plansys2::Predicate("(robot_available r2d2)"));
 
+    problem_expert_->addPredicate(plansys2::Predicate("(robot_at c3po wheels_zone)"));
+    problem_expert_->addPredicate(plansys2::Predicate("(battery_full c3po)"));
+    problem_expert_->addPredicate(plansys2::Predicate("(robot_available c3po)"));
+
+    problem_expert_->addPredicate(plansys2::Predicate("(robot_at bb8 wheels_zone)"));
+    problem_expert_->addPredicate(plansys2::Predicate("(battery_full bb8)"));
+    problem_expert_->addPredicate(plansys2::Predicate("(robot_available bb8)"));
+
     problem_expert_->addPredicate(plansys2::Predicate("(piece_not_used wheel_1)"));
     problem_expert_->addPredicate(plansys2::Predicate("(piece_not_used wheel_2)"));
     problem_expert_->addPredicate(plansys2::Predicate("(piece_not_used wheel_3)"));
@@ -137,20 +147,38 @@ public:
         "(and(car_assembled car_1) (car_assembled car_2) (car_assembled car_3))"));
   }
 
-  void step()
+  // Returns false once the plan is over
+  bool step()
   {
-    if (!executor_client_->execute_and_check_plan()) {  // Plan finished
-      auto result = executor_client_->getResult();
-
-      if (result.value().success) {
-        RCLCPP_INFO(get_logger(), "Plan succesfully finished");
-      } else {
-        RCLCPP_ERROR(get_logger(), "Plan finished with error");
-      }
+    if (executor_client_->execute_and_check_plan()) {
+      return true;
     }
+
+    auto result = executor_client_->getResult();
+    if (!result.has_value()) {  // The executor is gone, e.g. PlanSys2 stopped
+      RCLCPP_ERROR(get_logger(), "Plan finished without result");
+      return false;
+    }
+
+    switch (result.value().result) {
+      case plansys2_msgs::action::ExecutePlan::Result::SUCCESS:
+        succeeded_ = true;
+        RCLCPP_INFO(get_logger(), "Plan succesfully finished");
+        break;
+      case plansys2_msgs::action::ExecutePlan::Result::PREEMPT:
+        RCLCPP_INFO(get_logger(), "Plan preempted");
+        break;
+      case plansys2_msgs::action::ExecutePlan::Result::FAILURE:
+        RCLCPP_ERROR(get_logger(), "Plan finished with error");
+        break;
+    }
+    return false;
   }
 
+  bool succeeded() const {return succeeded_;}
+
 private:
+  bool succeeded_ {false};
   std::shared_ptr<plansys2::DomainExpertClient> domain_expert_;
   std::shared_ptr<plansys2::PlannerClient> planner_client_;
   std::shared_ptr<plansys2::ProblemExpertClient> problem_expert_;
@@ -163,18 +191,17 @@ int main(int argc, char ** argv)
   auto node = std::make_shared<Assemble>();
 
   if (!node->init()) {
-    return 0;
+    rclcpp::shutdown();
+    return 1;
   }
 
   rclcpp::Rate rate(5);
-  while (rclcpp::ok()) {
-    node->step();
-
+  while (rclcpp::ok() && node->step()) {
     rate.sleep();
-    rclcpp::spin_some(node->get_node_base_interface());
   }
 
   rclcpp::shutdown();
 
-  return 0;
+  // A test tells by it whether the plan succeeded
+  return node->succeeded() ? 0 : 1;
 }

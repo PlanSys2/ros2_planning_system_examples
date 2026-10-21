@@ -1,10 +1,10 @@
-<root main_tree_to_execute = "MainTree" >
+<root BTCPP_format="4" main_tree_to_execute = "MainTree" >
     <BehaviorTree ID="MainTree">
        <Sequence name="root_sequence">
            <OpenGripper    name="open_gripper"/>
            <ApproachObject name="approach_object"/>
            <CloseGripper   name="close_gripper"/>
-           <Move    name="move" goal="${arg3}"/>
+           <Move    name="move" goal="{arg3}"/>
            <OpenGripper    name="open_gripper"/>
        </Sequence>
     </BehaviorTree>
