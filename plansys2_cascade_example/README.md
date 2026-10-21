@@ -21,7 +21,7 @@ In `move` action we have specified this dependency:
 In terminal 1:
 
 ```
-ros2 launch plansys2_cascade_example plansys2_cascade_example_launch.py
+ros2 launch plansys2_cascade_example plansys2_cascade_example.launch.yaml
 ```
 
 In terminal 2:

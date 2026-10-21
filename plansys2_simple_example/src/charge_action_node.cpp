@@ -25,7 +25,7 @@ class ChargeAction : public plansys2::ActionExecutorClient
 {
 public:
   ChargeAction()
-  : plansys2::ActionExecutorClient("charge", 500ms)
+  : plansys2::ActionExecutorClient("charge")
   {
     progress_ = 0.0;
   }
@@ -33,8 +33,9 @@ public:
 private:
   void do_work()
   {
-    if (progress_ < 1.0) {
-      progress_ += 0.05;
+    // As long as the plan says it lasts
+    progress_ += 1.0 / std::max(1.0, get_planned_duration() * get_parameter("rate").as_double());
+    if (progress_ < 1.0 - 1e-3) {
       send_feedback(progress_, "Charge running");
     } else {
       finish(true, 1.0, "Charge completed");
@@ -57,6 +58,7 @@ int main(int argc, char ** argv)
   auto node = std::make_shared<ChargeAction>();
 
   node->set_parameter(rclcpp::Parameter("action_name", "charge"));
+  node->set_parameter(rclcpp::Parameter("rate", 2.0));
   node->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_CONFIGURE);
 
   rclcpp::spin(node->get_node_base_interface());

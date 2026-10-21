@@ -9,36 +9,27 @@ This example shows how to use Behavior Trees to carry out the tasks that an acti
 See https://github.com/IntelligentRoboticsLabs/ros2_planning_system/pull/27 for details.
 
 ## Prerequisites
-```bash
-sudo apt-get install ros-humble-turtlebot3*
-```
+
+Navigation uses [EasyNav](https://easynavigation.github.io): the `Move` BT node sends its goals
+with `easynav_system::GoalManagerClient`. Without EasyNav, the package is built without `Move`
+and `easynav_sim_node`.
 
 ## How to run
 
 ### In terminal 1:
 
 ```bash
-export GAZEBO_MODEL_PATH=$GAZEBO_MODEL_PATH:/opt/ros/humble/share/turtlebot3_gazebo/models
-export TURTLEBOT3_MODEL=waffle
-source /usr/share/gazebo/setup.sh
 source install/setup.bash
-ros2 launch nav2_bringup tb3_simulation_launch.py headless:=False
+ros2 run plansys2_bt_example easynav_sim_node
 ```
 
-This launches Navigation2. Use rviz to set the robot position, as shown here:
-
- ![nav2 start](nav2_init.png)
-
-Or use the commandline (e.g. in terminal 2):
-```bash
-ros2 topic pub --once /initialpose geometry_msgs/msg/PoseWithCovarianceStamped "{header: {stamp: {sec: 0, nanosec: 0}, frame_id: 'map'}, pose:{pose: {position: {x: -2.0, y: -0.5, z: 0.01}, orientation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}}}}"
-```
+This simulates EasyNav: each navigation takes 10 s, for several robots at once.
 
 ### In terminal 2:
 
 ```bash
 source install/setup.bash
-ros2 launch plansys2_bt_example plansys2_bt_example_launch.py
+ros2 launch plansys2_bt_example plansys2_bt_example.launch.yaml
 ```
 
 ### In terminal 3:
@@ -47,9 +38,6 @@ There are two options in this example. First option is to use the plansys2 termi
 
 ```bash
 source install/setup.bash
-
-# before you run the commands below, it seems the starting location must be different to prevent an error
-ros2 topic pub --times 3 /goal_pose geometry_msgs/PoseStamped "{header: {stamp: {sec: 0}, frame_id: 'map'}, pose: {position: {x: -0.4, y: 0.4, z: 0.01}, orientation: {w: 0.0}}}"
 
 ros2 run plansys2_terminal plansys2_terminal
 ```
@@ -84,7 +72,7 @@ Or use a custom controller:
 
 ```bash
 source install/setup.bash
-$HOME/dev_ws/build/plansys2_bt_example/assemble_controller_node
+ros2 run plansys2_bt_example assemble_controller_node
 ```
 NOTE: this problem domain is different from example entered in the plansys2 terminal.
 
@@ -100,3 +88,32 @@ $HOME/dev_ws/build/groot/Groot --mode monitor --publisher_port 2666 --server_por
 NOTE: best way is to run commands above just after you have followed the instructions as mentioned in `In terminal 3`.
 
 ![groot](groot.png)
+
+## Variant: assembly with arms, to analyze parallel execution
+
+`pddl/bt_arm_example.pddl` splits each trip into a long `move` and a short `approach`, and adds
+an arm preparation before each pick (`prepare_pick`) and each release (`prepare_release`). The
+preparation needs `(heading ?r ?z)`, which the **start** of `approach` makes true and which stays
+true until the robot leaves, so the plan prepares the arm during the approach.
+
+The executor turns the plan into a behavior tree with a BT builder:
+
+* `SimpleBTBuilder` only waits for actions to **end**: it prepares the arm after the approach.
+* `STNBTBuilder` follows the plan's time network, start and end of each action: it prepares the
+  arm while the robot approaches.
+
+Both complete the plan; the difference is how much of it runs in parallel. Navigation is
+simulated: the launcher starts its own `easynav_sim_node` (do not run another one), so neither
+a robot nor EasyNav has to run:
+
+```
+ros2 launch plansys2_bt_example plansys2_bt_arm_example.launch.yaml  # bt_builder:=simple to compare
+ros2 run plansys2_bt_example assemble_arm_controller_node --ros-args -p cars:=3
+```
+
+The controller reports the planned and the actual time:
+
+```
+Plan with 25 actions, 35.0 s planned
+Plan succesfully finished in 40.2 s
+```

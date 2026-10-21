@@ -1,0 +1,9 @@
+move_action_node:
+  ros__parameters:
+    waypoints: ["wp1", "wp2", "wp3", "wp4", "wp_control"]
+    waypoint_coords:
+      wp1: [0.0, -2.0]
+      wp2: [1.8, 0.0]
+      wp3: [0.0, 2.0]
+      wp4: [-0.5, -0.5]
+      wp_control: [-2.0, -0.4]

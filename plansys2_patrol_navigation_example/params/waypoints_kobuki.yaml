@@ -1,0 +1,12 @@
+# Waypoints in the map of the kobuki playground: [x, y, yaw]
+move_action_node:
+  ros__parameters:
+    # EasyNav may still be starting with the first goal
+    server_timeout: 30.0
+    waypoints: ["wp1", "wp2", "wp3", "wp4", "wp_control"]
+    waypoint_coords:
+      wp1: [7.64, -3.43, 1.2]
+      wp2: [1.51, 4.41, -2.4]
+      wp3: [-1.25, -4.22, 0.7]
+      wp4: [-7.83, -2.80, 3.0]
+      wp_control: [-7.87, 0.13, -1.0]
