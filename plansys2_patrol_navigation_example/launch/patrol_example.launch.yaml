@@ -1,0 +1,44 @@
+# Copyright 2019 Intelligent Robotics Lab
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# EasyNav runs apart, e.g. the kobuki playground of easynav_playgrounds
+
+launch:
+- arg:
+    name: waypoints_file
+    default: $(find-pkg-share plansys2_patrol_navigation_example)/params/waypoints_kobuki.yaml
+    description: Coordinates of the waypoints in the map of the robot
+- arg:
+    name: use_sim_time
+    default: 'true'
+    description: Use the simulation clock
+- include:
+    file: $(find-pkg-share plansys2_bringup)/launch/plansys2_bringup_launch_monolithic.py
+    arg:
+    - {name: model_file, value: $(find-pkg-share plansys2_patrol_navigation_example)/pddl/patrol.pddl}
+- node:
+    pkg: plansys2_patrol_navigation_example
+    exec: move_action_node
+    name: move_action_node
+    output: screen
+    param:
+    - from: $(var waypoints_file)
+    - {name: use_sim_time, value: $(var use_sim_time)}
+- node:
+    pkg: plansys2_patrol_navigation_example
+    exec: patrol_action_node
+    name: patrol_action_node
+    output: screen
+    param:
+    - {name: use_sim_time, value: $(var use_sim_time)}

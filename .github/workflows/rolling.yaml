@@ -18,8 +18,6 @@ jobs:
     steps:
       - name: Repo checkout
         uses: actions/checkout@v6
-        with:
-          ref: rolling
       - name: Install popf deps
         run: apt-get update && apt-get install -y libfl-dev
       - name: build and test

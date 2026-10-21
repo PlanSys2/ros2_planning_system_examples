@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <algorithm>
 #include <memory>
 
 #include "geometry_msgs/msg/twist.hpp"
@@ -54,9 +55,9 @@ public:
 private:
   void do_work()
   {
-    if (progress_ < 1.0) {
-      progress_ += 0.1;
-
+    // As long as the plan says it lasts
+    progress_ += 1.0 / std::max(1.0, get_planned_duration() * get_parameter("rate").as_double());
+    if (progress_ < 1.0 - 1e-3) {
       send_feedback(progress_, "Patrol running");
 
       geometry_msgs::msg::Twist cmd;

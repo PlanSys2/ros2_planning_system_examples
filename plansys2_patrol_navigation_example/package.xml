@@ -4,7 +4,7 @@
   <name>plansys2_patrol_navigation_example</name>
   <version>0.0.4</version>
 
-  <description>An example including Navigation</description>
+  <description>An example including navigation with EasyNav</description>
 
   <maintainer email="fmrico@gmail.com">Francisco Martin Rico</maintainer>
 
@@ -14,7 +14,9 @@
 
   <depend>geometry_msgs</depend>
   <depend>lifecycle_msgs</depend>
-  <depend>nav2_msgs</depend>
+  <!-- Optional: without EasyNav, move_action_node is not built -->
+  <depend>easynav_interfaces</depend>
+  <depend>easynav_system</depend>
   <depend>plansys2_domain_expert</depend>
   <depend>plansys2_executor</depend>
   <depend>plansys2_msgs</depend>
@@ -26,10 +28,16 @@
 
   <exec_depend>plansys2_bringup</exec_depend>
   <exec_depend>plansys2_terminal</exec_depend>
+  <!-- The simulated EasyNav of the fakesim launch -->
+  <exec_depend>plansys2_bt_example</exec_depend>
 
   <test_depend>ament_lint_common</test_depend>
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_cmake_gtest</test_depend>
+  <test_depend>launch_testing_ament_cmake</test_depend>
+  <test_depend>launch_testing</test_depend>
+  <test_depend>launch_ros</test_depend>
+  <test_depend>ros2lifecycle</test_depend>
 
   <export>
     <build_type>ament_cmake</build_type>

@@ -9,7 +9,7 @@ This is a simple example that shows the basic operation of PlanSys2. A simple PD
 In terminal 1:
 
 ```
-ros2 launch plansys2_simple_example plansys2_simple_example_launch.py
+ros2 launch plansys2_simple_example plansys2_simple_example.launch.yaml
 ```
 
 In terminal 2:

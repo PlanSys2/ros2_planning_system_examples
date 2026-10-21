@@ -14,22 +14,24 @@
 
 #include <math.h>
 
-#include <memory>
-#include <string>
-#include <map>
 #include <algorithm>
+#include <chrono>
+#include <map>
+#include <memory>
+#include <optional>
+#include <string>
+#include <vector>
 
+#include "easynav_interfaces/msg/goal_manager_info.hpp"
+#include "easynav_system/GoalManagerClient.hpp"
 #include "geometry_msgs/msg/pose_stamped.hpp"
-#include "geometry_msgs/msg/pose.hpp"
-#include "geometry_msgs/msg/pose_with_covariance_stamped.hpp"
-#include "nav2_msgs/action/navigate_to_pose.hpp"
 
 #include "plansys2_executor/ActionExecutorClient.hpp"
 
 #include "rclcpp/rclcpp.hpp"
-#include "rclcpp_action/rclcpp_action.hpp"
 
 using namespace std::chrono_literals;
+using State = easynav::GoalManagerClient::State;
 
 class MoveAction : public plansys2::ActionExecutorClient
 {
@@ -37,136 +39,168 @@ public:
   MoveAction()
   : plansys2::ActionExecutorClient("move")
   {
-    geometry_msgs::msg::PoseStamped wp;
-    wp.header.frame_id = "map";
-    wp.header.stamp = now();
-    wp.pose.position.x = 0.0;
-    wp.pose.position.y = -2.0;
-    wp.pose.position.z = 0.0;
-    wp.pose.orientation.x = 0.0;
-    wp.pose.orientation.y = 0.0;
-    wp.pose.orientation.z = 0.0;
-    wp.pose.orientation.w = 1.0;
-    waypoints_["wp1"] = wp;
+    // GoalManagerClient needs a plain node; without global arguments, so that the
+    // node name given in the launch does not apply to it
+    nav_node_ = rclcpp::Node::make_shared(
+      std::string(get_name()) + "_nav", get_namespace(),
+      rclcpp::NodeOptions().use_global_arguments(false));
+    navigation_ = easynav::GoalManagerClient::make_shared(nav_node_);
+    // Only the goal manager publishes it: is_connected() also counts other clients
+    manager_info_ = nav_node_->create_subscription<easynav_interfaces::msg::GoalManagerInfo>(
+      "easynav_manager_info", 10, [](easynav_interfaces::msg::GoalManagerInfo::UniquePtr) {});
 
-    wp.pose.position.x = 1.8;
-    wp.pose.position.y = 0.0;
-    waypoints_["wp2"] = wp;
+    // EasyNav may start late: wait for it this long before failing the action
+    server_timeout_ = declare_parameter("server_timeout", 30.0);
+    auto wp_names = declare_parameter("waypoints", std::vector<std::string>{});
 
-    wp.pose.position.x = 0.0;
-    wp.pose.position.y = 2.0;
-    waypoints_["wp3"] = wp;
+    for (const auto & wp : wp_names) {
+      auto coords = declare_parameter("waypoint_coords." + wp, std::vector<double>{});
+      if (coords.size() < 2) {
+        RCLCPP_ERROR(get_logger(), "Waypoint [%s] needs [x, y] or [x, y, yaw]", wp.c_str());
+        continue;
+      }
 
-    wp.pose.position.x = -0.5;
-    wp.pose.position.y = -0.5;
-    waypoints_["wp4"] = wp;
-
-    wp.pose.position.x = -2.0;
-    wp.pose.position.y = -0.4;
-    waypoints_["wp_control"] = wp;
-
-    using namespace std::placeholders;
-    pos_sub_ = create_subscription<geometry_msgs::msg::PoseWithCovarianceStamped>(
-      "/amcl_pose",
-      10,
-      std::bind(&MoveAction::current_pos_callback, this, _1));
-  }
-
-  void current_pos_callback(const geometry_msgs::msg::PoseWithCovarianceStamped::SharedPtr msg)
-  {
-    current_pos_ = msg->pose.pose;
+      geometry_msgs::msg::PoseStamped pose;
+      pose.header.frame_id = "map";
+      pose.pose.position.x = coords[0];
+      pose.pose.position.y = coords[1];
+      const double yaw = coords.size() > 2 ? coords[2] : 0.0;
+      pose.pose.orientation.z = sin(yaw / 2.0);
+      pose.pose.orientation.w = cos(yaw / 2.0);
+      waypoints_[wp] = pose;
+    }
   }
 
   rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
   on_activate(const rclcpp_lifecycle::State & previous_state)
   {
-    send_feedback(0.0, "Move starting");
-
-    navigation_action_client_ =
-      rclcpp_action::create_client<nav2_msgs::action::NavigateToPose>(
-      shared_from_this(),
-      "navigate_to_pose");
-
-    bool is_action_server_ready = false;
-    do {
-      RCLCPP_INFO(get_logger(), "Waiting for navigation action server...");
-
-      is_action_server_ready =
-        navigation_action_client_->wait_for_action_server(std::chrono::seconds(5));
-    } while (!is_action_server_ready);
-
-    RCLCPP_INFO(get_logger(), "Navigation action server ready");
-
     auto wp_to_navigate = get_arguments()[2];  // The goal is in the 3rd argument of the action
-    RCLCPP_INFO(get_logger(), "Start navigation to [%s]", wp_to_navigate.c_str());
+    if (waypoints_.find(wp_to_navigate) == waypoints_.end()) {
+      RCLCPP_ERROR(get_logger(), "No coordinates for waypoint [%s]", wp_to_navigate.c_str());
+      goal_pos_.reset();
+    } else {
+      RCLCPP_INFO(get_logger(), "Start navigation to [%s]", wp_to_navigate.c_str());
+      goal_pos_ = waypoints_[wp_to_navigate];
+      goal_pos_->header.stamp = now();
+    }
 
-    goal_pos_ = waypoints_[wp_to_navigate];
-    navigation_goal_.pose = goal_pos_;
+    // A navigation left by a previous action
+    switch (navigation_->get_state()) {
+      case State::IDLE:
+        break;
+      case State::SENT_GOAL:
+      case State::SENT_PREEMPT:
+      case State::ACCEPTED_AND_NAVIGATING:
+        renew_client();
+        break;
+      default:
+        navigation_->reset();
+    }
+    goal_sent_ = false;
+    initial_distance_ = -1.0;
+    phase_start_ = std::chrono::steady_clock::now();
 
-    dist_to_move = getDistance(goal_pos_.pose, current_pos_);
-
-    auto send_goal_options =
-      rclcpp_action::Client<nav2_msgs::action::NavigateToPose>::SendGoalOptions();
-
-    send_goal_options.feedback_callback = [this](
-      NavigationGoalHandle::SharedPtr,
-      NavigationFeedback feedback) {
-        send_feedback(
-          std::min(1.0, std::max(0.0, 1.0 - (feedback->distance_remaining / dist_to_move))),
-          "Move running");
-      };
-
-    send_goal_options.result_callback = [this](auto) {
-        finish(true, 1.0, "Move completed");
-      };
-
-    future_navigation_goal_handle_ =
-      navigation_action_client_->async_send_goal(navigation_goal_, send_goal_options);
-
+    send_feedback(0.0, "Move starting");
     return ActionExecutorClient::on_activate(previous_state);
   }
 
-private:
-  double getDistance(const geometry_msgs::msg::Pose & pos1, const geometry_msgs::msg::Pose & pos2)
+  rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
+  on_deactivate(const rclcpp_lifecycle::State & previous_state)
   {
-    return sqrt(
-      (pos1.position.x - pos2.position.x) * (pos1.position.x - pos2.position.x) +
-      (pos1.position.y - pos2.position.y) * (pos1.position.y - pos2.position.y));
+    // Cancelled by the executor: the robot must stop
+    if (navigation_->get_state() == State::ACCEPTED_AND_NAVIGATING) {
+      navigation_->cancel();
+    }
+    return ActionExecutorClient::on_deactivate(previous_state);
+  }
+
+  rclcpp::Node::SharedPtr get_nav_node() {return nav_node_;}
+
+private:
+  // A new client: reset() does not leave a goal still in course
+  void renew_client()
+  {
+    navigation_ = easynav::GoalManagerClient::make_shared(nav_node_);
   }
 
   void do_work()
   {
+    if (!goal_pos_) {
+      finish(false, 0.0, "Unknown waypoint");
+      return;
+    }
+
+    const auto elapsed = std::chrono::duration<double>(
+      std::chrono::steady_clock::now() - phase_start_).count();
+
+    if (!goal_sent_) {
+      if (manager_info_->get_publisher_count() > 0 && navigation_->is_connected()) {
+        navigation_->send_goal(*goal_pos_);
+        goal_sent_ = true;
+        phase_start_ = std::chrono::steady_clock::now();
+      } else if (elapsed > server_timeout_) {
+        finish(false, 0.0, "No EasyNav goal manager in easynav_control");
+      } else {
+        RCLCPP_INFO_THROTTLE(get_logger(), *get_clock(), 1000, "Waiting for EasyNav...");
+      }
+      return;
+    }
+
+    switch (navigation_->get_state()) {
+      case State::SENT_GOAL:
+        if (elapsed > server_timeout_) {
+          renew_client();
+          finish(false, 0.0, "EasyNav did not answer the navigation goal");
+        }
+        break;
+      case State::SENT_PREEMPT:
+      case State::ACCEPTED_AND_NAVIGATING:
+        {
+          const double distance = navigation_->get_feedback().distance_to_goal;
+          if (initial_distance_ < 0.0 && distance > 0.0) {
+            initial_distance_ = distance;
+          }
+          const double progress = initial_distance_ > 0.0 ?
+            1.0 - distance / initial_distance_ : 0.0;
+          send_feedback(std::clamp(progress, 0.0, 1.0), "Move running");
+        }
+        break;
+      case State::NAVIGATION_FINISHED:
+        navigation_->reset();
+        finish(true, 1.0, "Move completed");
+        break;
+      default:
+        navigation_->reset();
+        finish(false, 0.0, "Navigation failed");
+    }
   }
 
+  rclcpp::Node::SharedPtr nav_node_;
+  easynav::GoalManagerClient::SharedPtr navigation_;
+  rclcpp::Subscription<easynav_interfaces::msg::GoalManagerInfo>::SharedPtr manager_info_;
   std::map<std::string, geometry_msgs::msg::PoseStamped> waypoints_;
 
-  using NavigationGoalHandle =
-    rclcpp_action::ClientGoalHandle<nav2_msgs::action::NavigateToPose>;
-  using NavigationFeedback =
-    const std::shared_ptr<const nav2_msgs::action::NavigateToPose::Feedback>;
-
-  rclcpp_action::Client<nav2_msgs::action::NavigateToPose>::SharedPtr navigation_action_client_;
-  std::shared_future<NavigationGoalHandle::SharedPtr> future_navigation_goal_handle_;
-  NavigationGoalHandle::SharedPtr navigation_goal_handle_;
-
-  rclcpp::Subscription<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr pos_sub_;
-  geometry_msgs::msg::Pose current_pos_;
-  geometry_msgs::msg::PoseStamped goal_pos_;
-  nav2_msgs::action::NavigateToPose::Goal navigation_goal_;
-
-  double dist_to_move;
+  std::optional<geometry_msgs::msg::PoseStamped> goal_pos_;
+  bool goal_sent_ {false};
+  double initial_distance_ {-1.0};
+  double server_timeout_ {30.0};
+  std::chrono::steady_clock::time_point phase_start_;
 };
 
 int main(int argc, char ** argv)
 {
   rclcpp::init(argc, argv);
+
   auto node = std::make_shared<MoveAction>();
 
   node->set_parameter(rclcpp::Parameter("action_name", "move"));
   node->set_parameter(rclcpp::Parameter("rate", 2.0));
   node->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_CONFIGURE);
 
-  rclcpp::spin(node->get_node_base_interface());
+  rclcpp::executors::SingleThreadedExecutor executor;
+  executor.add_node(node->get_node_base_interface());
+  executor.add_node(node->get_nav_node());
+  executor.spin();
 
   rclcpp::shutdown();
 
