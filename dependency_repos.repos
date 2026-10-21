@@ -1,9 +1,21 @@
 repositories:
+  EasyNavigation:
+    type: git
+    url: https://github.com/EasyNavigation/EasyNavigation.git
+    version: rolling
+  yaets:
+    type: git
+    url: https://github.com/fmrico/yaets.git
+    version: rolling
   cascade_lifecycle:
     type: git
     url: https://github.com/fmrico/cascade_lifecycle.git
-    version: kilted-devel
+    version: rolling-devel
+  kairos:
+    type: git
+    url: https://github.com/PlanSys2/kairos.git
+    version: main
   ros2_planning_system:
     type: git
-    url: https://github.com/IntelligentRoboticsLabs/ros2_planning_system.git
-    version: kilted-devel
+    url: https://github.com/PlanSys2/ros2_planning_system.git
+    version: rolling

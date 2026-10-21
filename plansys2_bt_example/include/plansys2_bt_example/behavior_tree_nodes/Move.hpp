@@ -15,41 +15,78 @@
 #ifndef PLANSYS2_BT_EXAMPLE__BEHAVIOR_TREE_NODES__MOVE_HPP_
 #define PLANSYS2_BT_EXAMPLE__BEHAVIOR_TREE_NODES__MOVE_HPP_
 
-#include <string>
+#include <chrono>
 #include <map>
+#include <memory>
+#include <string>
 
+#include "easynav_interfaces/msg/goal_manager_info.hpp"
+#include "easynav_system/GoalManagerClient.hpp"
 #include "geometry_msgs/msg/pose.hpp"
-#include "nav2_msgs/action/navigate_to_pose.hpp"
 
-#include "plansys2_bt_actions/BTActionNode.hpp"
 #include "behaviortree_cpp/behavior_tree.h"
 #include "behaviortree_cpp/bt_factory.h"
+
+#include "rclcpp/rclcpp.hpp"
+#include "rclcpp_lifecycle/lifecycle_node.hpp"
 
 namespace plansys2_bt_tests
 {
 
-class Move : public plansys2::BtActionNode<
-    nav2_msgs::action::NavigateToPose>
+// Node and EasyNav client of a performer, kept between the trees of its actions
+struct Navigator
+{
+  Navigator(const std::string & name, const std::string & ns);
+
+  // The goal manager is matched both ways; is_connected() also counts other clients
+  bool connected() const;
+  // Every client gets the feedback of all robots: take all the queued messages
+  void spin();
+  // A new client and subscription: new endpoints, discovered again (a bad match never recovers)
+  void renew();
+
+  rclcpp::Node::SharedPtr node;
+  rclcpp::executors::SingleThreadedExecutor executor;
+  easynav::GoalManagerClient::SharedPtr client;
+  // Only the goal manager publishes it
+  rclcpp::Subscription<easynav_interfaces::msg::GoalManagerInfo>::SharedPtr manager_info;
+};
+
+// Navigates to a waypoint with EasyNav
+class Move : public BT::StatefulActionNode
 {
 public:
-  explicit Move(
-    const std::string & xml_tag_name,
-    const std::string & action_name,
-    const BT::NodeConfiguration & conf);
+  Move(const std::string & xml_tag_name, const BT::NodeConfiguration & conf);
 
-  BT::NodeStatus on_tick() override;
-  BT::NodeStatus on_success() override;
+  BT::NodeStatus onStart() override;
+  BT::NodeStatus onRunning() override;
+  void onHalted() override;
 
   static BT::PortsList providedPorts()
   {
     return {
-      BT::InputPort<std::string>("goal")
+      BT::InputPort<std::string>("goal"),
+      BT::InputPort<double>(
+        "server_timeout", 30.0,
+        "Seconds to wait for EasyNav to be connected and to accept (it may start late)")
     };
   }
 
 private:
-  int goal_reached_;
+  // A new client, with a new id, so that late messages to the old one are ignored
+  void renew_navigator();
+  void wait_while(easynav::GoalManagerClient::State state, double seconds);
+
+  rclcpp_lifecycle::LifecycleNode::SharedPtr node_;
+  std::string navigator_key_;
+  std::shared_ptr<Navigator> navigator_;
   std::map<std::string, geometry_msgs::msg::Pose> waypoints_;
+
+  geometry_msgs::msg::PoseStamped goal_;
+  bool goal_sent_ {false};
+  std::chrono::steady_clock::time_point phase_start_;
+  double server_timeout_ {30.0};
+  std::chrono::steady_clock::time_point renewed_;
 };
 
 }  // namespace plansys2_bt_tests

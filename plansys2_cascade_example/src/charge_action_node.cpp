@@ -34,8 +34,9 @@ public:
 private:
   void do_work()
   {
-    if (progress_ < 1.0) {
-      progress_ += 0.05;
+    // As long as the plan says it lasts
+    progress_ += 1.0 / std::max(1.0, get_planned_duration() * get_parameter("rate").as_double());
+    if (progress_ < 1.0 - 1e-3) {
       send_feedback(progress_, "Charge running");
     } else {
       finish(true, 1.0, "Charge completed");
