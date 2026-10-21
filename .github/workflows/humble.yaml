@@ -14,12 +14,15 @@ jobs:
   build-and-test:
     runs-on: ubuntu-22.04
     container:
-      image: ghcr.io/ros-tooling/setup-ros-docker/setup-ros-docker-ubuntu-jammy-ros-humble-ros-base:master
+      image: ubuntu:jammy
     steps:
       - name: Repo checkout
         uses: actions/checkout@v6
       - name: Install popf deps
         run: apt-get update && apt-get install -y libfl-dev
+      # There is no setup-ros image of Humble: setup-ros installs it
+      - name: Setup ROS 2
+        uses: ros-tooling/setup-ros@0.7.19
       - name: build and test
         uses: ros-tooling/action-ros-ci@0.4.8
         with:
