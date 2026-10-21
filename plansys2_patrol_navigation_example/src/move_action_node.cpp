@@ -49,7 +49,8 @@ public:
     manager_info_ = nav_node_->create_subscription<easynav_interfaces::msg::GoalManagerInfo>(
       "easynav_manager_info", 10, [](easynav_interfaces::msg::GoalManagerInfo::UniquePtr) {});
 
-    server_timeout_ = declare_parameter("server_timeout", 5.0);
+    // EasyNav may start late: wait for it this long before failing the action
+    server_timeout_ = declare_parameter("server_timeout", 30.0);
     auto wp_names = declare_parameter("waypoints", std::vector<std::string>{});
 
     for (const auto & wp : wp_names) {
@@ -182,7 +183,7 @@ private:
   std::optional<geometry_msgs::msg::PoseStamped> goal_pos_;
   bool goal_sent_ {false};
   double initial_distance_ {-1.0};
-  double server_timeout_ {5.0};
+  double server_timeout_ {30.0};
   std::chrono::steady_clock::time_point phase_start_;
 };
 

@@ -40,6 +40,12 @@ Navigator::Navigator(const std::string & name, const std::string & ns)
       name, ns, rclcpp::NodeOptions().use_global_arguments(false)))
 {
   executor.add_node(node);
+  renew();
+}
+
+void
+Navigator::renew()
+{
   client = easynav::GoalManagerClient::make_shared(node);
   manager_info = node->create_subscription<easynav_interfaces::msg::GoalManagerInfo>(
     "easynav_manager_info", 10, [](easynav_interfaces::msg::GoalManagerInfo::UniquePtr) {});
@@ -153,6 +159,7 @@ Move::onStart()
 
   goal_sent_ = false;
   phase_start_ = std::chrono::steady_clock::now();
+  renewed_ = phase_start_;
 
   return onRunning();
 }
@@ -178,6 +185,11 @@ Move::onRunning()
     } else if (elapsed > server_timeout_) {
       RCLCPP_ERROR(node_->get_logger(), "No EasyNav goal manager in easynav_control");
       return BT::NodeStatus::FAILURE;
+    } else if (std::chrono::steady_clock::now() - renewed_ > std::chrono::seconds(5)) {
+      // Not connected yet: maybe a bad match, which waiting does not fix
+      RCLCPP_INFO(node_->get_logger(), "Waiting for EasyNav...");
+      navigator_->renew();
+      renewed_ = std::chrono::steady_clock::now();
     }
     return BT::NodeStatus::RUNNING;
   }

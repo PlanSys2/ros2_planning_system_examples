@@ -42,6 +42,8 @@ struct Navigator
   bool connected() const;
   // Every client gets the feedback of all robots: take all the queued messages
   void spin();
+  // A new client and subscription: new endpoints, discovered again (a bad match never recovers)
+  void renew();
 
   rclcpp::Node::SharedPtr node;
   rclcpp::executors::SingleThreadedExecutor executor;
@@ -65,7 +67,8 @@ public:
     return {
       BT::InputPort<std::string>("goal"),
       BT::InputPort<double>(
-        "server_timeout", 5.0, "Seconds to wait for EasyNav to be connected and to accept")
+        "server_timeout", 30.0,
+        "Seconds to wait for EasyNav to be connected and to accept (it may start late)")
     };
   }
 
@@ -82,7 +85,8 @@ private:
   geometry_msgs::msg::PoseStamped goal_;
   bool goal_sent_ {false};
   std::chrono::steady_clock::time_point phase_start_;
-  double server_timeout_ {5.0};
+  double server_timeout_ {30.0};
+  std::chrono::steady_clock::time_point renewed_;
 };
 
 }  // namespace plansys2_bt_tests

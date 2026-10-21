@@ -18,9 +18,6 @@
 #include <string>
 #include <vector>
 
-#include "lifecycle_msgs/msg/state.hpp"
-#include "lifecycle_msgs/srv/get_state.hpp"
-
 #include "plansys2_domain_expert/DomainExpertClient.hpp"
 #include "plansys2_executor/ExecutorClient.hpp"
 #include "plansys2_planner/PlannerClient.hpp"
@@ -39,35 +36,12 @@ public:
     declare_parameter("waypoints", std::vector<std::string>{"wp1", "wp2"});
   }
 
-  // Whether the node is active, asked through its lifecycle
-  bool active(const std::string & node)
-  {
-    auto client = create_client<lifecycle_msgs::srv::GetState>(node + "/get_state");
-    if (!client->wait_for_service(1s)) {
-      return false;
-    }
-    auto future = client->async_send_request(
-      std::make_shared<lifecycle_msgs::srv::GetState::Request>());
-    if (rclcpp::spin_until_future_complete(shared_from_this(), future, 1s) !=
-      rclcpp::FutureReturnCode::SUCCESS)
-    {
-      return false;
-    }
-    return future.get()->current_state.id == lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE;
-  }
-
   int run()
   {
-    auto domain = std::make_shared<plansys2::DomainExpertClient>();
-    auto problem = std::make_shared<plansys2::ProblemExpertClient>();
-    auto planner = std::make_shared<plansys2::PlannerClient>();
-    auto executor = std::make_shared<plansys2::ExecutorClient>();
-    for (const auto & node : {"domain_expert", "problem_expert", "planner", "executor"}) {
-      while (rclcpp::ok() && !active(node)) {
-        RCLCPP_INFO(get_logger(), "Waiting for %s...", node);
-        rclcpp::sleep_for(500ms);
-      }
-    }
+    auto domain = std::make_shared<plansys2::DomainExpertClient>(*this);
+    auto problem = std::make_shared<plansys2::ProblemExpertClient>(*this);
+    auto planner = std::make_shared<plansys2::PlannerClient>(*this);
+    auto executor = std::make_shared<plansys2::ExecutorClient>(*this);
 
     // The control waypoint is connected to every other one
     problem->addInstance(plansys2::Instance{"r2d2", "robot"});

@@ -8,7 +8,7 @@ This example shows:
 - How to use an application to initiate knowledge (the PDDL problem) and control its execution flow.
 - How to navigate with EasyNav, using `easynav_system::GoalManagerClient`
 
-The patrolling_controller_node node must be run separately. Use the PlanSys2 API to populate instances, predicates, and goals. Implement a finite state machine to establish as a goal which waypoint to patrol. Patrolling a waypoint is going to that point and turning around for a few seconds.
+The patrolling_controller_node node must be run separately. Use the PlanSys2 API to populate instances, predicates, and goals. Implement a finite state machine to establish as a goal which waypoint to patrol. Patrolling a waypoint is going to that point and turning around for a few seconds. While it patrols, it shows the navigation feedback of EasyNav every 2 seconds: a subscription of the controller, served by the executor that spins its node in the loop of `main` (the PlanSys2 clients bring their own answers).
 
 ## How to run
 

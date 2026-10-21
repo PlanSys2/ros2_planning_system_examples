@@ -19,9 +19,6 @@
 #include <memory>
 #include <string>
 
-#include "lifecycle_msgs/msg/state.hpp"
-#include "lifecycle_msgs/srv/get_state.hpp"
-
 #include "plansys2_domain_expert/DomainExpertClient.hpp"
 #include "plansys2_executor/ExecutorClient.hpp"
 #include "plansys2_pddl_parser/Utils.hpp"
@@ -38,41 +35,12 @@ public:
     declare_parameter("cars", 3);
   }
 
-  // Whether the node is active, asked through its lifecycle
-  bool active(const std::string & node)
-  {
-    auto client = create_client<lifecycle_msgs::srv::GetState>(node + "/get_state");
-    if (!client->wait_for_service(std::chrono::seconds(1))) {
-      return false;
-    }
-    auto future = client->async_send_request(
-      std::make_shared<lifecycle_msgs::srv::GetState::Request>());
-    if (rclcpp::spin_until_future_complete(shared_from_this(), future, std::chrono::seconds(1)) !=
-      rclcpp::FutureReturnCode::SUCCESS)
-    {
-      return false;
-    }
-    return future.get()->current_state.id == lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE;
-  }
-
-  // PlanSys2 up before asking it anything: a request while it starts may get no answer
-  void wait_for_plansys2()
-  {
-    for (const auto & node : {"domain_expert", "problem_expert", "planner", "executor"}) {
-      while (rclcpp::ok() && !active(node)) {
-        RCLCPP_INFO(get_logger(), "Waiting for %s...", node);
-        rclcpp::sleep_for(std::chrono::milliseconds(500));
-      }
-    }
-  }
-
   bool init()
   {
-    domain_expert_ = std::make_shared<plansys2::DomainExpertClient>();
-    planner_client_ = std::make_shared<plansys2::PlannerClient>();
-    problem_expert_ = std::make_shared<plansys2::ProblemExpertClient>();
-    executor_client_ = std::make_shared<plansys2::ExecutorClient>();
-    wait_for_plansys2();
+    domain_expert_ = std::make_shared<plansys2::DomainExpertClient>(*this);
+    planner_client_ = std::make_shared<plansys2::PlannerClient>(*this);
+    problem_expert_ = std::make_shared<plansys2::ProblemExpertClient>(*this);
+    executor_client_ = std::make_shared<plansys2::ExecutorClient>(*this);
 
     init_knowledge(get_parameter("cars").as_int());
 
@@ -179,16 +147,14 @@ int main(int argc, char ** argv)
 {
   rclcpp::init(argc, argv);
   auto node = std::make_shared<AssembleArm>();
+
   if (!node->init()) {
     rclcpp::shutdown();
     return 1;
   }
 
-  rclcpp::executors::SingleThreadedExecutor exec;
-  exec.add_node(node);
   rclcpp::Rate rate(5);
   while (rclcpp::ok() && node->step()) {
-    exec.spin_some();
     rate.sleep();
   }
 
