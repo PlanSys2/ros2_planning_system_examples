@@ -1,0 +1,7 @@
+<root BTCPP_format="4" main_tree_to_execute="MainTree">
+  <BehaviorTree ID="MainTree">
+    <Sequence name="survey">
+      <ArbiterAction action="survey" nargs="2"/>
+    </Sequence>
+  </BehaviorTree>
+</root>

@@ -1,0 +1,69 @@
+# Two armies that plan, each with its PlanSys2: whoever takes every control point first wins.
+# Each side starts with its tank guarding a control point: only tanks and artillery clear it.
+# The same 3x3 map, the blue army at its base (c_west) and the red one at its (c_east); each side
+# sees only its base at the start. Run it with world:=duel
+combat_arbiter:
+  ros__parameters:
+    seed: 7
+    time_scale: 0.5  # real seconds per second of the plan: slow enough to follow in RViz
+    zones:
+      - "n_west"
+      - "n_mid"
+      - "n_east"
+      - "c_west"
+      - "c_mid"
+      - "c_east"
+      - "s_west"
+      - "s_mid"
+      - "s_east"
+    zone_positions:  # "zone x y", in meters on the map frame
+      - "n_west 0 20"
+      - "n_mid 10 20"
+      - "n_east 20 20"
+      - "c_west 0 10"
+      - "c_mid 10 10"
+      - "c_east 20 10"
+      - "s_west 0 0"
+      - "s_mid 10 0"
+      - "s_east 20 0"
+    connections:
+      - "n_west n_mid 10"
+      - "n_west c_west 10"
+      - "n_mid n_east 10"
+      - "n_mid c_mid 10"
+      - "n_east c_east 10"
+      - "c_west c_mid 10"
+      - "c_west s_west 10"
+      - "c_mid c_east 10"
+      - "c_mid s_mid 10"
+      - "c_east s_east 10"
+      - "s_west s_mid 10"
+      - "s_mid s_east 10"
+    control_points:
+      - "n_mid"
+      - "c_mid"
+      - "s_mid"
+    # Every side: its base, its army and what it sees from the start (its base if not given)
+    sides: ["blue", "red"]
+    armies: ["blue", "red"]  # the sides that plan, each with its PlanSys2 (read by the launcher)
+    viewpoint: ""  # in RViz, every robot solid: both sides play
+    blue:
+      base: "c_west"
+      robots:
+        - "b_drone drone c_west"
+        - "b_inf1 infantry c_west"
+        - "b_inf2 infantry c_west"
+        - "b_tank tank n_mid"  # guards a control point
+        - "b_art artillery c_west"
+    red:
+      base: "c_east"
+      robots:
+        - "r_drone drone c_east"
+        - "r_inf1 infantry c_east"
+        - "r_inf2 infantry c_east"
+        - "r_tank tank s_mid"  # guards a control point
+        - "r_art artillery c_east"
+    hit_probability:
+      - "infantry 0.7"
+      - "tank 0.8"
+      - "artillery 0.6"

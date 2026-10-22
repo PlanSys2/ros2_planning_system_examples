@@ -1,0 +1,57 @@
+Panels:
+  - Class: rviz_common/Displays
+    Name: Displays
+Visualization Manager:
+  Class: ""
+  Displays:
+    - Class: rviz_default_plugins/Grid
+      Name: Grid
+      Enabled: true
+      Cell Size: 10
+      Plane Cell Count: 7
+      Offset:
+        X: 25
+        Y: 25
+        Z: -0.1
+    - Class: rviz_default_plugins/TF
+      Name: TF
+      Enabled: false
+    - Class: rviz_default_plugins/MarkerArray
+      Name: Battle
+      Enabled: true
+      Topic:
+        Value: /combat/markers
+        Depth: 1
+        Durability Policy: Transient Local
+        Reliability Policy: Reliable
+    - Class: rviz_default_plugins/MarkerArray
+      Name: Shots
+      Enabled: true
+      Topic:
+        Value: /combat/effects
+        Depth: 50
+        Durability Policy: Volatile
+        Reliability Policy: Reliable
+  Enabled: true
+  Global Options:
+    Background Color: 30; 30; 40
+    Fixed Frame: map
+    Frame Rate: 30
+  Name: root
+  Tools:
+    - Class: rviz_default_plugins/MoveCamera
+    - Class: rviz_default_plugins/Interact
+  Value: true
+  Views:
+    Current:
+      Class: rviz_default_plugins/Orbit
+      Distance: 95
+      Focal Point:
+        X: 25
+        Y: 25
+        Z: 0
+      Pitch: 0.9
+      Yaw: -1.57
+      Name: Current View
+      Target Frame: <Fixed Frame>
+      Value: Orbit (rviz)

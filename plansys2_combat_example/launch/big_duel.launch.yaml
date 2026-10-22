@@ -1,0 +1,31 @@
+# Copyright 2026 Intelligent Robotics Lab
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# A big battle of two PlanSys2 on a 6x6 map with a river: the arbiter, PlanSys2, the
+# performers and the controller of every army that plans, and RViz2 with the battle
+launch:
+- arg: {name: goal, default: capture, description: 'capture, or total (also destroy every enemy found)'}
+- arg: {name: rviz, default: 'true', description: Show the battle in RViz2}
+- arg: {name: colors, default: 'true', description: 'The battle told in colors: the arbiter yellow, blue cyan, red red'}
+- arg: {name: shutdown_at_end, default: 'false', description: Stop everything when the battle ends}
+- arg: {name: seed, default: '', description: 'Seed of the shots; by default, the world''s'}
+- include:
+    file: $(find-pkg-share plansys2_combat_example)/launch/combat_launch.py
+    arg:
+    - {name: world, value: big_duel}
+    - {name: goal, value: $(var goal)}
+    - {name: rviz, value: $(var rviz)}
+    - {name: seed, value: $(var seed)}
+    - {name: shutdown_at_end, value: $(var shutdown_at_end)}
+    - {name: colors, value: $(var colors)}

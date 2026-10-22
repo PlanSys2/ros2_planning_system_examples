@@ -1,0 +1,7 @@
+# The end of an action: what really happened (a shot can miss, a zone can hide enemies)
+string side
+string action
+string[] arguments
+---
+bool success
+string message

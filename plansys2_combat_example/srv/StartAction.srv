@@ -1,0 +1,8 @@
+# The start of an action of a side's robot: resources it uses, and how long it lasts
+string side
+string action
+string[] arguments
+---
+bool accepted
+float64 duration  # seconds of real time, including getting back from a cancelled move
+string message

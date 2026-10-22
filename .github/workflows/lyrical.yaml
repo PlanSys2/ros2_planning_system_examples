@@ -23,7 +23,7 @@ jobs:
       - name: build and test
         uses: ros-tooling/action-ros-ci@0.4.8
         with:
-          package-name: plansys2_bt_example plansys2_cascade_example plansys2_multidomain_example plansys2_patrol_navigation_example plansys2_simple_example plansys2_simple_example_py
+          package-name: plansys2_bt_example plansys2_cascade_example plansys2_combat_example plansys2_multidomain_example plansys2_patrol_navigation_example plansys2_simple_example plansys2_simple_example_py
           target-ros2-distro: lyrical
           vcs-repo-file-url: ${GITHUB_WORKSPACE}/plansys2.repos
           colcon-defaults: |
