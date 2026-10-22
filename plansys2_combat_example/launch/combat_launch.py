@@ -115,6 +115,7 @@ def battle(context):
                 'goal': LaunchConfiguration('goal'),
                 'metric': LaunchConfiguration('metric'),
                 'colors': colors,
+                'dump_dir': LaunchConfiguration('dump_dir'),
             }])
         nodes.append(controller)
         # A controller ends with the battle: everything else may end with it
@@ -146,6 +147,9 @@ def generate_launch_description():
             description='Metric of the problem, e.g. minimize (+ (spent) (* 100 (total-time)))'),
         DeclareLaunchArgument(
             'rviz', default_value='true', description='Show the battle in RViz2'),
+        DeclareLaunchArgument(
+            'dump_dir', default_value='',
+            description='Where the controllers write the problems they find no plan for'),
         DeclareLaunchArgument(
             'colors', default_value='true',
             description='The battle told in colors: the arbiter yellow, blue cyan, red red'),

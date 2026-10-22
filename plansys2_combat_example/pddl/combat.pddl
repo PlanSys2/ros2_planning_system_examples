@@ -155,7 +155,8 @@
     (at end (available ?d))
     (at end (increase (spent) (op_cost ?d)))))
 
-; The drone hovers over a zone and designates targets for the artillery.
+; The drone hovers over a zone and designates targets for the artillery, within reach of the
+; enemy there (10 % of its value).
 (:durative-action spot
   :parameters (?d - drone ?z - zone)
   :duration (= ?duration 12)
@@ -171,7 +172,7 @@
     (at start (spotted ?z))
     (at end (not (spotted ?z)))
     (at end (available ?d))
-    (at end (increase (spent) (op_cost ?d)))))
+    (at end (increase (spent) (+ (op_cost ?d) (* 0.1 (value ?d)))))))
 
 (:durative-action recharge
   :parameters (?d - drone ?z - zone)
@@ -186,7 +187,8 @@
     (at end (assign (battery ?d) 100))
     (at end (available ?d))))
 
-; Light weapons: infantry only hurts soft targets in its zone.
+; Light weapons: infantry only hurts soft targets in its zone, in close combat: it risks being
+; shot back (15 % of its value).
 (:durative-action attack_infantry
   :parameters (?r - infantry ?t - soft ?z - zone)
   :duration (= ?duration 3)
@@ -203,9 +205,9 @@
     (at end (not (at ?t ?z)))
     (at end (destroyed ?t))
     (at end (available ?r))
-    (at end (increase (spent) (+ (op_cost ?r) (shot_cost ?r))))))
+    (at end (increase (spent) (+ (+ (op_cost ?r) (shot_cost ?r)) (* 0.15 (value ?r)))))))
 
-; The tank hurts any ground target in its zone.
+; The tank hurts any ground target in its zone; its armor keeps the risk low (1 % of its value).
 (:durative-action attack_tank
   :parameters (?r - tank ?t - ground ?z - zone)
   :duration (= ?duration 3)
@@ -222,9 +224,9 @@
     (at end (not (at ?t ?z)))
     (at end (destroyed ?t))
     (at end (available ?r))
-    (at end (increase (spent) (+ (op_cost ?r) (shot_cost ?r))))))
+    (at end (increase (spent) (+ (+ (op_cost ?r) (shot_cost ?r)) (* 0.01 (value ?r)))))))
 
-; Artillery fires at a connected zone while a drone spots it.
+; Artillery fires at a connected zone while a drone spots it: from afar, with no risk.
 (:durative-action bombard
   :parameters (?r - artillery ?t - ground ?from ?to - zone)
   :duration (= ?duration 4)

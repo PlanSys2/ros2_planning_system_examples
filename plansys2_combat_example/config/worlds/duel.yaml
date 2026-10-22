@@ -1,4 +1,5 @@
 # Two armies that plan, each with its PlanSys2: whoever takes every control point first wins.
+# Each side starts with its tank guarding a control point: only tanks and artillery clear it.
 # The same 3x3 map, the blue army at its base (c_west) and the red one at its (c_east); each side
 # sees only its base at the start. Run it with world:=duel
 combat_arbiter:
@@ -52,7 +53,7 @@ combat_arbiter:
         - "b_drone drone c_west"
         - "b_inf1 infantry c_west"
         - "b_inf2 infantry c_west"
-        - "b_tank tank c_west"
+        - "b_tank tank n_mid"  # guards a control point
         - "b_art artillery c_west"
     red:
       base: "c_east"
@@ -60,7 +61,7 @@ combat_arbiter:
         - "r_drone drone c_east"
         - "r_inf1 infantry c_east"
         - "r_inf2 infantry c_east"
-        - "r_tank tank c_east"
+        - "r_tank tank s_mid"  # guards a control point
         - "r_art artillery c_east"
     hit_probability:
       - "infantry 0.7"

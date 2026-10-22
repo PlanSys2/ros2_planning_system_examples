@@ -1,7 +1,8 @@
 # A big battle: two PlanSys2 with twelve robots each on a 6x6 map crossed by a river.
 # The river runs between columns 2 and 3 and has two bridges, in rows 1 and 4; eight control
 # points, in pairs on both banks. Blue starts at z2_0 and red at z3_5; each side sees only its
-# base at the start. Whoever holds every control point, or is the only one with robots left, wins
+# base at the start; each side guards its central points with its tanks, which only tanks and
+# artillery clear. Whoever holds every control point, or is the only one with robots left, wins
 combat_arbiter:
   ros__parameters:
     seed: 3
@@ -164,8 +165,8 @@ combat_arbiter:
         - "b_inf4 infantry z2_0"
         - "b_inf5 infantry z2_0"
         - "b_inf6 infantry z2_0"
-        - "b_tank1 tank z2_0"
-        - "b_tank2 tank z2_0"
+        - "b_tank1 tank z2_2"  # the tanks guard the control points of the center
+        - "b_tank2 tank z3_2"
         - "b_art1 artillery z2_0"
         - "b_art2 artillery z2_0"
     red:
@@ -179,8 +180,8 @@ combat_arbiter:
         - "r_inf4 infantry z3_5"
         - "r_inf5 infantry z3_5"
         - "r_inf6 infantry z3_5"
-        - "r_tank1 tank z3_5"
-        - "r_tank2 tank z3_5"
+        - "r_tank1 tank z2_3"  # the tanks guard the control points of the center
+        - "r_tank2 tank z3_3"
         - "r_art1 artillery z3_5"
         - "r_art2 artillery z3_5"
     hit_probability:

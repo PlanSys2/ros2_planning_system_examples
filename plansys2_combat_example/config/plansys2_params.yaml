@@ -13,6 +13,9 @@
     plan_solver_plugins: ["KAIROS"]
     KAIROS:
       plugin: "plansys2/KairosPlanSolver"
+      # Plans where the artillery fires while a drone spots (required concurrency) come after
+      # the first one: a second without a better plan instead of the default 0.1
+      no_improvement: 1.0
 /**/executor:
   ros__parameters:
     bt_builder_plugin: "STNBTBuilder"

@@ -18,6 +18,7 @@
 
 #include <algorithm>
 #include <chrono>
+#include <fstream>
 #include <functional>
 #include <map>
 #include <memory>
@@ -114,6 +115,8 @@ public:
     retry_period_ = declare_parameter<double>("retry_period", 5.0);  // seconds, with no plan
     better_by_ = declare_parameter<double>("better_by", 0.05);  // a new plan, cheaper by this
     assign_objectives_ = declare_parameter<bool>("assign_objectives", true);
+    reconnoitre_ = declare_parameter<bool>("reconnoitre", true);
+    dump_dir_ = declare_parameter<std::string>("dump_dir", "");  // problems with no plan
     chronicle_ = std::make_unique<plansys2_combat_example::Chronicle>(
       get_logger(), side_, declare_parameter<bool>("colors", true));
 
@@ -136,7 +139,7 @@ public:
     if (finished_ || !view_) {
       return;
     }
-    if (round_ == 0 && !executing_ && !waiting_) {
+    if (round_ == 0 && !executing_ && !waiting_ && !settling_) {
       // PlanSys2 may still be starting: wait until its problem expert answers
       if (!problem_client_->addInstance(plansys2::Instance(view_->zones.front(), "zone"))) {
         if (++waiting_expert_ > 75) {  // 15 s at 5 Hz
@@ -186,6 +189,15 @@ public:
       }
     }
 
+    // A plan given up: once the executor has taken back what it began, the next round
+    if (settling_) {
+      if (now() >= settled_at_) {
+        settling_ = false;
+        end_round("cancelled");
+      }
+      return;
+    }
+
     // No plan last time: try again with news from the arbiter, or after a while
     if (waiting_) {
       if (news_ || now() >= retry_at_) {
@@ -225,7 +237,10 @@ public:
   {
     chronicle_->tell("[" + side_ + "] " + why);
     executor_client_->cancel_plan_execution();
-    end_round("cancelled");
+    // The executor takes back what the cancelled actions began: only then the view rules
+    executing_ = false;
+    settling_ = true;
+    settled_at_ = now() + rclcpp::Duration::from_seconds(1.0);
   }
 
   bool finished() const {return finished_;}
@@ -417,7 +432,7 @@ private:
       return;
     }
 
-    const auto goal = make_goal();
+    const auto goal = can_capture() ? make_goal() : fight_on_goal();
     if (!problem_client_->setGoal(goal)) {
       RCLCPP_ERROR(get_logger(), "Goal not accepted: %s", parser::pddl::toString(goal).c_str());
       finished_ = true;
@@ -426,7 +441,12 @@ private:
 
     std::optional<plansys2_msgs::msg::Plan> plan;
     if (!problem_client_->isGoalSatisfied(goal)) {
-      plan = planner_client_->getPlan(domain_client_->getDomain(), problem_client_->getProblem());
+      const auto problem = problem_client_->getProblem();
+      plan = planner_client_->getPlan(domain_client_->getDomain(), problem);
+      if (!plan && !dump_dir_.empty()) {  // to study it with the planner alone
+        std::ofstream(dump_dir_ + "/" + side_ + "_" + std::to_string(++dumps_) + ".pddl") <<
+          problem;
+      }
     }
     if (!plan.has_value() || plan->items.empty()) {
       // The goal holds (the arbiter will say so) or there is no way now: wait and look again
@@ -471,14 +491,39 @@ private:
   plansys2::Goal make_goal()
   {
     std::string goal = "(and";
-    for (const auto & z : view_->control_points) {
-      goal += " (owned " + z + ")";
-    }
     orders_.clear();
+    // A point an enemy tank guards cannot be entered by infantry: first, the tank destroyed
+    const auto blocked = assign_objectives_ ? guarded() : std::map<std::string, std::string>{};
+    for (const auto & z : view_->control_points) {
+      auto tank = blocked.find(z);
+      if (tank == blocked.end()) {
+        goal += " (owned " + z + ")";
+      } else {
+        goal += " (destroyed " + tank->second + ")";
+        orders_ += (orders_.empty() ? "; orders: " : ", ") + std::string("destroy ") +
+          tank->second + " in " + z;
+      }
+    }
     if (assign_objectives_) {
-      for (const auto & [robot, zone] : objectives()) {
+      const auto given = orders(blocked);
+      for (const auto & [robot, zone] : given.objectives) {
         goal += " (at " + robot + " " + zone + ")";
         orders_ += (orders_.empty() ? "; orders: " : ", ") + robot + " to " + zone;
+      }
+      for (const auto & zone : given.reconnoitre) {
+        goal += " (explored " + zone + ")";
+      }
+      if (!given.reconnoitre.empty()) {
+        orders_ += "; reconnoitre " + std::to_string(given.reconnoitre.size()) + " zones";
+      }
+      // Tanks on a control point hold it: the enemy has to destroy them to take it
+      const std::set<std::string> points(
+        view_->control_points.begin(), view_->control_points.end());
+      for (const auto & r : view_->robots) {
+        if (r.alive && r.type == "tank" && points.count(r.zone)) {
+          goal += " (at " + r.name + " " + r.zone + ")";
+          orders_ += (orders_.empty() ? "; orders: " : ", ") + r.name + " holds " + r.zone;
+        }
       }
     }
     if (goal_mode_ == "total") {
@@ -489,50 +534,130 @@ private:
     return plansys2::Goal(goal + ")");
   }
 
-  // Control points not ours yet, each with the nearest free infantry (roads away)
-  std::vector<std::pair<std::string, std::string>> objectives() const
+  // With no infantry left, no point can be taken: what is left fights on, to win by destroying
+  // every enemy it knows of
+  bool can_capture() const
+  {
+    for (const auto & r : view_->robots) {
+      if (r.alive && r.type == "infantry") {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  plansys2::Goal fight_on_goal()
+  {
+    std::string goal;
+    for (const auto & e : view_->enemies) {
+      if (e.alive && !e.zone.empty()) {
+        goal += " (destroyed " + e.name + ")";
+      }
+    }
+    if (goal.empty()) {
+      return make_goal();  // no enemy where we know: wait for news
+    }
+    orders_ = "; no infantry left: destroy every enemy known";
+    return plansys2::Goal("(and" + goal + ")");
+  }
+
+  // Control points an enemy tank we know of is in, and that tank
+  std::map<std::string, std::string> guarded() const
+  {
+    const std::set<std::string> points(
+      view_->control_points.begin(), view_->control_points.end());
+    std::map<std::string, std::string> ret;
+    for (const auto & e : view_->enemies) {
+      if (e.alive && e.type == "tank" && points.count(e.zone)) {
+        ret.emplace(e.zone, e.name);
+      }
+    }
+    return ret;
+  }
+
+  // The orders of a round: the infantry that takes each control point not ours yet, and the
+  // zones to reconnoitre on their ways
+  struct Orders
+  {
+    std::vector<std::pair<std::string, std::string>> objectives;  // infantry, control point
+    std::set<std::string> reconnoitre;                             // zones to explore
+  };
+
+  // Each control point not ours yet goes to the nearest free infantry (roads away). The
+  // unexplored zones on its way are to be explored first, as many as the drones' battery
+  // allows: surveying costs far less than walking blind into a zone, but asking for more makes
+  // a plan of trips to recharge that the planner may not find in time
+  Orders orders(const std::map<std::string, std::string> & blocked) const
   {
     std::map<std::string, std::vector<std::string>> roads;
     for (size_t i = 0; i < view_->connection_from.size(); i++) {
       roads[view_->connection_from[i]].push_back(view_->connection_to[i]);
     }
-    auto hops_from = [&roads](const std::string & start) {
-        std::map<std::string, int> hops = {{start, 0}};
+    // From a zone: the zone each other one is reached from, on a shortest way
+    auto ways_from = [&roads](const std::string & start) {
+        std::map<std::string, std::string> from = {{start, ""}};
         std::vector<std::string> queue = {start};
         for (size_t i = 0; i < queue.size(); i++) {
           for (const auto & next : roads[queue[i]]) {
-            if (hops.emplace(next, hops[queue[i]] + 1).second) {
+            if (from.emplace(next, queue[i]).second) {
               queue.push_back(next);
             }
           }
         }
-        return hops;
+        return from;
       };
-    std::map<std::string, std::map<std::string, int>> free;  // infantry -> hops to each zone
+    auto way = [](const std::map<std::string, std::string> & from, std::string zone) {
+        std::vector<std::string> ret;
+        for (; from.count(zone) && !from.at(zone).empty(); zone = from.at(zone)) {
+          ret.push_back(zone);
+        }
+        return ret;  // from the goal back, without the start
+      };
+
+    std::map<std::string, std::map<std::string, std::string>> free;  // infantry -> its ways
+    // What the drones can survey with the battery they have: a flight and a survey each zone
+    int surveys = 0;
     for (const auto & r : view_->robots) {
       if (r.alive && r.type == "infantry") {
-        free[r.name] = hops_from(r.zone);
+        free[r.name] = ways_from(r.zone);
+      }
+      if (r.alive && r.type == "drone") {
+        surveys += static_cast<int>(r.battery / 15.0);
       }
     }
     const std::set<std::string> owned(view_->owned.begin(), view_->owned.end());
-    std::vector<std::pair<std::string, std::string>> ret;
+    const std::set<std::string> explored(view_->explored.begin(), view_->explored.end());
+    Orders ret;
     for (const auto & z : view_->control_points) {
-      if (owned.count(z) || free.empty()) {
+      if (owned.count(z) || blocked.count(z) || free.empty()) {
         continue;
       }
       auto best = free.end();
+      size_t best_length = 0;
       for (auto it = free.begin(); it != free.end(); ++it) {
-        auto h = it->second.find(z);
-        if (h != it->second.end() &&
-          (best == free.end() || h->second < best->second.at(z)))
+        if (it->second.count(z) &&
+          (best == free.end() || way(it->second, z).size() < best_length))
         {
           best = it;
+          best_length = way(it->second, z).size();
         }
       }
-      if (best != free.end()) {
-        ret.emplace_back(best->first, z);
-        free.erase(best);
+      if (best == free.end()) {
+        continue;
       }
+      ret.objectives.emplace_back(best->first, z);
+      if (reconnoitre_) {
+        // Nearest first: the way comes from the goal back
+        auto on_way = way(best->second, z);
+        for (auto it = on_way.rbegin(); it != on_way.rend(); ++it) {
+          if (!explored.count(*it) && !ret.reconnoitre.count(*it) &&
+            static_cast<int>(ret.reconnoitre.size()) < surveys)
+          {
+            ret.reconnoitre.insert(*it);
+          }
+        }
+      }
+      free.erase(best);
     }
     return ret;
   }
@@ -570,10 +695,15 @@ private:
   bool executing_ = false;
   bool waiting_ = false;  // for retry_at_, after a round with no plan
   bool news_ = false;     // the view changed since the last plan
+  bool settling_ = false;  // a plan given up, for settled_at_
+  rclcpp::Time settled_at_;
   rclcpp::Time retry_at_;
   double retry_period_;
   double better_by_;
   bool assign_objectives_;
+  bool reconnoitre_;
+  std::string dump_dir_;
+  int dumps_ = 0;
   std::string orders_;  // the objectives of the last goal, to tell
   std::unique_ptr<plansys2_combat_example::Chronicle> chronicle_;
   bool battle_over_ = false;

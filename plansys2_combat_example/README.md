@@ -56,9 +56,10 @@ ros2 run plansys2_tui_cli plansys2_tui --ros-args -r __ns:=/blue
 ### Duel
 
 Blue and red, each with its PlanSys2 and its controller, fight for the three control points of
-the same 3x3 map. Each one only knows its base at the start: they find each other as they move,
-shoot at each other and take points from each other. The first to hold every point, or the only
-one with robots left, wins.
+the same 3x3 map. Each one only knows its base at the start, and its tank guards a control point
+(blue's the north one, red's the south one): only tanks and artillery can clear it. They find
+each other as they move, shoot at each other and take points from each other. The first to hold
+every point, or the only one with robots left, wins.
 
 ```shell
 ros2 launch plansys2_combat_example duel.launch.yaml
@@ -70,8 +71,8 @@ ros2 run plansys2_tui_cli plansys2_tui --ros-args -r __ns:=/red
 
 A big battle of the same kind: twelve robots a side (two drones, six infantry, two tanks and two
 artillery) on a 6x6 map crossed by a river with two bridges, and eight control points in pairs
-on both banks. Plans have dozens of actions and take seconds, so time runs slower: a battle lasts
-two or three minutes.
+on both banks. Each side's tanks guard its two central points. Plans have dozens of actions and
+take seconds, so time runs slower: a battle lasts a few minutes.
 
 ```shell
 ros2 launch plansys2_combat_example big_duel.launch.yaml
@@ -103,6 +104,13 @@ drawn (the river of `big_duel`).
   points. Tanks assault defended zones. Artillery fires at a connected zone while a drone spots
   it, which needs the STN executor (required concurrency). Each action costs euros: operation,
   ammunition and the risk of losing the robot. The metric is the euros spent.
+
+  The risks are what makes each kind of robot worth using. Walking blind into a zone (`advance`)
+  risks 20 % of the robot; a drone surveys it for a hundred euros. Infantry fights in close
+  combat (15 % of its value), the tank behind its armor (1 %), and the artillery from the next
+  zone with no risk, but only while a drone, exposed over the target (10 %), spots it. So the
+  plans send drones ahead, clear zones with artillery or tanks, and bring infantry in to take
+  them. Infantry cannot hurt a tank nor go where one is: tanks and artillery deal with tanks.
 - **The arbiter** (`combat_arbiter_node`): the true state of the battle, loaded from a world in
   `config/worlds`. It knows nothing of PlanSys2. It resolves every action
   (`/combat/start_action`, `/combat/finish_action`, `/combat/cancel_action`): whether the robot
@@ -120,10 +128,25 @@ drawn (the river of `big_duel`).
   finished or failed, it makes the problem match the view and plans again; with no plan, it waits
   for news. It stops when the arbiter says who has won.
 
-  As a commander would, it gives each control point still to take to the nearest free infantry,
-  which must end there (`assign_objectives`): the planner shares the work among the army, instead
-  of a plan where one robot goes everywhere (in `pddl/problems/large/huge_fog_1.pddl`, 6 infantry
-  and a plan of 75 s instead of one infantry and 130 s).
+  As a commander would, it gives orders that the goal carries (`assign_objectives`), and the
+  planner finds how:
+  - each control point still to take goes to the nearest free infantry, which must end there:
+    the planner shares the work among the army, instead of a plan where one robot goes
+    everywhere (in `pddl/problems/large/huge_fog_1.pddl`, 6 infantry and a plan of 75 s instead
+    of one infantry and 130 s);
+  - the zones on their way not yet explored must be (`reconnoitre`): drones survey ahead, which
+    costs far less than walking blind (6 700 euros instead of 63 300 in that problem), up to as
+    many zones as the drones' battery allows: asking for more makes a plan of trips to recharge
+    that the planner may not find in time;
+  - a point an enemy tank guards first needs that tank destroyed; the capture comes in a later
+    round. One goal with everything at once can take the planner longer than it has;
+  - a tank on a control point holds it: the enemy has to destroy it to take the point;
+  - with no infantry left no point can be taken, so what is left fights on, to win by
+    destroying every enemy it knows of.
+
+  Kairos gets a second without a better plan (`KAIROS.no_improvement` in
+  `config/plansys2_params.yaml`) instead of the default 0.1: plans where the artillery fires
+  while a drone spots come after the first one.
 
 ## Replanning with what is found
 
