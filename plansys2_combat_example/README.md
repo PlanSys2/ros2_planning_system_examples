@@ -7,41 +7,86 @@ an enemy is not where it was seen. Each side that plans has its own PlanSys2 in 
 state of the battle. The side that takes every control point, or the only one with robots left,
 wins.
 
-## Modes
-
-| Launcher | Battle |
-|---|---|
-| `fog_defense.launch.yaml` | Blue against a red defense that holds still. Blue only knows its base: the enemy is found while fighting |
-| `known_defense.launch.yaml` | The same defense, with the whole map surveyed from the start |
-| `duel.launch.yaml` | Blue and red, each with its PlanSys2, fight each other. Each one only knows its base at the start |
-| `big_duel.launch.yaml` | A big battle: twelve robots a side on a 6x6 map crossed by a river with two bridges, and eight control points |
-
-Each launcher starts the arbiter, the PlanSys2, performers and controller of every side that
-plans, and RViz2 with the battle.
-
 ## Running it
 
-PlanSys2 recommends Zenoh. In one terminal, the router:
+PlanSys2 recommends Zenoh. In every terminal:
 
 ```shell
+source install/setup.bash
 export RMW_IMPLEMENTATION=rmw_zenoh_cpp
+```
+
+and in one of them, the router:
+
+```shell
 ros2 run rmw_zenoh_cpp rmw_zenohd
 ```
 
-In another one, a battle:
+Each mode has its launcher, which starts the arbiter, the PlanSys2, performers and controller of
+every side that plans, and RViz2 with the battle. The battle is told in the terminal of the
+launcher, in colors: what really happens, from the arbiter, in yellow; what blue decides in
+light cyan; what red decides in red. Captures, robots destroyed and the end of the battle stand
+out in bold.
+
+The PlanSys2 TUI shows each side's plan, its execution and its knowledge. Each side has its
+PlanSys2 in its namespace, so the TUI of a side runs in it.
+
+### Fog defense
+
+Blue attacks a red defense that holds still on a 3x3 map: an infantry in the center, a tank in
+the north and artillery in the east. Blue only knows its base: its drone surveys ahead, and
+every enemy found changes the plan. Infantry takes the three control points in the middle
+column; the artillery fires while the drone spots its target. Blue wins when it holds them all.
 
 ```shell
-export RMW_IMPLEMENTATION=rmw_zenoh_cpp
-ros2 launch plansys2_combat_example duel.launch.yaml
-ros2 launch plansys2_combat_example fog_defense.launch.yaml goal:=total
-ros2 launch plansys2_combat_example known_defense.launch.yaml seed:=11
+ros2 launch plansys2_combat_example fog_defense.launch.yaml
+ros2 run plansys2_tui_cli plansys2_tui --ros-args -r __ns:=/blue
 ```
 
-Arguments of every launcher:
+### Known defense
+
+The same defense, with the whole map surveyed from the start: blue plans knowing where every
+enemy is, and only misses and losses change the plan.
+
+```shell
+ros2 launch plansys2_combat_example known_defense.launch.yaml
+ros2 run plansys2_tui_cli plansys2_tui --ros-args -r __ns:=/blue
+```
+
+### Duel
+
+Blue and red, each with its PlanSys2 and its controller, fight for the three control points of
+the same 3x3 map. Each one only knows its base at the start: they find each other as they move,
+shoot at each other and take points from each other. The first to hold every point, or the only
+one with robots left, wins.
+
+```shell
+ros2 launch plansys2_combat_example duel.launch.yaml
+ros2 run plansys2_tui_cli plansys2_tui --ros-args -r __ns:=/blue
+ros2 run plansys2_tui_cli plansys2_tui --ros-args -r __ns:=/red
+```
+
+### Big duel
+
+A big battle of the same kind: twelve robots a side (two drones, six infantry, two tanks and two
+artillery) on a 6x6 map crossed by a river with two bridges, and eight control points in pairs
+on both banks. Plans have dozens of actions and take seconds, so time runs slower: a battle lasts
+two or three minutes.
+
+```shell
+ros2 launch plansys2_combat_example big_duel.launch.yaml
+ros2 run plansys2_tui_cli plansys2_tui --ros-args -r __ns:=/blue
+ros2 run plansys2_tui_cli plansys2_tui --ros-args -r __ns:=/red
+```
+
+### Arguments
+
+Every launcher takes:
 
 - `goal`: `capture` (every control point) or `total` (also destroy every enemy found).
 - `seed`: the shots that hit or miss; by default, the world's.
 - `rviz`: `false` to run without RViz2.
+- `colors`: `false` to tell the battle without colors, e.g. into a file.
 - `shutdown_at_end`: `true` to stop everything when the battle ends; by default RViz2 keeps the
   last view.
 

@@ -52,7 +52,8 @@ def battle(context):
         world = yaml.safe_load(f)['combat_arbiter']['ros__parameters']
 
     # Another seed: other shots hit or miss
-    arbiter_params = [world_file]
+    colors = LaunchConfiguration('colors').perform(context) == 'true'
+    arbiter_params = [world_file, {'colors': colors}]
     seed = LaunchConfiguration('seed').perform(context)
     if seed:
         arbiter_params.append({'seed': int(seed)})
@@ -113,6 +114,7 @@ def battle(context):
             parameters=[{
                 'goal': LaunchConfiguration('goal'),
                 'metric': LaunchConfiguration('metric'),
+                'colors': colors,
             }])
         nodes.append(controller)
         # A controller ends with the battle: everything else may end with it
@@ -144,6 +146,9 @@ def generate_launch_description():
             description='Metric of the problem, e.g. minimize (+ (spent) (* 100 (total-time)))'),
         DeclareLaunchArgument(
             'rviz', default_value='true', description='Show the battle in RViz2'),
+        DeclareLaunchArgument(
+            'colors', default_value='true',
+            description='The battle told in colors: the arbiter yellow, blue cyan, red red'),
         DeclareLaunchArgument(
             'shutdown_at_end', default_value='false',
             description='Stop everything when the battle ends (else RViz keeps the last view)'),

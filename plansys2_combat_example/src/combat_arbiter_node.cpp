@@ -27,6 +27,7 @@
 #include <vector>
 
 #include "plansys2_combat_example/BattleView.hpp"
+#include "plansys2_combat_example/Chronicle.hpp"
 #include "plansys2_combat_example/World.hpp"
 #include "plansys2_combat_example/msg/side_view.hpp"
 #include "plansys2_combat_example/srv/cancel_action.hpp"
@@ -91,6 +92,8 @@ public:
     world_(static_cast<unsigned int>(declare_parameter<int64_t>("seed", 0)))
   {
     time_scale_ = declare_parameter<double>("time_scale", 0.2);
+    chronicle_ = std::make_unique<Chronicle>(
+      get_logger(), "arbiter", declare_parameter<bool>("colors", true));
     using Strings = std::vector<std::string>;
     for (const auto & z : declare_parameter<Strings>("zones", Strings{})) {
       world_.add_zone(z);
@@ -238,18 +241,28 @@ private:
     res.success = out.success;
     res.message = out.message;
     for (const auto & e : out.discovered) {
-      RCLCPP_WARN(
-        get_logger(), "[%s] enemy %s (%s) seen in %s", req.side.c_str(), e.c_str(),
-        world_.robots().at(e).type.c_str(), world_.robots().at(e).zone.c_str());
+      chronicle_->tell(
+        "[" + req.side + "] sees " + e + " (" + world_.robots().at(e).type + ") in " +
+        world_.robots().at(e).zone);
     }
-    RCLCPP_INFO(
-      get_logger(), "[%s] %s%s", req.side.c_str(), out.success ? "" : "FAILED: ",
-      out.message.c_str());
+    // What changes the battle stands out; the rest is routine
+    const bool destroyed = target_alive && !world_.robots().at(args[1]).alive;
+    if (req.action == "capture" && out.success) {
+      chronicle_->announce("[" + req.side + "] " + args[0] + " captures " + args[1]);
+    } else if (destroyed) {
+      chronicle_->announce("[" + req.side + "] " + args[0] + " destroys " + args[1]);
+    } else if (shot || req.action == "capture") {
+      chronicle_->tell("[" + req.side + "] " + out.message);
+    } else {
+      RCLCPP_INFO(
+        get_logger(), "[%s] %s%s", req.side.c_str(), out.success ? "" : "FAILED: ",
+        out.message.c_str());
+    }
     publish();  // a robot seen or destroyed changes what every side knows
     const auto winner = world_.winner();
     if (!winner.empty() && announced_.empty()) {
       announced_ = winner;
-      RCLCPP_WARN(get_logger(), "THE BATTLE IS OVER: %s wins", winner.c_str());
+      chronicle_->announce("THE BATTLE IS OVER: " + winner + " wins");
     }
   }
 
@@ -284,7 +297,7 @@ private:
     if (back >= 0.0) {
       what += ", back to " + r->second.zone + " in " + std::to_string(back) + " s";
     }
-    RCLCPP_WARN(get_logger(), "[%s] %s", req.side.c_str(), what.c_str());
+    RCLCPP_INFO(get_logger(), "[%s] %s", req.side.c_str(), what.c_str());
     ongoing_.erase(it);
   }
 
@@ -331,6 +344,7 @@ private:
   }
 
   World world_;
+  std::unique_ptr<Chronicle> chronicle_;
   std::string announced_;  // the winner, once told
   double time_scale_;
   std::unique_ptr<BattleView> view_;

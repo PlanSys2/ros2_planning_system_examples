@@ -17,6 +17,7 @@
 launch:
 - arg: {name: goal, default: capture, description: 'capture, or total (also destroy every enemy found)'}
 - arg: {name: rviz, default: 'true', description: Show the battle in RViz2}
+- arg: {name: colors, default: 'true', description: 'The battle told in colors: the arbiter yellow, blue cyan, red red'}
 - arg: {name: shutdown_at_end, default: 'false', description: Stop everything when the battle ends}
 - arg: {name: seed, default: '', description: 'Seed of the shots; by default, the world''s'}
 - include:
@@ -27,3 +28,4 @@ launch:
     - {name: rviz, value: $(var rviz)}
     - {name: seed, value: $(var seed)}
     - {name: shutdown_at_end, value: $(var shutdown_at_end)}
+    - {name: colors, value: $(var colors)}

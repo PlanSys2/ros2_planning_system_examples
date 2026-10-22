@@ -30,6 +30,7 @@
 
 #include "kairos/plan.hpp"
 #include "kairos/validate.hpp"
+#include "plansys2_combat_example/Chronicle.hpp"
 #include "plansys2_combat_example/World.hpp"
 #include "plansys2_combat_example/msg/side_view.hpp"
 #include "plansys2_domain_expert/DomainExpertClient.hpp"
@@ -113,6 +114,8 @@ public:
     retry_period_ = declare_parameter<double>("retry_period", 5.0);  // seconds, with no plan
     better_by_ = declare_parameter<double>("better_by", 0.05);  // a new plan, cheaper by this
     assign_objectives_ = declare_parameter<bool>("assign_objectives", true);
+    chronicle_ = std::make_unique<plansys2_combat_example::Chronicle>(
+      get_logger(), side_, declare_parameter<bool>("colors", true));
 
     view_sub_ = create_subscription<SideView>(
       "/combat/" + side_ + "/view", rclcpp::QoS(1).transient_local().reliable(),
@@ -158,9 +161,9 @@ public:
       if (executing_) {
         executor_client_->cancel_plan_execution();
       }
-      RCLCPP_WARN(
-        get_logger(), "[%s] %s after %d rounds", side_.c_str(),
-        view_->winner == side_ ? "VICTORY" : "DEFEAT", round_);
+      chronicle_->announce(
+        "[" + side_ + "] " + (view_->winner == side_ ? "VICTORY" : "DEFEAT") + " after " +
+        std::to_string(round_) + " rounds");
       battle_over_ = true;
       finished_ = true;
       return;
@@ -175,7 +178,7 @@ public:
       if (executing_) {
         for (const auto & t : threats()) {
           if (!planned_threats_.count(t)) {
-            RCLCPP_WARN(get_logger(), "[%s] new threat %s", side_.c_str(), t.c_str());
+            chronicle_->tell("[" + side_ + "] news: " + t + ", is there a better plan?");
             reconsider();
             break;
           }
@@ -212,14 +215,15 @@ public:
   void end_round(const char * how)
   {
     executing_ = false;
-    RCLCPP_INFO(get_logger(), "[%s] round %d %s: replanning", side_.c_str(), round_, how);
+    chronicle_->tell(
+      "[" + side_ + "] round " + std::to_string(round_) + " " + how + ": planning again");
     reconcile(true);
     next_round();
   }
 
   void give_up_plan(const char * why)
   {
-    RCLCPP_WARN(get_logger(), "[%s] %s", side_.c_str(), why);
+    chronicle_->tell("[" + side_ + "] " + why);
     executor_client_->cancel_plan_execution();
     end_round("cancelled");
   }
@@ -295,7 +299,7 @@ private:
       for (const auto & r : v.robots) {
         if (!r.alive) {
           if (lost_.insert(r.name).second) {
-            RCLCPP_WARN(get_logger(), "[%s] %s lost", side_.c_str(), r.name.c_str());
+            chronicle_->tell("[" + side_ + "] has lost " + r.name);
             problem_client_->removeInstance(plansys2::Instance(r.name, r.type));
           }
           continue;
@@ -310,7 +314,7 @@ private:
     }
     for (const auto & e : v.enemies) {
       if (seen_.insert(e.name).second) {
-        RCLCPP_WARN(
+        RCLCPP_INFO(
           get_logger(), "[%s] enemy %s (%s) in %s", side_.c_str(), e.name.c_str(),
           e.type.c_str(), e.zone.c_str());
         ok = add_instance(e.name, e.type) && ok;
@@ -376,12 +380,12 @@ private:
     const auto better = plan ? cost(domain, *problem, *plan) : std::nullopt;
 
     auto text = [](const std::optional<double> & c) {
-        return c ? std::to_string(static_cast<int>(*c)) : std::string("no plan");
+        return c ? std::to_string(static_cast<int>(*c)) + " EUR" : std::string("none valid");
       };
     if (better && (!current || *better < *current * (1.0 - better_by_))) {
-      RCLCPP_WARN(
-        get_logger(), "[%s] a better plan: %s instead of %s", side_.c_str(),
-        text(better).c_str(), text(current).c_str());
+      chronicle_->tell(
+        "[" + side_ + "] changes to a better plan: " + text(better) + " instead of " +
+        text(current));
       log_plan(*plan);
       if (!executor_client_->start_plan_execution(*plan)) {
         give_up_plan("the executor did not take the better plan");
@@ -389,9 +393,9 @@ private:
     } else if (!current) {
       give_up_plan("the plan no longer works, and no other");
     } else {
-      RCLCPP_INFO(
-        get_logger(), "[%s] the plan goes on: %s, a new one %s", side_.c_str(),
-        text(current).c_str(), text(better).c_str());
+      chronicle_->tell(
+        "[" + side_ + "] keeps its plan (" + text(current) + "); " +
+        (better ? "a new one, " + text(better) + ", is not enough better" : "no other works"));
     }
   }
 
@@ -432,9 +436,9 @@ private:
     }
 
     round_++;
-    RCLCPP_INFO(
-      get_logger(), "[%s] round %d: plan with %zu actions", side_.c_str(), round_,
-      plan->items.size());
+    chronicle_->tell(
+      "[" + side_ + "] round " + std::to_string(round_) + ": a plan of " +
+      std::to_string(plan->items.size()) + " actions" + orders_);
     log_plan(*plan);
     planned_threats_ = threats();
     if (!executor_client_->start_plan_execution(plan.value())) {
@@ -470,9 +474,11 @@ private:
     for (const auto & z : view_->control_points) {
       goal += " (owned " + z + ")";
     }
+    orders_.clear();
     if (assign_objectives_) {
       for (const auto & [robot, zone] : objectives()) {
         goal += " (at " + robot + " " + zone + ")";
+        orders_ += (orders_.empty() ? "; orders: " : ", ") + robot + " to " + zone;
       }
     }
     if (goal_mode_ == "total") {
@@ -568,6 +574,8 @@ private:
   double retry_period_;
   double better_by_;
   bool assign_objectives_;
+  std::string orders_;  // the objectives of the last goal, to tell
+  std::unique_ptr<plansys2_combat_example::Chronicle> chronicle_;
   bool battle_over_ = false;
   bool finished_ = false;
 
