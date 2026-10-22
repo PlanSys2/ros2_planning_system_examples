@@ -1,0 +1,68 @@
+# Only the base is known: the enemy defense is found while fighting.
+# The true world for the arbiter: a 3x3 map, the blue army at its base (c_west), the red defense
+combat_arbiter:
+  ros__parameters:
+    seed: 1
+    time_scale: 0.2  # real seconds per second of the plan
+    zones:
+      - "n_west"
+      - "n_mid"
+      - "n_east"
+      - "c_west"
+      - "c_mid"
+      - "c_east"
+      - "s_west"
+      - "s_mid"
+      - "s_east"
+    zone_positions:  # "zone x y", in meters on the map frame
+      - "n_west 0 20"
+      - "n_mid 10 20"
+      - "n_east 20 20"
+      - "c_west 0 10"
+      - "c_mid 10 10"
+      - "c_east 20 10"
+      - "s_west 0 0"
+      - "s_mid 10 0"
+      - "s_east 20 0"
+    connections:
+      - "n_west n_mid 10"
+      - "n_west c_west 10"
+      - "n_mid n_east 10"
+      - "n_mid c_mid 10"
+      - "n_east c_east 10"
+      - "c_west c_mid 10"
+      - "c_west s_west 10"
+      - "c_mid c_east 10"
+      - "c_mid s_mid 10"
+      - "c_east s_east 10"
+      - "s_west s_mid 10"
+      - "s_mid s_east 10"
+    control_points:
+      - "n_mid"
+      - "c_mid"
+      - "s_mid"
+    # Every side: its base, its army and what it sees from the start (its base if not given).
+    # The blue side plans with PlanSys2 in /blue; the red one holds still in this world
+    sides: ["blue", "red"]
+    armies: ["blue"]  # the sides that plan, each with its PlanSys2 (read by the launcher)
+    viewpoint: "blue"  # in RViz, the enemies blue has not seen are faint
+    blue:
+      base: "c_west"
+      explored:
+        - "c_west"
+      robots:
+        - "d1 drone c_west"
+        - "i1 infantry c_west"
+        - "i2 infantry c_west"
+        - "t1 tank c_west"
+        - "a1 artillery c_west"
+    red:
+      base: "c_east"
+      robots:
+        - "e_inf1 infantry c_mid"
+        - "e_tank1 tank n_mid"
+        - "e_art1 artillery c_east"
+    hit_probability:
+      - "infantry 0.7"
+      - "tank 0.8"
+      - "artillery 0.6"

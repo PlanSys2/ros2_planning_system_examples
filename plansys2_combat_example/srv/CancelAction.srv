@@ -1,0 +1,5 @@
+# An action PlanSys2 cancelled before its end: a robot on the road turns back
+string side
+string action
+string[] arguments
+---

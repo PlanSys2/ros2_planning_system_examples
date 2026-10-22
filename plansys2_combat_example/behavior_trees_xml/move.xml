@@ -1,0 +1,7 @@
+<root BTCPP_format="4" main_tree_to_execute="MainTree">
+  <BehaviorTree ID="MainTree">
+    <Sequence name="move">
+      <ArbiterAction action="move" nargs="3"/>
+    </Sequence>
+  </BehaviorTree>
+</root>

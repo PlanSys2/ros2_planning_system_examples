@@ -1,0 +1,18 @@
+# PlanSys2 for the combat example: Kairos plans (negative preconditions, quantifiers, a metric
+# in euros) and the STN builder runs the plans (artillery fires only while a drone spots).
+# /**/ so that it applies to every side's PlanSys2, whatever its namespace
+/**/plansys2:
+  ros__parameters:
+    use_real_time: false
+/**/planner_client:
+  ros__parameters:
+    plan_solver_timeout: 15.0
+/**/planner:
+  ros__parameters:
+    plan_solver_timeout: 15.0
+    plan_solver_plugins: ["KAIROS"]
+    KAIROS:
+      plugin: "plansys2/KairosPlanSolver"
+/**/executor:
+  ros__parameters:
+    bt_builder_plugin: "STNBTBuilder"

@@ -1,0 +1,7 @@
+<root BTCPP_format="4" main_tree_to_execute="MainTree">
+  <BehaviorTree ID="MainTree">
+    <Sequence name="recharge">
+      <ArbiterAction action="recharge" nargs="2"/>
+    </Sequence>
+  </BehaviorTree>
+</root>

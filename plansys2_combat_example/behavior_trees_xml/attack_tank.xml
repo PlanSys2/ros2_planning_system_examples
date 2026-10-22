@@ -1,0 +1,7 @@
+<root BTCPP_format="4" main_tree_to_execute="MainTree">
+  <BehaviorTree ID="MainTree">
+    <Sequence name="attack_tank">
+      <ArbiterAction action="attack_tank" nargs="3"/>
+    </Sequence>
+  </BehaviorTree>
+</root>
