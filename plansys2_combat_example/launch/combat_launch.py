@@ -68,7 +68,7 @@ def battle(context):
     armies = LaunchConfiguration('armies').perform(context).replace(',', ' ').split()
     if not armies:
         armies = world.get('armies', ['blue'])
-    for side in armies:
+    for index, side in enumerate(armies):
         nodes.append(IncludeLaunchDescription(
             PythonLaunchDescriptionSource(os.path.join(
                 get_package_share_directory('plansys2_bringup'),
@@ -78,6 +78,9 @@ def battle(context):
                 'params_file': os.path.join(example_dir, 'config', 'plansys2_params.yaml'),
                 'bt_builder_plugin': 'STNBTBuilder',
                 'namespace': side,
+                # Groot2 shows the tree of each side's plan, on a port of its own (and the next)
+                'enable_groot_monitoring': 'true',
+                'groot_port': str(1800 + 2 * index),
             }.items()))
 
         # One performer per robot and action, only for that robot's actions, all in one process

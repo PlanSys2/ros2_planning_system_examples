@@ -29,7 +29,9 @@ light cyan; what red decides in red. Captures, robots destroyed and the end of t
 out in bold.
 
 The PlanSys2 TUI shows each side's plan, its execution and its knowledge. Each side has its
-PlanSys2 in its namespace, so the TUI of a side runs in it.
+PlanSys2 in its namespace, so the TUI of a side runs in it. Its Behavior tree tab (key `3`)
+shows the tree of the plan as it runs: each side's executor publishes it on a port of its own,
+blue's on 1800 and red's on 1802 (type it with `p` in the tab).
 
 ### Fog defense
 

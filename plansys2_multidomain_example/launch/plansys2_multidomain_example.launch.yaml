@@ -17,6 +17,8 @@ launch:
     file: $(find-pkg-share plansys2_bringup)/launch/plansys2_bringup_launch_monolithic.py
     arg:
     - {name: model_file, value: $(find-pkg-share plansys2_multidomain_example)/pddl_1/domain_1.pddl:$(find-pkg-share plansys2_multidomain_example)/pddl_2/domain_2.pddl}
+    # Groot2 shows the behavior tree of the plan as it runs
+    - {name: enable_groot_monitoring, value: 'true'}
 - node:
     pkg: plansys2_multidomain_example
     exec: move_action_node
