@@ -17,6 +17,8 @@ launch:
     file: $(find-pkg-share plansys2_bringup)/launch/plansys2_bringup_launch_monolithic.py
     arg:
     - {name: model_file, value: $(find-pkg-share plansys2_patrol_navigation_example)/pddl/patrol.pddl}
+    # Groot2 shows the behavior tree of the plan as it runs
+    - {name: enable_groot_monitoring, value: 'true'}
 # Simulated EasyNav: each navigation takes 10 s
 - node:
     pkg: plansys2_bt_example

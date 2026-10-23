@@ -21,6 +21,8 @@ launch:
     file: $(find-pkg-share plansys2_bringup)/launch/plansys2_bringup_launch_monolithic.py
     arg:
     - {name: model_file, value: $(find-pkg-share plansys2_simple_example_py)/pddl/simple_example.pddl}
+    # Groot2 shows the behavior tree of the plan as it runs
+    - {name: enable_groot_monitoring, value: 'true'}
     - {name: namespace, value: $(var namespace)}
 - node:
     pkg: plansys2_simple_example_py

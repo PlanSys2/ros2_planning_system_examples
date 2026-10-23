@@ -28,6 +28,8 @@ launch:
     file: $(find-pkg-share plansys2_bringup)/launch/plansys2_bringup_launch_monolithic.py
     arg:
     - {name: model_file, value: $(find-pkg-share plansys2_bt_example)/pddl/bt_arm_example.pddl}
+    # Groot2 shows the behavior tree of the plan as it runs
+    - {name: enable_groot_monitoring, value: 'true'}
     - {name: namespace, value: $(var namespace)}
     - {name: params_file, value: $(find-pkg-share plansys2_bt_example)/config/plansys2_arm_$(var bt_builder).yaml}
 # Navigation is simulated: neither a robot nor EasyNav has to run
