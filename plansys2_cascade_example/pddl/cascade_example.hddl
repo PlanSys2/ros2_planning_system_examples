@@ -1,0 +1,100 @@
+; The cascade example as a hierarchical (HTN) domain: the same actions, and a task to
+; go to a room
+(define (domain cascade)
+(:requirements :strips :typing :adl :fluents :durative-actions :hierarchy :method-preconditions)
+
+;; Types ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(:types
+robot
+room
+);; end Types ;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; Predicates ;;;;;;;;;;;;;;;;;;;;;;;;;
+(:predicates
+
+(robot_at ?r - robot ?ro - room)
+(connected ?ro1 ?ro2 - room)
+(battery_full ?r - robot)
+(battery_low ?r - robot)
+(charging_point_at ?ro - room)
+
+);; end Predicates ;;;;;;;;;;;;;;;;;;;;
+;; Functions ;;;;;;;;;;;;;;;;;;;;;;;;;
+(:functions
+
+);; end Functions ;;;;;;;;;;;;;;;;;;;;
+;; Tasks and methods ;;;;;;;;;;;;;;;;;;;
+;; Going to a room: there already; recharging first if the battery is low; or a step to a
+;; room next to this one, and going on from there
+(:task go_to :parameters (?r - robot ?to - room))
+
+(:method go_arrived
+    :parameters (?r - robot ?to - room)
+    :task (go_to ?r ?to)
+    :precondition (robot_at ?r ?to)
+    :ordered-subtasks ()
+)
+
+(:method go_charge_first
+    :parameters (?r - robot ?to ?from ?cp - room)
+    :task (go_to ?r ?to)
+    :precondition (and (battery_low ?r) (robot_at ?r ?from) (charging_point_at ?cp))
+    :ordered-subtasks (and
+        (askcharge ?r ?from ?cp)
+        (charge ?r ?cp)
+        (go_to ?r ?to))
+)
+
+(:method go_step
+    :parameters (?r - robot ?to ?from ?mid - room)
+    :task (go_to ?r ?to)
+    :precondition (and
+        (battery_full ?r) (robot_at ?r ?from) (connected ?from ?mid) (not (robot_at ?r ?to)))
+    :ordered-subtasks (and
+        (move ?r ?from ?mid)
+        (go_to ?r ?to))
+)
+;; end Tasks and methods ;;;;;;;;;;;;;;;
+
+;; Actions ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(:durative-action move
+    :parameters (?r - robot ?r1 ?r2 - room)
+    :duration ( = ?duration 5)
+    :condition (and
+        (at start(connected ?r1 ?r2))
+        (at start(robot_at ?r ?r1))
+        (over all(battery_full ?r))
+        )
+    :effect (and
+        (at start(not(robot_at ?r ?r1)))
+        (at end(robot_at ?r ?r2))
+    )
+)
+
+(:durative-action askcharge
+    :parameters (?r - robot ?r1 ?r2 - room)
+    :duration ( = ?duration 5)
+    :condition (and
+        (at start(robot_at ?r ?r1))
+        (at start(charging_point_at ?r2))
+       )
+    :effect (and
+        (at start(not(robot_at ?r ?r1)))
+        (at start(robot_at ?r ?r2))
+    )
+)
+
+(:durative-action charge
+    :parameters (?r - robot ?ro - room)
+    :duration ( = ?duration 5)
+    :condition (and
+        (at start(robot_at ?r ?ro))
+        (at start(charging_point_at ?ro))
+    )
+    :effect (and
+         (at end(not(battery_low ?r)))
+         (at end(battery_full ?r))
+    )
+)
+
+);; end Domain ;;;;;;;;;;;;;;;;;;;;;;;;

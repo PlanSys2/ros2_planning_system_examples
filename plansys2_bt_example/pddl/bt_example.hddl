@@ -1,0 +1,203 @@
+; The factory of the BT example as a hierarchical (HTN) domain: the same actions, and the
+; task of building a car
+(define (domain factory)
+(:requirements :strips :typing :adl :fluents :durative-actions :hierarchy :method-preconditions)
+
+;; Types ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(:types
+robot
+zone
+piece
+car
+);; end Types ;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; Predicates ;;;;;;;;;;;;;;;;;;;;;;;;;
+(:predicates
+
+(battery_full ?r - robot)
+
+(robot_available ?r - robot)
+
+(robot_at ?r - robot ?z - zone)
+(piece_at ?p - piece ?z - zone)
+
+(piece_is_wheel ?p - piece)
+(piece_is_body_car ?p - piece)
+(piece_is_steering_wheel ?p - piece)
+
+(piece_not_used ?p - piece)
+
+(is_assembly_zone ?z - zone)
+(is_recharge_zone ?z - zone)
+
+(car_assembled ?c - car)
+
+);; end Predicates ;;;;;;;;;;;;;;;;;;;;
+;; Functions ;;;;;;;;;;;;;;;;;;;;;;;;;
+(:functions
+
+);; end Functions ;;;;;;;;;;;;;;;;;;;;
+;; Tasks and methods ;;;;;;;;;;;;;;;;;;;
+;; Building a car: the three pieces to the assembly zone, in any order and by any robots, a
+;; robot ready there, and then assembling it
+(:task build :parameters (?c - car))
+;; A piece to a zone: there already; carried by a robot where it is; a robot going for it; or a
+;; robot recharging first
+(:task fetch :parameters (?p - piece ?to - zone))
+;; A robot in a zone with its battery full
+(:task ready :parameters (?r - robot ?z - zone))
+
+(:method build_car
+    :parameters (?c - car ?z - zone ?w ?b ?s - piece ?r - robot)
+    :task (build ?c)
+    :precondition (and
+        (is_assembly_zone ?z)
+        (piece_is_wheel ?w) (piece_is_body_car ?b) (piece_is_steering_wheel ?s)
+        (piece_not_used ?w) (piece_not_used ?b) (piece_not_used ?s))
+    :subtasks (and
+        (t1 (fetch ?w ?z))
+        (t2 (fetch ?b ?z))
+        (t3 (fetch ?s ?z))
+        (t4 (ready ?r ?z))
+        (t5 (assemble ?r ?z ?w ?b ?s ?c)))
+    :ordering (and (< t1 t5) (< t2 t5) (< t3 t5) (< t4 t5))
+)
+
+(:method fetch_there
+    :parameters (?p - piece ?to - zone)
+    :task (fetch ?p ?to)
+    :precondition (piece_at ?p ?to)
+    :ordered-subtasks ()
+)
+
+(:method fetch_carry
+    :parameters (?p - piece ?to ?from - zone ?r - robot)
+    :task (fetch ?p ?to)
+    :precondition (and
+        (piece_at ?p ?from) (robot_at ?r ?from) (battery_full ?r) (not (piece_at ?p ?to)))
+    :ordered-subtasks (and
+        (transport ?r ?p ?from ?to))
+)
+
+(:method fetch_go
+    :parameters (?p - piece ?to ?from ?rz - zone ?r - robot)
+    :task (fetch ?p ?to)
+    :precondition (and
+        (piece_at ?p ?from) (robot_at ?r ?rz) (battery_full ?r) (not (robot_at ?r ?from))
+        (not (piece_at ?p ?to)))
+    :ordered-subtasks (and
+        (move ?r ?rz ?from)
+        (transport ?r ?p ?from ?to))
+)
+
+(:method fetch_recharge
+    :parameters (?p - piece ?to ?rz ?cz - zone ?r - robot)
+    :task (fetch ?p ?to)
+    :precondition (and (robot_at ?r ?rz) (not (battery_full ?r)) (is_recharge_zone ?cz))
+    :ordered-subtasks (and
+        (move ?r ?rz ?cz)
+        (recharge ?r ?cz)
+        (fetch ?p ?to))
+)
+
+(:method ready_here
+    :parameters (?r - robot ?z - zone)
+    :task (ready ?r ?z)
+    :precondition (and (robot_at ?r ?z) (battery_full ?r))
+    :ordered-subtasks ()
+)
+
+(:method ready_go
+    :parameters (?r - robot ?z ?rz - zone)
+    :task (ready ?r ?z)
+    :precondition (and (robot_at ?r ?rz) (battery_full ?r) (not (robot_at ?r ?z)))
+    :ordered-subtasks (and
+        (move ?r ?rz ?z))
+)
+;; end Tasks and methods ;;;;;;;;;;;;;;;
+
+;; Actions ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(:durative-action move
+    :parameters (?r - robot ?z1 ?z2 - zone)
+    :duration ( = ?duration 5)
+    :condition (and
+        (at start(robot_at ?r ?z1))
+        (at start(robot_available ?r))
+        )
+    :effect (and
+        (at start(not(robot_at ?r ?z1)))
+        (at end(robot_at ?r ?z2))
+        (at start(not(robot_available ?r)))
+        (at end(robot_available ?r))
+    )
+)
+
+(:durative-action transport
+    :parameters (?r - robot ?p - piece ?z1 ?z2 - zone)
+    :duration ( = ?duration 5)
+    :condition (and
+        (over all(battery_full ?r))
+        (at start(robot_at ?r ?z1))
+        (at start(piece_at ?p ?z1))
+        (at start(robot_available ?r))
+    )
+    :effect (and
+        (at start(not(robot_at ?r ?z1)))
+        (at end(robot_at ?r ?z2))
+        (at start(not(piece_at ?p ?z1)))
+        (at end(piece_at ?p ?z2))
+        (at start(not(robot_available ?r)))
+        (at end(robot_available ?r))
+    )
+)
+
+(:durative-action recharge
+    :parameters (?r - robot ?z - zone)
+    :duration ( = ?duration 5)
+    :condition (and
+        (at start(is_recharge_zone ?z))
+        (over all(robot_at ?r ?z))
+        (at start(robot_available ?r))
+      )
+    :effect (and
+        (at end(battery_full ?r))
+                (at start(not(robot_available ?r)))
+        (at end(robot_available ?r))
+    )
+)
+
+(:durative-action assemble
+    :parameters (?r - robot ?z - zone ?p1 ?p2 ?p3 - piece ?c - car)
+    :duration ( = ?duration 5)
+    :condition (and
+        (over all(battery_full ?r))
+
+        (at start(is_assembly_zone ?z))
+        (at start(robot_at ?r ?z))
+
+        (at start(piece_at ?p1 ?z))
+        (at start(piece_at ?p2 ?z))
+        (at start(piece_at ?p3 ?z))
+
+        (at start(piece_not_used ?p1))
+        (at start(piece_not_used ?p2))
+        (at start(piece_not_used ?p3))
+
+        (at start(piece_is_wheel ?p1))
+        (at start(piece_is_body_car ?p2))
+        (at start(piece_is_steering_wheel ?p3))
+        (at start(robot_available ?r))
+    )
+    :effect (and
+        (at start(not(piece_not_used ?p1)))
+        (at start(not(piece_not_used ?p2)))
+        (at start(not(piece_not_used ?p3)))
+        (at end(car_assembled ?c))
+                (at start(not(robot_available ?r)))
+        (at end(robot_available ?r))
+
+    )
+)
+
+
+);; end Domain ;;;;;;;;;;;;;;;;;;;;;;;;
