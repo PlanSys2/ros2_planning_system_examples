@@ -68,15 +68,20 @@ def battle(context):
     armies = LaunchConfiguration('armies').perform(context).replace(',', ' ').split()
     if not armies:
         armies = world.get('armies', ['blue'])
+    # HDDL: the hierarchical domain, its builder, and the controller giving the orders as tasks
+    hddl = LaunchConfiguration('hddl').perform(context) == 'true'
     for index, side in enumerate(armies):
         nodes.append(IncludeLaunchDescription(
             PythonLaunchDescriptionSource(os.path.join(
                 get_package_share_directory('plansys2_bringup'),
                 'launch', 'plansys2_bringup_launch_monolithic.py')),
             launch_arguments={
-                'model_file': os.path.join(example_dir, 'pddl', 'combat.pddl'),
-                'params_file': os.path.join(example_dir, 'config', 'plansys2_params.yaml'),
-                'bt_builder_plugin': 'STNBTBuilder',
+                'model_file': os.path.join(
+                    example_dir, 'pddl', 'combat.hddl' if hddl else 'combat.pddl'),
+                'params_file': os.path.join(
+                    example_dir, 'config',
+                    'plansys2_params_hddl.yaml' if hddl else 'plansys2_params.yaml'),
+                'bt_builder_plugin': 'HTNBTBuilder' if hddl else 'STNBTBuilder',
                 'namespace': side,
                 # Groot2 shows the tree of each side's plan, on a port of its own (and the next)
                 'enable_groot_monitoring': 'true',
@@ -119,6 +124,7 @@ def battle(context):
                 'metric': LaunchConfiguration('metric'),
                 'colors': colors,
                 'dump_dir': LaunchConfiguration('dump_dir'),
+                'hddl': hddl,
             }])
         nodes.append(controller)
         # A controller ends with the battle: everything else may end with it
@@ -161,6 +167,10 @@ def generate_launch_description():
             description='Stop everything when the battle ends (else RViz keeps the last view)'),
         DeclareLaunchArgument(
             'seed', default_value='', description="Seed of the shots; by default, the world's"),
+        DeclareLaunchArgument(
+            'hddl', default_value='false',
+            description='Plan with the hierarchical domain (combat.hddl) and Klimax, and execute '
+            'the plans by their decomposition'),
         DeclareLaunchArgument(
             'armies', default_value='',
             description='Sides that plan with their own PlanSys2, e.g. "blue red"; '
