@@ -1,0 +1,69 @@
+; The second domain of the multidomain example as a hierarchical (HTN) one: a task to take
+; an object to a room, which goes with the task of the first domain
+(define (domain multidomain2)
+(:requirements :strips :typing :adl :fluents :durative-actions :hierarchy :method-preconditions)
+
+;; Types ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(:types
+robot
+pickable_object
+room
+);; end Types ;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; Predicates ;;;;;;;;;;;;;;;;;;;;;;;;;
+(:predicates
+
+(robot_at ?r - robot ?ro - room)
+(object_at_robot ?o - pickable_object ?r - robot)
+(object_at_room ?o - pickable_object ?ro - room)
+
+);; end Predicates ;;;;;;;;;;;;;;;;;;;;
+;; Functions ;;;;;;;;;;;;;;;;;;;;;;;;;
+(:functions
+
+);; end Functions ;;;;;;;;;;;;;;;;;;;;
+;; Tasks and methods ;;;;;;;;;;;;;;;;;;;
+;; Taking an object to a room: going where it is (go_to, of the first domain), picking it,
+;; going to the room and placing it
+(:task deliver :parameters (?o - pickable_object ?to - room))
+
+(:method deliver_object
+    :parameters (?o - pickable_object ?to ?from - room ?r - robot)
+    :task (deliver ?o ?to)
+    :precondition (object_at_room ?o ?from)
+    :ordered-subtasks (and
+        (go_to ?r ?from)
+        (pick_object ?r ?from ?o)
+        (go_to ?r ?to)
+        (place_object ?r ?to ?o))
+)
+;; end Tasks and methods ;;;;;;;;;;;;;;;
+
+;; Actions ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(:durative-action pick_object
+    :parameters (?r - robot ?ro - room ?o - pickable_object)
+    :duration ( = ?duration 5)
+    :condition (and
+        (at start(object_at_room ?o ?ro))
+        (at start(robot_at ?r ?ro))
+        )
+    :effect (and
+        (at start(not(object_at_room ?o ?ro)))
+        (at end(object_at_robot ?o ?r))
+    )
+)
+
+(:durative-action place_object
+    :parameters (?r - robot ?ro - room ?o - pickable_object)
+    :duration ( = ?duration 5)
+    :condition (and
+        (at start(object_at_robot ?o ?r))
+        (at start(robot_at ?r ?ro))
+        )
+    :effect (and
+        (at start(not(object_at_robot ?o ?r)))
+        (at end(object_at_room ?o ?ro))
+    )
+)
+
+);; end Domain ;;;;;;;;;;;;;;;;;;;;;;;;

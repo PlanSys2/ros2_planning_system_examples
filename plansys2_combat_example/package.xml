@@ -33,6 +33,7 @@
   <exec_depend>rosidl_default_runtime</exec_depend>
   <exec_depend>plansys2_bringup</exec_depend>
   <exec_depend>plansys2_kairos_plan_solver</exec_depend>
+  <exec_depend>plansys2_klimax_plan_solver</exec_depend>
   <exec_depend>python3-yaml</exec_depend>
   <exec_depend>rviz2</exec_depend>
 

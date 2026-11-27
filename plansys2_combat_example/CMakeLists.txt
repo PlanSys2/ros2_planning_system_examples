@@ -109,6 +109,8 @@ if(BUILD_TESTING)
   find_package(launch_testing_ament_cmake REQUIRED)
   add_launch_test(test/test_fog_defense.py TIMEOUT 300)
   add_launch_test(test/test_duel.py TIMEOUT 300)
+  add_launch_test(test/test_fog_defense_hddl.py TIMEOUT 300)
+  add_launch_test(test/test_duel_hddl.py TIMEOUT 300)
 endif()
 
 ament_export_dependencies(rosidl_default_runtime)

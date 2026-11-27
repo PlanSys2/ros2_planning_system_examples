@@ -17,6 +17,7 @@
 // planned (a miss, enemies found, a zone not clear) until the goal is reached
 
 #include <algorithm>
+#include <cctype>
 #include <chrono>
 #include <fstream>
 #include <functional>
@@ -60,11 +61,65 @@ std::string value(const std::string & function, const std::vector<std::string> &
   return "(= " + fact(function, args) + " " + std::to_string(v) + ")";
 }
 
-// What a plan costs from a problem (its metric, the euros spent; else its makespan), checked by
-// Kairos's validator; empty if it does not reach the goal from there
-std::optional<double> cost(
-  const std::string & domain, const std::string & problem, const plansys2_msgs::msg::Plan & plan)
+// The PDDL of an HDDL domain or problem: without its tasks, methods and task network, nor the
+// requirements of the hierarchy (what Kairos's validator reads); PDDL as it is
+std::string pddl_part(const std::string & text)
 {
+  static const std::vector<std::string> blocks = {
+    "(:task", "(:method", "(:durative-method", "(:htn"};
+  static const std::vector<std::string> requirements = {
+    ":hierarchy", ":method-preconditions", ":durative-methods", ":method-constraints"};
+  std::string out;
+  for (size_t i = 0; i < text.size(); ) {
+    if (text[i] == ';') {  // a comment, whatever parentheses it has
+      const size_t end = text.find('\n', i);
+      i = end == std::string::npos ? text.size() : end;
+      continue;
+    }
+    bool skipped = false;
+    for (const auto & b : blocks) {
+      if (text.compare(i, b.size(), b) == 0) {
+        int depth = 0;
+        size_t j = i;
+        for (; j < text.size(); ++j) {
+          if (text[j] == ';') {
+            j = std::min(text.find('\n', j), text.size() - 1);
+          } else if (text[j] == '(') {
+            ++depth;
+          } else if (text[j] == ')' && --depth == 0) {
+            break;
+          }
+        }
+        i = j + 1;
+        skipped = true;
+        break;
+      }
+    }
+    for (const auto & r : requirements) {
+      if (!skipped && text.compare(i, r.size(), r) == 0 &&
+        (i + r.size() == text.size() || !std::isalnum(text[i + r.size()]) &&
+        text[i + r.size()] != '-'))
+      {
+        i += r.size();
+        skipped = true;
+      }
+    }
+    if (!skipped) {
+      out += text[i++];
+    }
+  }
+  return out;
+}
+
+// What a plan costs from a problem (its metric, the euros spent; else its makespan), checked by
+// Kairos's validator; empty if it does not reach the goal from there. Of HDDL, the PDDL part:
+// the plan of a hierarchical problem is valid as one of its actions
+std::optional<double> cost(
+  const std::string & hddl_domain, const std::string & hddl_problem,
+  const plansys2_msgs::msg::Plan & plan)
+{
+  const std::string domain = pddl_part(hddl_domain);
+  const std::string problem = pddl_part(hddl_problem);
   if (plan.items.empty()) {
     return std::nullopt;
   }
@@ -117,6 +172,8 @@ public:
     assign_objectives_ = declare_parameter<bool>("assign_objectives", true);
     reconnoitre_ = declare_parameter<bool>("reconnoitre", true);
     dump_dir_ = declare_parameter<std::string>("dump_dir", "");  // problems with no plan
+    // A hierarchical domain (combat.hddl): each round also gives the orders as tasks
+    hddl_ = declare_parameter<bool>("hddl", false);
     chronicle_ = std::make_unique<plansys2_combat_example::Chronicle>(
       get_logger(), side_, declare_parameter<bool>("colors", true));
 
@@ -438,6 +495,13 @@ private:
       finished_ = true;
       return;
     }
+    if (hddl_ && !set_tasks()) {
+      RCLCPP_ERROR(
+        get_logger(), "Task network not accepted: %s",
+        parser::pddl::toString(network()).c_str());
+      finished_ = true;
+      return;
+    }
 
     std::optional<plansys2_msgs::msg::Plan> plan;
     if (!problem_client_->isGoalSatisfied(goal)) {
@@ -485,33 +549,44 @@ private:
     return ret;
   }
 
-  // Every control point ours; with "total", also every enemy we know destroyed. As a commander
-  // would, each point still to take goes to the nearest free infantry, which ends there: the
-  // planner then shares the work among the army instead of sending one robot everywhere
+  // Every control point ours; with "total", also every enemy on the ground we know destroyed. As
+  // a commander would, each point still to take goes to the nearest free infantry, which ends
+  // there: the planner then shares the work among the army instead of sending one robot
+  // everywhere
   plansys2::Goal make_goal()
   {
     std::string goal = "(and";
     orders_.clear();
+    tasks_.clear();
     // A point an enemy tank guards cannot be entered by infantry: first, the tank destroyed
     const auto blocked = assign_objectives_ ? guarded() : std::map<std::string, std::string>{};
+    std::vector<std::string> to_take;  // control points still to take, as tasks
+    const std::set<std::string> ours(view_->owned.begin(), view_->owned.end());
     for (const auto & z : view_->control_points) {
       auto tank = blocked.find(z);
       if (tank == blocked.end()) {
         goal += " (owned " + z + ")";
+        if (!ours.count(z)) {
+          to_take.push_back(z);
+        }
       } else {
         goal += " (destroyed " + tank->second + ")";
+        tasks_.push_back("(destroy_enemy " + tank->second + ")");
         orders_ += (orders_.empty() ? "; orders: " : ", ") + std::string("destroy ") +
           tank->second + " in " + z;
       }
     }
+    std::map<std::string, std::string> taker;  // control point, the infantry ordered to it
     if (assign_objectives_) {
       const auto given = orders(blocked);
       for (const auto & [robot, zone] : given.objectives) {
         goal += " (at " + robot + " " + zone + ")";
         orders_ += (orders_.empty() ? "; orders: " : ", ") + robot + " to " + zone;
+        taker[zone] = robot;
       }
       for (const auto & zone : given.reconnoitre) {
         goal += " (explored " + zone + ")";
+        tasks_.push_back("(reconnoitre " + zone + ")");
       }
       if (!given.reconnoitre.empty()) {
         orders_ += "; reconnoitre " + std::to_string(given.reconnoitre.size()) + " zones";
@@ -522,17 +597,44 @@ private:
       for (const auto & r : view_->robots) {
         if (r.alive && r.type == "tank" && points.count(r.zone)) {
           goal += " (at " + r.name + " " + r.zone + ")";
+          tasks_.push_back("(hold " + r.name + " " + r.zone + ")");
           orders_ += (orders_.empty() ? "; orders: " : ", ") + r.name + " holds " + r.zone;
         }
       }
     }
+    // Each point to take, by the infantry ordered to it, or by any
+    for (const auto & z : to_take) {
+      auto robot = taker.find(z);
+      tasks_.push_back(
+        robot == taker.end() ? "(capture_point " + z + ")" : "(take " + robot->second + " " + z +
+        ")");
+    }
     if (goal_mode_ == "total") {
       for (const auto & e : view_->enemies) {
+        if (e.type == "drone") {
+          continue;  // nothing on the ground can hit a drone
+        }
         goal += " (destroyed " + e.name + ")";
+        if (e.alive && !e.zone.empty()) {
+          tasks_.push_back("(destroy_enemy " + e.name + ")");
+        }
       }
     }
     return plansys2::Goal(goal + ")");
   }
+
+  // The orders of the round as an initial task network, none ordered: each to do at once
+  plansys2::TaskNetwork network() const
+  {
+    plansys2::TaskNetwork orders;
+    for (const auto & task : tasks_) {
+      orders.add(task);
+    }
+    return orders;
+  }
+
+  // The task network for the planner, as the goal: the problem expert keeps it
+  bool set_tasks() {return problem_client_->setTaskNetwork(network());}
 
   // With no infantry left, no point can be taken: what is left fights on, to win by destroying
   // every enemy it knows of
@@ -549,15 +651,18 @@ private:
   plansys2::Goal fight_on_goal()
   {
     std::string goal;
+    tasks_.clear();
     for (const auto & e : view_->enemies) {
-      if (e.alive && !e.zone.empty()) {
+      // Nothing on the ground can hit a drone: a goal of destroying one has no plan
+      if (e.alive && !e.zone.empty() && e.type != "drone") {
         goal += " (destroyed " + e.name + ")";
+        tasks_.push_back("(destroy_enemy " + e.name + ")");
       }
     }
     if (goal.empty()) {
       return make_goal();  // no enemy where we know: wait for news
     }
-    orders_ = "; no infantry left: destroy every enemy known";
+    orders_ = "; no infantry left: destroy every enemy known on the ground";
     return plansys2::Goal("(and" + goal + ")");
   }
 
@@ -705,6 +810,8 @@ private:
   std::string dump_dir_;
   int dumps_ = 0;
   std::string orders_;  // the objectives of the last goal, to tell
+  bool hddl_ = false;              // combat.hddl: the orders also as an initial task network
+  std::vector<std::string> tasks_;  // the orders of the last goal, as tasks
   std::unique_ptr<plansys2_combat_example::Chronicle> chronicle_;
   bool battle_over_ = false;
   bool finished_ = false;

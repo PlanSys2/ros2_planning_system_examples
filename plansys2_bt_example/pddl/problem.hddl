@@ -1,0 +1,26 @@
+; A car to build, with the robots and pieces of the assemble controller, each robot next to a
+; piece: the three pieces come at once, each by a robot
+(define (problem build_a_car)
+  (:domain factory)
+  (:objects
+    r2d2 c3po bb8 - robot
+    car_1 - car
+    wheels_zone steering_wheels_zone body_car_zone assembly_zone recharge_zone - zone
+    wheel_1 body_car_1 steering_wheel_1 - piece)
+  (:htn
+    :parameters ()
+    :ordered-subtasks (and
+      (t1 (build car_1))))
+  (:init
+    (is_assembly_zone assembly_zone)
+    (is_recharge_zone recharge_zone)
+    (piece_is_wheel wheel_1) (piece_at wheel_1 wheels_zone) (piece_not_used wheel_1)
+    (piece_is_body_car body_car_1) (piece_at body_car_1 body_car_zone)
+    (piece_not_used body_car_1)
+    (piece_is_steering_wheel steering_wheel_1)
+    (piece_at steering_wheel_1 steering_wheels_zone) (piece_not_used steering_wheel_1)
+    (robot_at r2d2 wheels_zone) (battery_full r2d2) (robot_available r2d2)
+    (robot_at c3po body_car_zone) (battery_full c3po) (robot_available c3po)
+    (robot_at bb8 steering_wheels_zone) (battery_full bb8) (robot_available bb8))
+  (:goal (and (car_assembled car_1)))
+)

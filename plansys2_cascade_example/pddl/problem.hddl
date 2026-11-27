@@ -1,0 +1,21 @@
+; The problem of the commands of the cascade example, as a task: leia goes to the bathroom
+(define (problem go_to_bathroom)
+  (:domain cascade)
+  (:objects
+    leia - robot
+    entrance kitchen bedroom dinning bathroom chargingroom - room)
+  (:htn
+    :parameters ()
+    :ordered-subtasks (and
+      (t1 (go_to leia bathroom))))
+  (:init
+    (connected entrance dinning) (connected dinning entrance)
+    (connected dinning kitchen) (connected kitchen dinning)
+    (connected dinning bedroom) (connected bedroom dinning)
+    (connected bathroom bedroom) (connected bedroom bathroom)
+    (connected chargingroom kitchen) (connected kitchen chargingroom)
+    (charging_point_at chargingroom)
+    (battery_low leia)
+    (robot_at leia entrance))
+  (:goal (and (robot_at leia bathroom)))
+)

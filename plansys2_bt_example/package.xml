@@ -31,6 +31,7 @@
 
   <exec_depend>plansys2_bringup</exec_depend>
   <exec_depend>plansys2_terminal</exec_depend>
+  <exec_depend>plansys2_klimax_plan_solver</exec_depend>
 
   <test_depend>ament_lint_common</test_depend>
   <test_depend>ament_lint_auto</test_depend>

@@ -1,0 +1,24 @@
+;; Patrolling the four waypoints in turn: the control waypoint is connected to every other one
+(define (problem patrol_problem)
+(:domain patrol)
+(:objects
+    r2d2 - robot
+    wp_control wp1 wp2 wp3 wp4 - waypoint
+)
+(:htn
+    :ordered-subtasks (and
+        (patrol_wp r2d2 wp1)
+        (patrol_wp r2d2 wp2)
+        (patrol_wp r2d2 wp3)
+        (patrol_wp r2d2 wp4))
+)
+(:init
+    (robot_at r2d2 wp_control)
+    (connected wp_control wp1) (connected wp1 wp_control)
+    (connected wp_control wp2) (connected wp2 wp_control)
+    (connected wp_control wp3) (connected wp3 wp_control)
+    (connected wp_control wp4) (connected wp4 wp_control)
+)
+(:goal (and
+    (patrolled wp1) (patrolled wp2) (patrolled wp3) (patrolled wp4)))
+)

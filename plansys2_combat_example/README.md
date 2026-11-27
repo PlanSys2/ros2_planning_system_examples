@@ -86,7 +86,7 @@ ros2 run plansys2_tui_cli plansys2_tui --ros-args -r __ns:=/red
 
 Every launcher takes:
 
-- `goal`: `capture` (every control point) or `total` (also destroy every enemy found).
+- `goal`: `capture` (every control point) or `total` (also destroy every enemy found on the ground: nothing hits a drone).
 - `seed`: the shots that hit or miss; by default, the world's.
 - `rviz`: `false` to run without RViz2.
 - `colors`: `false` to tell the battle without colors, e.g. into a file.

@@ -20,6 +20,7 @@ launch:
 - arg: {name: colors, default: 'true', description: 'The battle told in colors: the arbiter yellow, blue cyan, red red'}
 - arg: {name: shutdown_at_end, default: 'false', description: Stop everything when the battle ends}
 - arg: {name: seed, default: '', description: 'Seed of the shots; by default, the world''s'}
+- arg: {name: hddl, default: 'false', description: 'Plan with combat.hddl and Klimax, executed by its decomposition'}
 - include:
     file: $(find-pkg-share plansys2_combat_example)/launch/combat_launch.py
     arg:
@@ -29,3 +30,4 @@ launch:
     - {name: seed, value: $(var seed)}
     - {name: shutdown_at_end, value: $(var shutdown_at_end)}
     - {name: colors, value: $(var colors)}
+    - {name: hddl, value: $(var hddl)}

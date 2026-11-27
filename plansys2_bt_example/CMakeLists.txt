@@ -121,6 +121,24 @@ target_link_libraries(assemble_controller_node
   rclcpp_action::rclcpp_action
 )
 
+add_executable(assemble_hddl_controller_node src/assemble_hddl_controller_node.cpp)
+target_include_directories(assemble_hddl_controller_node PRIVATE
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+  "$<INSTALL_INTERFACE:include/${PROJECT_NAME}>"
+)
+target_link_libraries(assemble_hddl_controller_node
+  PRIVATE
+  ${lifecycle_msgs_TARGETS}
+  plansys2_domain_expert::plansys2_domain_expert
+  plansys2_executor::plansys2_executor
+  ${plansys2_msgs_TARGETS}
+  plansys2_pddl_parser::plansys2_pddl_parser
+  plansys2_planner::plansys2_planner
+  plansys2_problem_expert::plansys2_problem_expert
+  rclcpp::rclcpp
+  rclcpp_action::rclcpp_action
+)
+
 add_executable(timed_action_node src/timed_action_node.cpp)
 target_link_libraries(timed_action_node
   PRIVATE
@@ -130,6 +148,19 @@ target_link_libraries(timed_action_node
 
 add_executable(assemble_arm_controller_node src/assemble_arm_controller_node.cpp)
 target_link_libraries(assemble_arm_controller_node
+  PRIVATE
+  ${lifecycle_msgs_TARGETS}
+  plansys2_domain_expert::plansys2_domain_expert
+  plansys2_executor::plansys2_executor
+  ${plansys2_msgs_TARGETS}
+  plansys2_pddl_parser::plansys2_pddl_parser
+  plansys2_planner::plansys2_planner
+  plansys2_problem_expert::plansys2_problem_expert
+  rclcpp::rclcpp
+)
+
+add_executable(assemble_arm_hddl_controller_node src/assemble_arm_hddl_controller_node.cpp)
+target_link_libraries(assemble_arm_hddl_controller_node
   PRIVATE
   ${lifecycle_msgs_TARGETS}
   plansys2_domain_expert::plansys2_domain_expert
@@ -157,8 +188,8 @@ install(TARGETS ${plugin_libs}
   RUNTIME DESTINATION lib/${PROJECT_NAME}
 )
 
-install(TARGETS assemble_action_node assemble_controller_node
-  timed_action_node assemble_arm_controller_node
+install(TARGETS assemble_action_node assemble_controller_node assemble_hddl_controller_node
+  timed_action_node assemble_arm_controller_node assemble_arm_hddl_controller_node
   RUNTIME DESTINATION lib/${PROJECT_NAME}
 )
 
@@ -176,8 +207,12 @@ if(BUILD_TESTING)
   if(easynav_system_FOUND AND easynav_interfaces_FOUND)
     find_package(launch_testing_ament_cmake REQUIRED)
     add_launch_test(test/test_terminal_commands.py TIMEOUT 300)
+    add_launch_test(test/test_hddl.py TIMEOUT 300)
+    add_launch_test(test/test_hddl_arm.py TIMEOUT 450)
     add_launch_test(test/test_assemble_controller.py TIMEOUT 300)
+    add_launch_test(test/test_assemble_hddl_controller.py TIMEOUT 450)
     add_launch_test(test/test_assemble_arm_controller.py TIMEOUT 900)
+    add_launch_test(test/test_assemble_arm_hddl_controller.py TIMEOUT 450)
   endif()
 endif()
 
