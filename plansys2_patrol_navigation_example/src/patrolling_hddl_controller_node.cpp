@@ -77,6 +77,8 @@ public:
 
   void init_knowledge()
   {
+    // The problem is this controller's: none loaded by the launch is mixed in
+    problem_expert_->clearKnowledge();
     problem_expert_->addInstance(plansys2::Instance{"r2d2", "robot"});
     problem_expert_->addInstance(plansys2::Instance{"wp_control", "waypoint"});
     problem_expert_->addInstance(plansys2::Instance{"wp1", "waypoint"});

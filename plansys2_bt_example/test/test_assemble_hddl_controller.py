@@ -35,8 +35,8 @@ def generate_test_description():
         AnyLaunchDescriptionSource(
             os.path.join(
                 get_package_share_directory('plansys2_bt_example'), 'launch',
-                'plansys2_bt_example_hddl.launch.yaml')),
-        launch_arguments=[('problem_file', '')])
+                'plansys2_bt_example_hddl.launch.yaml')))
+    # With the launch's own problem loaded: the controller's replaces it, never mixes with it
     # Once PlanSys2 is up, as the README runs it: a start at once is the robustness PR's (55)
     controller = ExecuteProcess(
         cmd=['bash', '-c',

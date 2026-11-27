@@ -117,3 +117,31 @@ The controller reports the planned and the actual time:
 Plan with 25 actions, 35.0 s planned
 Plan succesfully finished in 40.2 s
 ```
+
+## HDDL mode: the same factory as tasks
+
+`pddl/bt_example.hddl` is the domain in HDDL: what is to be done is a network of tasks
+(`(build car_1)`) instead of a goal, and its methods say how a car is built: fetch its three
+pieces, each robot its own, then assemble. Klimax plans it, and the `HTNBTBuilder` runs the plan
+by its decomposition, checking each method's precondition when the method is applied.
+
+With the problem of `pddl/problem.hddl` (one car), in the terminal:
+
+```bash
+ros2 run plansys2_bt_example easynav_sim_node                         # terminal 1
+ros2 launch plansys2_bt_example plansys2_bt_example_hddl.launch.yaml  # terminal 2
+ros2 run plansys2_terminal plansys2_terminal                          # terminal 3
+> get problem tasks
+> get plan
+> run
+```
+
+Or with the controller, which sets its own problem, three cars, with `setTaskNetwork` (it
+replaces the problem the launcher loads):
+
+```bash
+ros2 run plansys2_bt_example assemble_hddl_controller_node            # terminal 3
+```
+
+The variant with arms has its HDDL version too:
+`plansys2_bt_arm_example_hddl.launch.yaml` and `assemble_arm_hddl_controller_node`.

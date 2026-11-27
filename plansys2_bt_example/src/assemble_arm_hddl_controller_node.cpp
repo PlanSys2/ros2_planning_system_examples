@@ -97,6 +97,8 @@ public:
 private:
   bool init_knowledge(int cars)
   {
+    // The problem is this controller's: none loaded by the launch is mixed in
+    problem_expert_->clearKnowledge();
     for (auto robot : {"r2d2", "c3po", "bb8"}) {
       problem_expert_->addInstance(plansys2::Instance{robot, "robot"});
     }

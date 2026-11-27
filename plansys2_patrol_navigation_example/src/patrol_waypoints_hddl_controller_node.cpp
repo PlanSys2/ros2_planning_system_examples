@@ -56,6 +56,8 @@ public:
     auto planner = std::make_shared<plansys2::PlannerClient>(*this);
     auto executor = std::make_shared<plansys2::ExecutorClient>(*this);
 
+    // The problem is this controller's: none loaded by the launch is mixed in
+    problem->clearKnowledge();
     // The control waypoint is connected to every other one
     problem->addInstance(plansys2::Instance{"r2d2", "robot"});
     problem->addInstance(plansys2::Instance{"wp_control", "waypoint"});
