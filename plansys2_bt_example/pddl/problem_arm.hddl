@@ -1,0 +1,31 @@
+;; The problem of assemble_arm_controller_node with three cars, as a task network: one car after
+;; another, the three robots bringing the pieces of each at once
+(define (problem factory_arm_problem)
+(:domain factory_arm)
+(:objects
+    r2d2 c3po bb8 - robot
+    wheels_zone steering_wheels_zone body_car_zone assembly_zone - zone
+    wheel_1 body_car_1 steering_wheel_1 wheel_2 body_car_2 steering_wheel_2 wheel_3 body_car_3 steering_wheel_3 - piece
+    car_1 car_2 car_3 - car
+)
+(:htn
+    :ordered-subtasks (and (build car_1) (build car_2) (build car_3))
+)
+(:init
+    (is_assembly_zone assembly_zone)
+    (assigned r2d2 wheels_zone) (assigned c3po body_car_zone) (assigned bb8 steering_wheels_zone)
+    (robot_at r2d2 assembly_zone) (heading r2d2 assembly_zone) (robot_available r2d2) (arm_free r2d2)
+    (robot_at c3po assembly_zone) (heading c3po assembly_zone) (robot_available c3po) (arm_free c3po)
+    (robot_at bb8 assembly_zone) (heading bb8 assembly_zone) (robot_available bb8) (arm_free bb8)
+    (piece_is_wheel wheel_1) (piece_at wheel_1 wheels_zone) (piece_not_used wheel_1)
+    (piece_is_body_car body_car_1) (piece_at body_car_1 body_car_zone) (piece_not_used body_car_1)
+    (piece_is_steering_wheel steering_wheel_1) (piece_at steering_wheel_1 steering_wheels_zone) (piece_not_used steering_wheel_1)
+    (piece_is_wheel wheel_2) (piece_at wheel_2 wheels_zone) (piece_not_used wheel_2)
+    (piece_is_body_car body_car_2) (piece_at body_car_2 body_car_zone) (piece_not_used body_car_2)
+    (piece_is_steering_wheel steering_wheel_2) (piece_at steering_wheel_2 steering_wheels_zone) (piece_not_used steering_wheel_2)
+    (piece_is_wheel wheel_3) (piece_at wheel_3 wheels_zone) (piece_not_used wheel_3)
+    (piece_is_body_car body_car_3) (piece_at body_car_3 body_car_zone) (piece_not_used body_car_3)
+    (piece_is_steering_wheel steering_wheel_3) (piece_at steering_wheel_3 steering_wheels_zone) (piece_not_used steering_wheel_3)
+)
+(:goal (and (car_assembled car_1) (car_assembled car_2) (car_assembled car_3)))
+)

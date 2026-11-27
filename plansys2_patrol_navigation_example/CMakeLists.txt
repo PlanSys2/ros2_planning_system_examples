@@ -94,6 +94,7 @@ if(BUILD_TESTING)
   if(easynav_system_FOUND AND easynav_interfaces_FOUND)
     find_package(launch_testing_ament_cmake REQUIRED)
     add_launch_test(test/test_patrol_waypoints.py TIMEOUT 300)
+    add_launch_test(test/test_hddl.py TIMEOUT 300)
   endif()
 endif()
 

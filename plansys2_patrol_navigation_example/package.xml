@@ -28,6 +28,7 @@
 
   <exec_depend>plansys2_bringup</exec_depend>
   <exec_depend>plansys2_terminal</exec_depend>
+  <exec_depend>plansys2_klimax_plan_solver</exec_depend>
   <!-- The simulated EasyNav of the fakesim launch -->
   <exec_depend>plansys2_bt_example</exec_depend>
 

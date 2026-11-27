@@ -1,0 +1,74 @@
+;; The patrol example as a hierarchical domain (HDDL): patrolling a waypoint is getting
+;; there, by the connections between waypoints, and patrolling it
+(define (domain patrol)
+(:requirements :strips :typing :negative-preconditions :hierarchy :method-preconditions
+  :durative-actions)
+
+(:types
+robot
+waypoint
+);; end Types ;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(:predicates
+
+(robot_at ?r - robot ?wp - waypoint)
+(connected ?wp1 ?wp2 - waypoint)
+(patrolled ?wp - waypoint)
+
+);; end Predicates ;;;;;;;;;;;;;;;;;;;;
+
+;; Tasks and methods ;;;;;;;;;;;;;;;;;;;
+(:task patrol_wp :parameters (?r - robot ?wp - waypoint))
+(:task go_to :parameters (?r - robot ?wp - waypoint))
+
+(:method patrol_there
+    :parameters (?r - robot ?wp - waypoint)
+    :task (patrol_wp ?r ?wp)
+    :ordered-subtasks (and
+        (go_to ?r ?wp)
+        (patrol ?r ?wp))
+)
+
+(:method go_arrived
+    :parameters (?r - robot ?wp - waypoint)
+    :task (go_to ?r ?wp)
+    :precondition (robot_at ?r ?wp)
+    :ordered-subtasks ()
+)
+
+(:method go_step
+    :parameters (?r - robot ?wp ?from ?next - waypoint)
+    :task (go_to ?r ?wp)
+    :precondition (and (robot_at ?r ?from) (connected ?from ?next) (not (robot_at ?r ?wp)))
+    :ordered-subtasks (and
+        (move ?r ?from ?next)
+        (go_to ?r ?wp))
+)
+;; end Tasks and methods ;;;;;;;;;;;;;;;
+
+;; Actions ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(:durative-action move
+    :parameters (?r - robot ?wp1 ?wp2 - waypoint)
+    :duration ( = ?duration 5)
+    :condition (and
+        (at start(connected ?wp1 ?wp2))
+        (at start(robot_at ?r ?wp1))
+        )
+    :effect (and
+        (at start(not(robot_at ?r ?wp1)))
+        (at end(robot_at ?r ?wp2))
+    )
+)
+
+(:durative-action patrol
+    :parameters (?r - robot ?wp - waypoint)
+    :duration ( = ?duration 5)
+    :condition (and
+        (at start(robot_at ?r ?wp))
+       )
+    :effect (and
+        (at end(patrolled ?wp))
+    )
+)
+
+);; end Domain ;;;;;;;;;;;;;;;;;;;;;;;;
