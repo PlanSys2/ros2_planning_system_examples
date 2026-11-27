@@ -41,7 +41,20 @@ if(easynav_system_FOUND AND easynav_interfaces_FOUND)
     rclcpp::rclcpp
     rclcpp_action::rclcpp_action
   )
-  install(TARGETS move_action_node patrolling_controller_node
+  add_executable(patrolling_hddl_controller_node src/patrolling_hddl_controller_node.cpp)
+  target_link_libraries(patrolling_hddl_controller_node
+    PRIVATE
+    ${easynav_interfaces_TARGETS}
+    plansys2_executor::plansys2_executor
+    plansys2_domain_expert::plansys2_domain_expert
+    ${plansys2_msgs_TARGETS}
+    plansys2_pddl_parser::plansys2_pddl_parser
+    plansys2_planner::plansys2_planner
+    plansys2_problem_expert::plansys2_problem_expert
+    rclcpp::rclcpp
+    rclcpp_action::rclcpp_action
+  )
+  install(TARGETS move_action_node patrolling_controller_node patrolling_hddl_controller_node
     RUNTIME DESTINATION lib/${PROJECT_NAME}
   )
 else()
@@ -70,6 +83,18 @@ target_link_libraries(patrol_waypoints_controller_node
   rclcpp::rclcpp
 )
 
+add_executable(patrol_waypoints_hddl_controller_node src/patrol_waypoints_hddl_controller_node.cpp)
+target_link_libraries(patrol_waypoints_hddl_controller_node
+  PRIVATE
+  ${lifecycle_msgs_TARGETS}
+  plansys2_executor::plansys2_executor
+  plansys2_domain_expert::plansys2_domain_expert
+  ${plansys2_msgs_TARGETS}
+  plansys2_planner::plansys2_planner
+  plansys2_problem_expert::plansys2_problem_expert
+  rclcpp::rclcpp
+)
+
 install(DIRECTORY launch pddl params
   DESTINATION share/${PROJECT_NAME}
 )
@@ -77,6 +102,7 @@ install(DIRECTORY launch pddl params
 install(TARGETS
   patrol_action_node
   patrol_waypoints_controller_node
+  patrol_waypoints_hddl_controller_node
   RUNTIME DESTINATION lib/${PROJECT_NAME}
 )
 
@@ -95,6 +121,7 @@ if(BUILD_TESTING)
     find_package(launch_testing_ament_cmake REQUIRED)
     add_launch_test(test/test_patrol_waypoints.py TIMEOUT 300)
     add_launch_test(test/test_hddl.py TIMEOUT 300)
+    add_launch_test(test/test_patrol_waypoints_hddl.py TIMEOUT 300)
   endif()
 endif()
 

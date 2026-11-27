@@ -20,12 +20,16 @@ launch:
     name: namespace
     default: ''
     description: Namespace
+- arg:
+    name: problem_file
+    default: $(find-pkg-share plansys2_bt_example)/pddl/problem_arm.hddl
+    description: 'The problem: empty for one set by a controller (assemble_arm_hddl_controller_node)'
 - include:
     file: $(find-pkg-share plansys2_bringup)/launch/plansys2_bringup_launch_monolithic.py
     arg:
     # HDDL mode: a hierarchical domain and problem, and the tree of the decomposition
     - {name: model_file, value: $(find-pkg-share plansys2_bt_example)/pddl/bt_arm_example.hddl}
-    - {name: problem_file, value: $(find-pkg-share plansys2_bt_example)/pddl/problem_arm.hddl}
+    - {name: problem_file, value: $(var problem_file)}
     - {name: bt_builder_plugin, value: HTNBTBuilder}
     # Groot2 shows the behavior tree of the plan as it runs
     - {name: enable_groot_monitoring, value: 'true'}
